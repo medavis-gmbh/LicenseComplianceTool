@@ -66,7 +66,7 @@ public final class Component {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (Component) obj;
+        Component that = (Component) obj;
         return Objects.equals(this.group, that.group) &&
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.version, that.version) &&

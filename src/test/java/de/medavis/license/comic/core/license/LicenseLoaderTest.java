@@ -20,6 +20,8 @@
 package de.medavis.license.comic.core.license;
 
 
+import java.net.URL;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,18 +33,18 @@ class LicenseLoaderTest {
 
     @Test
     void shouldLoadLicenseWithUrl() {
-        final var licenseUrl = getClass().getResource("/license/license-lgpl.json");
+        final URL licenseUrl = getClass().getResource("/license/license-lgpl.json");
 
-        final var actual = underTest.load(licenseUrl);
+        final Map<String, License> actual = underTest.load(licenseUrl);
 
         assertThat(actual).containsExactly(entry("LGPL", new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")));
     }
 
     @Test
     void shouldLoadLicenseWithoutUrl() {
-        final var licenseUrl = getClass().getResource("/license/license-minimal.json");
+        final URL licenseUrl = getClass().getResource("/license/license-minimal.json");
 
-        final var actual = underTest.load(licenseUrl);
+        final Map<String, License> actual = underTest.load(licenseUrl);
 
         assertThat(actual).containsExactly(entry("LGPL", new License("LGPL", null, null)));
     }

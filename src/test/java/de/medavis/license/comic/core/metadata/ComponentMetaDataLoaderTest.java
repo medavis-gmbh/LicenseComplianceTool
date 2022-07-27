@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,9 @@
  */
 package de.medavis.license.comic.core.metadata;
 
+import com.google.common.collect.ImmutableSet;
+import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -32,21 +35,23 @@ class ComponentMetaDataLoaderTest {
 
     @Test
     void shouldLoadCompleteRecords() {
-        final var metadataUrl = getClass().getResource("/metadata/metadata-complete.json");
+        final URL metadataUrl = getClass().getResource("/metadata/metadata-complete.json");
 
-        final var actual = underTest.load(metadataUrl);
+        final Collection<ComponentMetadata> actual = underTest.load(metadataUrl);
 
         Assertions.assertThat(actual).containsExactly(
-                new ComponentMetadata("my\\.group", "keep", false, "KEEP!", "https://keep.com", "Keep component", Set.of("LIC-1.0")),
-                new ComponentMetadata("my\\.group", "ignore", true, "IGNORE!", "https://ignore.com", "Ignore component", Set.of("LIC1-1.0", "LIC2-1.0"))
+                new ComponentMetadata("my\\.group", "keep", false, "KEEP!", "https://keep.com", "Keep component",
+                        ImmutableSet.of("LIC-1.0")),
+                new ComponentMetadata("my\\.group", "ignore", true, "IGNORE!", "https://ignore.com", "Ignore component",
+                        ImmutableSet.of("LIC1-1.0", "LIC2-1.0"))
         );
     }
 
     @Test
     void shouldLoadMinimalRecords() {
-        final var metadataUrl = getClass().getResource("/metadata/metadata-minimal.json");
+        final URL metadataUrl = getClass().getResource("/metadata/metadata-minimal.json");
 
-        final var actual = underTest.load(metadataUrl);
+        final Collection<ComponentMetadata> actual = underTest.load(metadataUrl);
 
         Assertions.assertThat(actual).containsExactly(
                 new ComponentMetadata("my\\.group", null, false, null, null, null, Collections.emptySet()),

@@ -34,10 +34,12 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import jenkins.tasks.SimpleBuildStep;
 import jenkins.util.BuildListenerAdapter;
 import org.jenkinsci.Symbol;
@@ -91,8 +93,8 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
-            var inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
-            var outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
+            Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
+            Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
             manifestCreator.create(listener.getLogger(), inputPathAbsolute, outputPathAbsolute, format);
             archiveOutput(run, workspace, launcher, listener);
         } catch (IOException e) {
@@ -101,7 +103,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void archiveOutput(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-        var archiveFilename = ARCHIVE_FILE_NAME + "." + format.getExtension();
+        String archiveFilename = ARCHIVE_FILE_NAME + "." + format.getExtension();
         Map<String, String> file = Collections.singletonMap(archiveFilename, outputPath);
         run.pickArtifactManager().archive(workspace, launcher, new BuildListenerAdapter(listener), file);
     }
@@ -123,14 +125,14 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillFormatItems() {
-            var result = new ListBoxModel();
+            ListBoxModel result = new ListBoxModel();
             Arrays.stream(Format.values()).forEach(f -> result.add(f.name()));
             return result;
         }
 
         @POST
         public FormValidation doCheckFormat(@QueryParameter String value) {
-            var format = Format.fromString(value);
+            Optional<Format> format = Format.fromString(value);
             if (!format.isPresent()) {
                 return FormValidation.error(de.medavis.license.comic.jenkins.create.Messages.CreateManifestBuilder_DescriptorImpl_error_invalidFormat());
             }

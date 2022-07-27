@@ -48,7 +48,7 @@ final class LicenseMapping {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (LicenseMapping) obj;
+        LicenseMapping that = (LicenseMapping) obj;
         return Objects.equals(this.alias, that.alias) &&
                Objects.equals(this.canonicalNames, that.canonicalNames);
     }

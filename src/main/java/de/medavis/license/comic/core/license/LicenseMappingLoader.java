@@ -36,7 +36,7 @@ public class LicenseMappingLoader {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            var result = objectMapper.<List<LicenseMapping>>readValue(licenseMappingUrl,
+            Map<String, String> result = objectMapper.<List<LicenseMapping>>readValue(licenseMappingUrl,
                             objectMapper.getTypeFactory().constructCollectionType(List.class, LicenseMapping.class))
                     .stream()
                     .collect(Collectors.toMap(LicenseMapping::alias, LicenseMapping::canonicalNames));

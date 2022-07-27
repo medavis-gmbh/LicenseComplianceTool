@@ -52,7 +52,7 @@ public final class Asset {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (Asset) obj;
+        Asset that = (Asset) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.version, that.version) &&
                Objects.equals(this.components, that.components);

@@ -60,7 +60,7 @@ public final class License {
         if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var that = (License) obj;
+        License that = (License) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.url, that.url) &&
                Objects.equals(this.downloadUrl, that.downloadUrl);

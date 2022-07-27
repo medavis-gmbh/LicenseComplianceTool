@@ -22,7 +22,9 @@ package de.medavis.license.comic.core.creator;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
+import java.util.List;
 
+import de.medavis.license.comic.core.list.ComponentData;
 import de.medavis.license.comic.core.list.ComponentLister;
 
 public class ManifestCreator {
@@ -35,7 +37,7 @@ public class ManifestCreator {
 
     public void create(PrintStream logger, Path inputPath, Path outputPath, Format format) throws MalformedURLException {
         logger.printf("Exporting component comic in format %s from '%s' to '%s'.%n", format, inputPath, outputPath);
-        var components = componentLister.listComponents(inputPath.toUri().toURL());
+        List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
         OutputterFactory.getOutputter(format).output(components, outputPath);
         logger.printf("Exported %d components.%n", components.size());
     }

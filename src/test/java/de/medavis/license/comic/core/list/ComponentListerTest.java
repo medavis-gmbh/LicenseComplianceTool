@@ -19,10 +19,10 @@
  */
 package de.medavis.license.comic.core.list;
 
+import com.google.common.collect.ImmutableSet;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -42,15 +42,15 @@ class ComponentListerTest {
     void useWithoutModifications() {
         assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -60,11 +60,11 @@ class ComponentListerTest {
     void canMergeComponentsWithSameMappedName() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -74,13 +74,13 @@ class ComponentListerTest {
     void canMergeLicensesWhenMergingComponents() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom-modifiedLicense"))
                 .containsExactly(
-                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("EPL-1.0-Modified", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
                                 new License("GNU Greater General Public License", "https://greater.gnu.com")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -90,7 +90,7 @@ class ComponentListerTest {
     void canIgnoreComponents() {
         assertThat(executeTest("metadata-ignoreLogback", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -100,15 +100,15 @@ class ComponentListerTest {
     void canRenameLicenseAndReplaceUrl() {
         assertThat(executeTest("metadata-empty", "license-lgpl", "licensemapping-lgpl", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")
                         )),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -118,15 +118,15 @@ class ComponentListerTest {
     void canRenameLicenseWithOriginalUrl() {
         assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-lgpl", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -136,15 +136,15 @@ class ComponentListerTest {
     void canOverwriteUrl() {
         assertThat(executeTest("metadata-overwriteSlf4jUrl", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://my.slf4j.com/", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://my.slf4j.com/", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -154,14 +154,14 @@ class ComponentListerTest {
     void canOverwriteLicensesForSpecificComponents() {
         assertThat(executeTest("metadata-overwriteMyLicense", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         )),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", Set.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("MYLICENSE", null)
                         )),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
                         ))
                 );
@@ -173,7 +173,7 @@ class ComponentListerTest {
         when(configuration.getLicensesUrl()).thenReturn(Optional.of(getResourceURL("license", licenseFile, "json")));
         when(configuration.getLicenseMappingsUrl()).thenReturn(Optional.of(getResourceURL("license", licenseMappingFile, "json")));
 
-        var componentLister = new ComponentLister(
+        ComponentLister componentLister = new ComponentLister(
                 new AssetLoader(),
                 new ComponentMetaDataLoader(),
                 new LicenseLoader(),

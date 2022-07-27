@@ -105,7 +105,7 @@ public final class ComponentMetadata {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (ComponentMetadata) obj;
+        ComponentMetadata that = (ComponentMetadata) obj;
         return Objects.equals(this.groupMatch, that.groupMatch) &&
                Objects.equals(this.nameMatch, that.nameMatch) &&
                this.ignore == that.ignore &&

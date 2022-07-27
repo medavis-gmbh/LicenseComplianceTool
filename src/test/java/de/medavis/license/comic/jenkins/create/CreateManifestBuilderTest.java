@@ -21,6 +21,8 @@ package de.medavis.license.comic.jenkins.create;
 
 import com.google.common.io.Resources;
 import hudson.model.AbstractBuild;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Label;
 import hudson.model.Run.Artifact;
 import java.io.IOException;
@@ -69,7 +71,7 @@ class CreateManifestBuilderTest {
     public void setUp() throws MalformedURLException {
         ManifestCreatorFactory.setInstance(manifestCreatorMock);
         doAnswer(invocation -> {
-            var outputPath = invocation.getArgument(2, Path.class);
+            Path outputPath = invocation.getArgument(2, Path.class);
             outputPath.toFile().createNewFile();
             return null;
         }).when(manifestCreatorMock).create(any(), any(), any(), any());
@@ -77,34 +79,34 @@ class CreateManifestBuilderTest {
 
     @Test
     void testConfigRoundtripDefaultFormat(JenkinsRule jenkins) throws Exception {
-        var project = jenkins.createFreeStyleProject();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
         project = jenkins.configRoundtrip(project);
 
-        var expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
+        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         expected.setFormat(Format.PDF);
         jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
     }
 
     @Test
     void testConfigRoundtripCustomFormat(JenkinsRule jenkins) throws Exception {
-        var project = jenkins.createFreeStyleProject();
-        final var createManifestBuilder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        final CreateManifestBuilder createManifestBuilder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         createManifestBuilder.setFormat(Format.HTML);
         project.getBuildersList().add(createManifestBuilder);
         project = jenkins.configRoundtrip(project);
 
-        var expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
+        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         expected.setFormat(Format.HTML);
         jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
     }
 
     @Test
     void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
-        var project = jenkins.createFreeStyleProject();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
 
-        var build = jenkins.buildAndAssertSuccess(project);
+        FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
 
         verify(manifestCreatorMock).create(any(), eq(pathRelativeToWorkspace(INPUT_PATH, build)),
                 eq(pathRelativeToWorkspace(OUTPUT_PATH, build)), eq(DescriptorImpl.defaultFormat));
@@ -120,7 +122,7 @@ class CreateManifestBuilderTest {
         String pipelineScript = Resources.toString(getClass().getResource("scriptedPipeline.groovy"), Charset.defaultCharset());
         job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
 
-        var run = jenkins.buildAndAssertSuccess(job);
+        WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         verify(manifestCreatorMock).create(any(), eq(pathRelativeToWorkspace(INPUT_PATH, run)),
                 eq(pathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));
@@ -136,7 +138,7 @@ class CreateManifestBuilderTest {
         String pipelineScript = Resources.toString(getClass().getResource("declarativePipeline.groovy"), Charset.defaultCharset());
         job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
 
-        var run = jenkins.buildAndAssertSuccess(job);
+        WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         verify(manifestCreatorMock).create(any(), eq(pathRelativeToWorkspace(INPUT_PATH, run)),
                 eq(pathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));

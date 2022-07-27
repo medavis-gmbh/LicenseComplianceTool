@@ -64,7 +64,7 @@ public final class ComponentData {
             return true;
         if (obj == null || obj.getClass() != this.getClass())
             return false;
-        var that = (ComponentData) obj;
+        ComponentData that = (ComponentData) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.version, that.version) &&
                Objects.equals(this.url, that.url) &&

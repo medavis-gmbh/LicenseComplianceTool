@@ -19,6 +19,8 @@
  */
 package de.medavis.license.comic.core.license;
 
+import java.net.URL;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,9 +32,9 @@ class LicenseMappingLoaderTest {
 
     @Test
     void shouldLoadLicenseFromCSV() {
-        final var licenseMappingUrl = getClass().getResource("/license/licensemapping-lgpl.json");
+        final URL licenseMappingUrl = getClass().getResource("/license/licensemapping-lgpl.json");
 
-        final var actual = underTest.load(licenseMappingUrl);
+        final Map<String, String> actual = underTest.load(licenseMappingUrl);
 
         assertThat(actual).containsExactly(entry("GNU Lesser General Public License", "LGPL"));
     }

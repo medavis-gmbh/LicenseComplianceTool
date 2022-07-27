@@ -26,7 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.medavis.license.comic.core.Configuration;
 import de.medavis.license.comic.core.asset.AssetLoader;
@@ -55,9 +57,9 @@ public class ComponentLister {
     }
 
     public List<ComponentData> listComponents(URL bomPath) {
-        var componentMetadata = configuration.getComponentMetadataUrl().map(componentMetaDataLoader::load).orElse(Collections.emptyList());
-        var licenses = configuration.getLicensesUrl().map(licenseLoader::load).orElse(Collections.emptyMap());
-        var licenseMappings = configuration.getLicenseMappingsUrl().map(licenseMappingLoader::load).orElse(Collections.emptyMap());
+        Collection<ComponentMetadata> componentMetadata = configuration.getComponentMetadataUrl().map(componentMetaDataLoader::load).orElse(Collections.emptyList());
+        Map<String, License> licenses = configuration.getLicensesUrl().map(licenseLoader::load).orElse(Collections.emptyMap());
+        Map<String, String> licenseMappings = configuration.getLicenseMappingsUrl().map(licenseMappingLoader::load).orElse(Collections.emptyMap());
 
         return assetLoader.loadFromBom(bomPath)
                 .components()
@@ -69,9 +71,9 @@ public class ComponentLister {
                 .stream()
                 .map(componentByName -> {
                     // ComponentMetadata has to ensure that component with same name has same url and version
-                    var url = componentByName.getValue().get(0).url();
-                    var version = componentByName.getValue().get(0).version();
-                    var allLicenses = componentByName.getValue().stream()
+                    String url = componentByName.getValue().get(0).url();
+                    String version = componentByName.getValue().get(0).version();
+                    Set<License> allLicenses = componentByName.getValue().stream()
                             .flatMap(cd -> cd.licenses().stream())
                             .distinct()
                             .collect(Collectors.toSet());
@@ -91,16 +93,16 @@ public class ComponentLister {
 
     private ComponentData enrichWithMetadata(Component component, Collection<ComponentMetadata> componentMetadata, Map<String, License> licenses,
             Map<String, String> licenseMappings) {
-        var actualLicenses = componentMetadata.stream()
+        Stream<License> actualLicenses = componentMetadata.stream()
                 .filter(cmd -> cmd.matches(component.group(), component.name()))
                 .filter(cmd -> !cmd.licenses().isEmpty())
                 .findFirst()
                 .map(cmd -> cmd.licenses().stream().map(licenseName -> new License(licenseName, null, null)))
                 .orElse(component.licenses().stream());
 
-        var convertedLicenses = actualLicenses
+        Set<License> convertedLicenses = actualLicenses
                 .map(license -> {
-                    var mappedLicenseName = licenseMappings.getOrDefault(license.name(), license.name());
+                    String mappedLicenseName = licenseMappings.getOrDefault(license.name(), license.name());
                     return licenses.getOrDefault(mappedLicenseName, new License(mappedLicenseName, license.url(), license.downloadUrl()));
                 })
                 .collect(Collectors.toSet());

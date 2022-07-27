@@ -48,15 +48,15 @@ class PDFOutputter implements Outputter {
 
     @Override
     public void output(List<ComponentData> data, Path outputFile) {
-        try (var outputFileStream = new FileOutputStream(outputFile.toFile());
-                var document = new Document(PageSize.A4)) {
+        try (FileOutputStream outputFileStream = new FileOutputStream(outputFile.toFile());
+                Document document = new Document(PageSize.A4)) {
 
             PdfWriter.getInstance(document, outputFileStream);
 
             document.open();
 
-            var columnSizes = new float[]{0.4f, 0.2f, 0.4f};
-            var table = new PdfPTable(columnSizes);
+            float[] columnSizes = new float[]{0.4f, 0.2f, 0.4f};
+            PdfPTable table = new PdfPTable(columnSizes);
             table.getDefaultCell().setBorder(BOX);
             table.getDefaultCell().setPadding(5);
             table.setHorizontalAlignment(0);
@@ -75,7 +75,7 @@ class PDFOutputter implements Outputter {
                 table.addCell(renderTextWithOptionalUrl(component.name(), component.url()));
                 table.addCell(new Phrase(component.version(), FONT_DEFAULT));
 
-                var licenseContent = new Paragraph();
+                Paragraph licenseContent = new Paragraph();
 
                 for (Iterator<License> iterator = component.licenses().iterator(); iterator.hasNext(); ) {
                     License licenseData = iterator.next();
@@ -97,7 +97,8 @@ class PDFOutputter implements Outputter {
 
     private Phrase renderTextWithOptionalUrl(String text, String url) {
         if (url != null) {
-            var urlChunk = new Chunk(text);
+            Chunk urlChunk;
+            urlChunk = new Chunk(text);
             urlChunk.setAnchor(url);
             urlChunk.setFont(FONT_HYPERLINK);
             return new Paragraph(urlChunk);
