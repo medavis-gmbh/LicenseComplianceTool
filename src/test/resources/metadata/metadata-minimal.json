@@ -1,0 +1,8 @@
+[
+  {
+    "groupMatch": "my\\.group"
+  },
+  {
+    "nameMatch": "my\\.name"
+  }
+]

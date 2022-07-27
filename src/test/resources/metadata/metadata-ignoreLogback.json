@@ -1,0 +1,6 @@
+[
+  {
+    "groupMatch": "ch\\.qos\\.logback",
+    "ignore": true
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "groupMatch": "ch\\.qos\\.logback",
+    "nameMatch": "logback-core",
+    "licenses": [
+      "MYLICENSE"
+    ]
+  }
+]

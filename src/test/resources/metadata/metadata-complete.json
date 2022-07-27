@@ -1,0 +1,25 @@
+[
+  {
+    "groupMatch": "my\\.group",
+    "nameMatch": "keep",
+    "ignore": false,
+    "mappedName": "KEEP!",
+    "url": "https://keep.com",
+    "comment": "Keep component",
+    "licenses": [
+      "LIC-1.0"
+    ]
+  },
+  {
+    "groupMatch": "my\\.group",
+    "nameMatch": "ignore",
+    "ignore": true,
+    "mappedName": "IGNORE!",
+    "url": "https://ignore.com",
+    "comment": "Ignore component",
+    "licenses": [
+      "LIC1-1.0",
+      "LIC2-1.0"
+    ]
+  }
+]

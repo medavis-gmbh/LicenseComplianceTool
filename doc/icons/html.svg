@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 14.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 43363)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="266px" height="310px" viewBox="0 0 266 310" enable-background="new 0 0 266 310" xml:space="preserve">
+<desc>sample image of HTML code</desc>
+<g id="background_box">
+	<g>
+		
+			<linearGradient id="page_3_" gradientUnits="userSpaceOnUse" x1="-10.4058" y1="289.8037" x2="233.5942" y2="7.8037" gradientTransform="matrix(1 0 0 -1 11 321)">
+			<stop  offset="0.55" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#000000"/>
+		</linearGradient>
+		<path id="page" fill="url(#page_3_)" fill-opacity="0.2" d="M11,11v288h254V81l-64-70H11z"/>
+	</g>
+	<g>
+		
+			<linearGradient id="page_4_" gradientUnits="userSpaceOnUse" x1="-10.4058" y1="289.8027" x2="233.5942" y2="7.8027" gradientTransform="matrix(1 0 0 -1 7 317)">
+			<stop  offset="0.55" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#000000"/>
+		</linearGradient>
+		<path id="page_1_" fill="url(#page_4_)" fill-opacity="0.2" d="M7,7v288h254V77L197,7H7z"/>
+	</g>
+	<g>
+		
+			<linearGradient id="page_5_" gradientUnits="userSpaceOnUse" x1="236" y1="275" x2="35.0012" y2="74.0012" gradientTransform="matrix(1 0 0 -1 2 312)">
+			<stop  offset="0" style="stop-color:#DADADA"/>
+			<stop  offset="0.35" style="stop-color:#F3F3F3"/>
+		</linearGradient>
+		<path id="page_2_" fill="url(#page_5_)" stroke="#222222" stroke-opacity="0.5" d="M2,2v288h254V72L192,2H2z"/>
+	</g>
+	
+		<linearGradient id="page2_1_" gradientUnits="userSpaceOnUse" x1="-4.8823" y1="30.9414" x2="95.1172" y2="129.941" gradientTransform="matrix(1 0 0 -1 0 310)">
+		<stop  offset="0" style="stop-color:#F0F0F0"/>
+		<stop  offset="1" style="stop-color:#F7F7F7"/>
+	</linearGradient>
+	<path id="page2" fill="url(#page2_1_)" d="M4,20v256h248v-56c-5,2-62-79-133-76C50,144,69,30,3,20H4z"/>
+</g>
+<g id="text" transform="translate(15,43) scale(0.77,1)">
+	<text font-family="'AndaleMono'" font-size="18">&lt;!DOCTYPE html&gt;</text>
+	<text transform="matrix(1 0 0 1 0 22)" font-family="'AndaleMono'" font-size="18">&lt;html&gt;</text>
+	<text transform="matrix(1 0 0 1 0 44)" font-family="'AndaleMono'" font-size="18">&lt;!-- created 2010-01-01 --&gt;</text>
+	<text transform="matrix(1 0 0 1 0 66)" font-family="'AndaleMono'" font-size="18"> &lt;head&gt;</text>
+	<text transform="matrix(1 0 0 1 0 88)" font-family="'AndaleMono'" font-size="18">  &lt;title&gt;sample&lt;/title&gt;</text>
+	<text transform="matrix(1 0 0 1 0 110)" font-family="'AndaleMono'" font-size="18"> &lt;/head&gt;</text>
+	<text transform="matrix(1 0 0 1 0 132)" font-family="'AndaleMono'" font-size="18"> &lt;body&gt;</text>
+	<text transform="matrix(1 0 0 1 0 154)" font-family="'AndaleMono'" font-size="18">  &lt;p&gt;Voluptatem accusantium</text>
+	<text transform="matrix(1 0 0 1 0 176)" font-family="'AndaleMono'" font-size="18">   totam rem aperiam.&lt;/p&gt;</text>
+	<text transform="matrix(1 0 0 1 0 198)" font-family="'AndaleMono'" font-size="18"> &lt;/body&gt;</text>
+	<text transform="matrix(1 0 0 1 0 220)" font-family="'AndaleMono'" font-size="18">&lt;/html&gt;</text>
+</g>
+<linearGradient id="fold_1_" gradientUnits="userSpaceOnUse" x1="193.794" y1="248.8662" x2="234.793" y2="282.8654" gradientTransform="matrix(1 0 0 -1 0 310)">
+	<stop  offset="0" style="stop-color:#FFFFFF"/>
+	<stop  offset="1" style="stop-color:#DADADA"/>
+</linearGradient>
+<path id="fold" fill="url(#fold_1_)" stroke="#999999" stroke-opacity="0.4" d="M191,1c11,21,6,54,6,64c16-1,41-3,59,7L191,1z"/>
+<g id="HTML" transform="translate(175,272)">
+	<path fill="#FFCCAA" d="M0,0h90l-2,2H2v36H0V0z"/>
+	<path fill="#803300" d="M90,0v38H0l2-2h86V2L90,0z"/>
+	<rect x="2" y="2" fill="#FF6600" width="86" height="34"/>
+	<g>
+		<text transform="matrix(1 0 0 1 14 28)" font-family="'Verdana-Bold'" font-size="20">HTML</text>
+		<text transform="matrix(1 0 0 1 12 26)" fill="#FFFFFF" font-family="'Verdana-Bold'" font-size="20">HTML</text>
+	</g>
+</g>
+</svg>
