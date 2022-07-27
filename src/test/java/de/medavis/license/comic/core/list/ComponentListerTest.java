@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,10 +36,10 @@ import de.medavis.license.comic.core.license.LicenseLoader;
 import de.medavis.license.comic.core.license.LicenseMappingLoader;
 import de.medavis.license.comic.core.metadata.ComponentMetaDataLoader;
 
-public class ComponentListerTest {
+class ComponentListerTest {
 
     @Test
-    public void useWithoutModifications() {
+    void useWithoutModifications() {
         assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -57,7 +57,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canMergeComponentsWithSameMappedName() {
+    void canMergeComponentsWithSameMappedName() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
                         new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -71,7 +71,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canMergeLicensesWhenMergingComponents() {
+    void canMergeLicensesWhenMergingComponents() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom-modifiedLicense"))
                 .containsExactly(
                         new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -87,7 +87,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canIgnoreComponents() {
+    void canIgnoreComponents() {
         assertThat(executeTest("metadata-ignoreLogback", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", Set.of(
@@ -97,7 +97,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canRenameLicenseAndReplaceUrl() {
+    void canRenameLicenseAndReplaceUrl() {
         assertThat(executeTest("metadata-empty", "license-lgpl", "licensemapping-lgpl", "test-bom"))
                 .containsExactly(
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -115,7 +115,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canRenameLicenseWithOriginalUrl() {
+    void canRenameLicenseWithOriginalUrl() {
         assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-lgpl", "test-bom"))
                 .containsExactly(
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -133,7 +133,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canOverwriteUrl() {
+    void canOverwriteUrl() {
         assertThat(executeTest("metadata-overwriteSlf4jUrl", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(
@@ -151,7 +151,7 @@ public class ComponentListerTest {
     }
 
     @Test
-    public void canOverwriteLicensesForSpecificComponents() {
+    void canOverwriteLicensesForSpecificComponents() {
         assertThat(executeTest("metadata-overwriteMyLicense", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", Set.of(

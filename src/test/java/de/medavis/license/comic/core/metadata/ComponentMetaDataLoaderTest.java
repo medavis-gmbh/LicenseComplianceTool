@@ -22,16 +22,16 @@ package de.medavis.license.comic.core.metadata;
 import java.util.Collections;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ComponentMetaDataLoaderTest {
+class ComponentMetaDataLoaderTest {
 
     private final ComponentMetaDataLoader underTest = new ComponentMetaDataLoader();
 
     @Test
-    public void shouldLoadCompleteRecords() {
+    void shouldLoadCompleteRecords() {
         final var metadataUrl = getClass().getResource("/metadata/metadata-complete.json");
 
         final var actual = underTest.load(metadataUrl);
@@ -43,7 +43,7 @@ public class ComponentMetaDataLoaderTest {
     }
 
     @Test
-    public void shouldLoadMinimalRecords() {
+    void shouldLoadMinimalRecords() {
         final var metadataUrl = getClass().getResource("/metadata/metadata-minimal.json");
 
         final var actual = underTest.load(metadataUrl);

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,13 +35,14 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.actions.WorkspaceActionImpl;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.Mock.Strictness;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,21 +55,17 @@ import de.medavis.license.comic.core.creator.ManifestCreator;
 import de.medavis.license.comic.core.creator.ManifestCreatorFactory;
 import de.medavis.license.comic.jenkins.create.CreateManifestBuilder.DescriptorImpl;
 
-public class CreateManifestBuilderTest {
+@ExtendWith(MockitoExtension.class)
+@WithJenkins
+class CreateManifestBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_PATH = "output.pdf";
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public MockitoRule mockito = MockitoJUnit.rule();
-
-    @Mock
+    @Mock(strictness = Strictness.LENIENT)
     private ManifestCreator manifestCreatorMock;
 
-    @Before
+    @BeforeEach
     public void setUp() throws MalformedURLException {
         ManifestCreatorFactory.setInstance(manifestCreatorMock);
         doAnswer(invocation -> {
@@ -79,7 +76,7 @@ public class CreateManifestBuilderTest {
     }
 
     @Test
-    public void testConfigRoundtripDefaultFormat() throws Exception {
+    void testConfigRoundtripDefaultFormat(JenkinsRule jenkins) throws Exception {
         var project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
         project = jenkins.configRoundtrip(project);
@@ -90,7 +87,7 @@ public class CreateManifestBuilderTest {
     }
 
     @Test
-    public void testConfigRoundtripCustomFormat() throws Exception {
+    void testConfigRoundtripCustomFormat(JenkinsRule jenkins) throws Exception {
         var project = jenkins.createFreeStyleProject();
         final var createManifestBuilder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         createManifestBuilder.setFormat(Format.HTML);
@@ -103,7 +100,7 @@ public class CreateManifestBuilderTest {
     }
 
     @Test
-    public void testFreeStyleBuild() throws Exception {
+    void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
         var project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
 
@@ -116,7 +113,7 @@ public class CreateManifestBuilderTest {
     }
 
     @Test
-    public void testScriptedPipelineBuild() throws Exception {
+    void testScriptedPipelineBuild(JenkinsRule jenkins) throws Exception {
         String agentLabel = "any";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
@@ -132,7 +129,7 @@ public class CreateManifestBuilderTest {
     }
 
     @Test
-    public void testDeclarativePipelineBuild() throws Exception {
+    void testDeclarativePipelineBuild(JenkinsRule jenkins) throws Exception {
         String agentLabel = "any";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-declarative-pipeline");
