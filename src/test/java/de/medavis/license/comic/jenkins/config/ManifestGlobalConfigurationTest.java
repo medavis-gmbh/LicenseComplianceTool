@@ -24,13 +24,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import java.net.URL;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import org.jvnet.hudson.test.JenkinsSessionRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 // TODO Add tests for error cases
-// Still using JUnit 4 annotations since there seems to be no JUnit 5 equivalent for RestartableJenkinsRule
+// Still using JUnit 4 annotations since there seems to be no JUnit 5 equivalent for JenkinsSessionRule
 public class ManifestGlobalConfigurationTest {
 
     private static final String COMPONENT_METADATA_URL = "https://component.metadata.url";
@@ -38,12 +38,12 @@ public class ManifestGlobalConfigurationTest {
     private static final String LICENSES_MAPPING_URL = "https://licenses.mapping.url";
 
     @Rule
-    public RestartableJenkinsRule reloadableJenkins = new RestartableJenkinsRule();
+    public JenkinsSessionRule jenkinsSession = new JenkinsSessionRule();
 
     @Test
-    public void persistSettingDuringReload() {
+    public void persistSettingDuringReload() throws Throwable {
         // TODO Check if we can prefix input field names to prevent collisions
-        reloadableJenkins.then(jenkins -> {
+        jenkinsSession.then(jenkins -> {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
             setInputValue(config, "_.componentMetadata", COMPONENT_METADATA_URL);
             setInputValue(config, "_.licenses", LICENSES_URL);
@@ -51,7 +51,7 @@ public class ManifestGlobalConfigurationTest {
             jenkins.submit(config);
             verifyStoredConfig("After submit");
         });
-        reloadableJenkins.then(jenkins -> verifyStoredConfig("After restart"));
+        jenkinsSession.then(jenkins -> verifyStoredConfig("After restart"));
     }
 
     private void setInputValue(HtmlForm config, String name, String value) {
