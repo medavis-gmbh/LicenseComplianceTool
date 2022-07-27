@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 // TODO Add tests for error cases
+// Still using JUnit 4 annotations since there seems to be no JUnit 5 equivalent for RestartableJenkinsRule
 public class ManifestGlobalConfigurationTest {
 
     private static final String COMPONENT_METADATA_URL = "https://component.metadata.url";

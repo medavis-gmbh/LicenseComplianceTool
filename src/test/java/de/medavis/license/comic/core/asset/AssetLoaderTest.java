@@ -21,20 +21,20 @@ package de.medavis.license.comic.core.asset;
 
 import java.net.URL;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.medavis.license.comic.core.license.License;
 
-public class AssetLoaderTest {
+class AssetLoaderTest {
 
     private final static String SAMPLE_BOM = "/asset/test-bom.json";
 
     private final AssetLoader underTest = new AssetLoader();
 
     @Test
-    public void shouldLoadAssetFromBOM() {
+    void shouldLoadAssetFromBOM() {
         URL sampleBomPath = getClass().getResource(SAMPLE_BOM);
 
         var actual = underTest.loadFromBom(sampleBomPath);

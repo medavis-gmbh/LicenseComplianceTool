@@ -19,17 +19,18 @@
  */
 package de.medavis.license.comic.core.license;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 
-public class LicenseLoaderTest {
+class LicenseLoaderTest {
 
     private final LicenseLoader underTest = new LicenseLoader();
 
     @Test
-    public void shouldLoadLicenseWithUrl() {
+    void shouldLoadLicenseWithUrl() {
         final var licenseUrl = getClass().getResource("/license/license-lgpl.json");
 
         final var actual = underTest.load(licenseUrl);
@@ -38,7 +39,7 @@ public class LicenseLoaderTest {
     }
 
     @Test
-    public void shouldLoadLicenseWithoutUrl() {
+    void shouldLoadLicenseWithoutUrl() {
         final var licenseUrl = getClass().getResource("/license/license-minimal.json");
 
         final var actual = underTest.load(licenseUrl);
