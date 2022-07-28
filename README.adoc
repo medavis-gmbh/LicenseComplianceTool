@@ -171,10 +171,25 @@ Different components often use different names for the same license. You can use
 |The name of the license in the license information
 |===
 
-### Create manifest
+=== Create manifest
+This build step creates a component manifest file based on an input SBOM and the global configuration. You can use it in scripted or declarative pipelines as well as freestyle jobs.
+
+[source,groovy,title=Declarative pipeline example]
+----
+pipeline {
+    agent any
+
+    stages {
+        stage('Create manifest') {
+            steps {
+                componentManifest inputPath: 'input.json', outputPath: 'output.pdf'
+            }
+        }
+    }
+}
+----
 
 
-
-### Download licenses
+=== Download licenses
 
 **TODO**
