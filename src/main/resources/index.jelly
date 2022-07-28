@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    TODO
+    Generate component manifest and license files for compliance with licenses of third-party software
 </div>
