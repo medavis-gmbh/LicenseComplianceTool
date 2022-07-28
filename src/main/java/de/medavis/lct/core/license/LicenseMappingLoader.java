@@ -39,7 +39,7 @@ public class LicenseMappingLoader {
             Map<String, String> result = objectMapper.<List<LicenseMapping>>readValue(licenseMappingUrl,
                             objectMapper.getTypeFactory().constructCollectionType(List.class, LicenseMapping.class))
                     .stream()
-                    .collect(Collectors.toMap(LicenseMapping::alias, LicenseMapping::canonicalNames));
+                    .collect(Collectors.toMap(LicenseMapping::alias, LicenseMapping::canonicalName));
 
             logger.info("Imported {} component metadata entries from {}.", result.size(), licenseMappingUrl);
             return result;

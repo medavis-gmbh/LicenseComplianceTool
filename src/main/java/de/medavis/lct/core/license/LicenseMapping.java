@@ -26,20 +26,20 @@ import java.util.Objects;
 final class LicenseMapping {
 
     private final String alias;
-    private final String canonicalNames;
+    private final String canonicalName;
 
     @JsonCreator
-    LicenseMapping(@JsonProperty("alias") String alias, @JsonProperty("canonicalNames") String canonicalNames) {
+    LicenseMapping(@JsonProperty("alias") String alias, @JsonProperty("canonicalName") String canonicalName) {
         this.alias = alias;
-        this.canonicalNames = canonicalNames;
+        this.canonicalName = canonicalName;
     }
 
     public String alias() {
         return alias;
     }
 
-    public String canonicalNames() {
-        return canonicalNames;
+    public String canonicalName() {
+        return canonicalName;
     }
 
     @Override
@@ -50,18 +50,18 @@ final class LicenseMapping {
             return false;
         LicenseMapping that = (LicenseMapping) obj;
         return Objects.equals(this.alias, that.alias) &&
-               Objects.equals(this.canonicalNames, that.canonicalNames);
+               Objects.equals(this.canonicalName, that.canonicalName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(alias, canonicalNames);
+        return Objects.hash(alias, canonicalName);
     }
 
     @Override
     public String toString() {
         return "LicenseMapping[" +
                "alias=" + alias + ", " +
-               "canonicalNames=" + canonicalNames + ']';
+               "canonicalName=" + canonicalName + ']';
     }
 }
