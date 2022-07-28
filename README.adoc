@@ -1,7 +1,9 @@
 :toc: macro
+:toc-title:
 :imagesdir: doc
 
 = License Compliance Tool
+
 
 When you are using open-source third-party software components, you have to conform to their license.
 For most licenses, this means three things:
