@@ -42,7 +42,6 @@ public class ManifestGlobalConfigurationTest {
 
     @Test
     public void persistSettingDuringReload() throws Throwable {
-        // TODO Check if we can prefix input field names to prevent collisions
         jenkinsSession.then(jenkins -> {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
             setInputValue(config, "_.componentMetadata", COMPONENT_METADATA_URL);

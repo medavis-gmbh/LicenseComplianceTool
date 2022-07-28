@@ -21,6 +21,7 @@ package de.medavis.lct.jenkins.config;
 
 import com.google.common.base.Strings;
 import hudson.Extension;
+import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import de.medavis.lct.core.Configuration;
 
 @Extension
-public class ManifestGlobalConfiguration extends GlobalConfiguration implements Configuration {
+public class ManifestGlobalConfiguration extends GlobalConfiguration implements PersistentDescriptor, Configuration {
 
     private static final Logger LOG = LoggerFactory.getLogger(ManifestGlobalConfiguration.class);
     private String componentMetadata;
@@ -45,10 +46,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
-    }
-
-    public ManifestGlobalConfiguration() {
-        load();
     }
 
     public String getComponentMetadata() {
@@ -122,6 +119,9 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     private FormValidation checkUrlInput(String value) {
+        if (Strings.isNullOrEmpty(value)) {
+            return FormValidation.ok();
+        }
         try {
             URL asUrl = new URL(value);
             final List<String> http = Arrays.asList("http", "https");
