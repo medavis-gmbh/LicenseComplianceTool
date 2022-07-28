@@ -23,6 +23,11 @@
         <url>https://www.medavis.com/</url>
     </organization>
 
+    <scm>
+        <connection>scm:git:https://github.com/medavis-gmbh/LicenseComplianceTool.git</connection>
+        <url>https://github.com/medavis-gmbh/LicenseComplianceTool</url>
+    </scm>
+
     <groupId>de.medavis</groupId>
     <artifactId>license-compliance-tool</artifactId>
     <name>License Compliance Tool</name>
