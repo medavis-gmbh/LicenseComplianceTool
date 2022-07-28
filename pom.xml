@@ -23,9 +23,9 @@
         <url>https://www.medavis.com/</url>
     </organization>
 
-    <groupId>de.medavis.comic</groupId>
-    <artifactId>comic-jenkins-plugin</artifactId>
-    <name>CoMiC - Component Manifest Creator</name>
+    <groupId>de.medavis</groupId>
+    <artifactId>license-compliance-tool</artifactId>
+    <name>License Compliance Tool</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
@@ -64,7 +64,7 @@
             <artifactId>pipeline-model-definition</artifactId>
         </dependency>
 
-        <!-- Required for comic creation -->
+        <!-- Required for manifest creation -->
         <dependency>
             <groupId>org.cyclonedx</groupId>
             <artifactId>cyclonedx-core-java</artifactId>
