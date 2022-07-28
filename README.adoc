@@ -44,7 +44,6 @@ Take a look at their https://github.com/CycloneDX[GitHub page] for a complete li
 image::GlobalConfiguration.png[]
 
 ==== Component meta data
-
 Use this setting to override existing or add missing attributes to the components of the SBOM.
 This is especially useful when you use a SBOM generated from your dependency management system since the resulting data is often incomplete and incorrect.
 
@@ -133,9 +132,42 @@ Here are some examples to illustrate what you can do with it:
 }
 ----
 
-#### License information
+==== License information
+Use this setting to define licenses and URLs with the license texts. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+|===
+|Name | Type | Required?|  Meaning
 
-#### License mapping
+|name
+|String
+|yes
+|Will be used for the component manifest as well as for the filename of the license file.
+
+|url
+|String
+|no
+|URL to which the license name will be linked in the component manifest. If empty, no link will be created.
+
+|downloadUrl
+|String
+|no
+|URL from which the license file will be downloaded. If not set, the file will be downloaded from `url`.
+|===
+
+==== License mapping
+Different components often use different names for the same license. You can use this setting to define aliases for licenses. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+|===
+|Name | Type | Required?|  Meaning
+
+|alias
+|String
+|yes
+|The name of the license in the SBOM
+
+|canonicalName
+|String
+|no
+|The name of the license in the license information
+|===
 
 ### Create manifest
 
