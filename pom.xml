@@ -31,6 +31,8 @@
     <groupId>de.medavis</groupId>
     <artifactId>license-compliance-tool</artifactId>
     <name>License Compliance Tool</name>
+    <description>Generate component manifest and license files for compliance with licenses of third-party software</description>
+    <url>https://github.com/medavis-gmbh/LicenseComplianceTool</url>
     <version>1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
@@ -47,8 +49,8 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Popular Jenkins plugin versions. See https://github.com/jenkinsci/bom#usage for current version -->
             <dependency>
-                <!-- See https://github.com/jenkinsci/bom#usage for current version -->
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.346.x</artifactId>
                 <version>1478.v81d3dc4f9a_43</version>
@@ -68,17 +70,57 @@
             <groupId>org.jenkinsci.plugins</groupId>
             <artifactId>pipeline-model-definition</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-lang3-api</artifactId>
+        </dependency>
 
-        <!-- Required for manifest creation -->
+        <!-- Required for BOM parsing -->
         <dependency>
             <groupId>org.cyclonedx</groupId>
             <artifactId>cyclonedx-core-java</artifactId>
             <version>${cyclonedx.version}</version>
+            <exclusions>
+                <!-- These dependencies are already delivered by Jenkins or other plugins -->
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-xml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <!-- Required for PDF creation -->
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>${openpdf.version}</version>
+            <exclusions>
+                <!-- These dependencies are already delivered by Jenkins or other plugins -->
+                <exclusion>
+                    <artifactId>jsr305</artifactId>
+                    <groupId>com.google.code.findbugs</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Jenkins test tooling -->
