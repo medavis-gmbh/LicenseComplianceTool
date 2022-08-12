@@ -134,4 +134,10 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
             return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidUrl());
         }
     }
+
+    @Override
+    public String getLicenseCachePath() {
+        // TODO Add to global config
+        return null;
+    }
 }

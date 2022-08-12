@@ -45,6 +45,7 @@
         <cyclonedx.version>7.1.5</cyclonedx.version>
         <openpdf.version>1.3.28</openpdf.version>
         <assertj.version>3.23.1</assertj.version>
+        <wiremock.version>2.33.2</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -158,6 +159,13 @@
             <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <repositories>

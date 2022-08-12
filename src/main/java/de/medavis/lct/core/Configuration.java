@@ -30,4 +30,6 @@ public interface Configuration {
 
     Optional<URL> getLicenseMappingsUrl();
 
+    String getLicenseCachePath();
+
 }
