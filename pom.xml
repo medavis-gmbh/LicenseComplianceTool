@@ -7,7 +7,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.44</version>
+        <!-- See https://github.com/jenkinsci/plugin-pom/releases for latest version -->
+        <version>4.46</version>
         <relativePath />
     </parent>
 
@@ -39,7 +40,6 @@
     <properties>
         <!-- Jenkins versions -->
         <jenkins.version>2.346.2</jenkins.version>
-        <jenkins-test-harness.version>1816.v8138d8056949</jenkins-test-harness.version>
 
         <!-- Other dependency versions -->
         <cyclonedx.version>7.1.5</cyclonedx.version>
