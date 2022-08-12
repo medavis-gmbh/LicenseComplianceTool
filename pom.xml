@@ -49,11 +49,11 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Popular Jenkins plugin versions. See https://github.com/jenkinsci/bom#usage for current version -->
+            <!-- See https://github.com/jenkinsci/bom/releases for latest version -->
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.346.x</artifactId>
-                <version>1478.v81d3dc4f9a_43</version>
+                <version>1580.v47b_429a_c853a</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
