@@ -44,10 +44,10 @@ public class LicenseDownloader {
                 .filter(license -> !Strings.isNullOrEmpty(license.downloadUrl()) || !Strings.isNullOrEmpty(license.url()))
                 .collect(Collectors.toMap(License::name, license -> firstNonNull(license.downloadUrl(), license.url())));
         logger.printf("Will download %d licenses.%n", licenses.size());
-        downloadUrls.forEach((name, url) -> download(name, url, logger, outputPath));
+        downloadUrls.forEach((name, url) -> downloadFile(name, url, logger, outputPath));
     }
 
-    private void download(String name, String source, PrintStream logger, Path outputPath) {
+    private void downloadFile(String name, String source, PrintStream logger, Path outputPath) {
         try {
             File outputFile = outputPath.resolve(name).toFile();
             logger.printf("Downloading from %s into %s... ", source, outputFile);
