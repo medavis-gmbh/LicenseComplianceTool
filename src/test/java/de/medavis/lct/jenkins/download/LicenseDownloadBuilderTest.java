@@ -17,16 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.jenkins.create;
+package de.medavis.lct.jenkins.download;
 
 import com.google.common.io.Resources;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Label;
-import hudson.model.Run.Artifact;
-import java.net.MalformedURLException;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -39,74 +36,59 @@ import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import de.medavis.lct.core.creator.Format;
-import de.medavis.lct.core.creator.ManifestCreator;
-import de.medavis.lct.core.creator.ManifestCreatorFactory;
-import de.medavis.lct.jenkins.create.CreateManifestBuilder.DescriptorImpl;
+import de.medavis.lct.core.downloader.LicenseDownloader;
+import de.medavis.lct.core.downloader.LicenseDownloaderFactory;
 
 import static de.medavis.lct.util.WorkspaceResolver.getPathRelativeToWorkspace;
 
 @ExtendWith(MockitoExtension.class)
 @WithJenkins
-class CreateManifestBuilderTest {
+class LicenseDownloadBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
-    private static final String OUTPUT_PATH = "output.pdf";
+    private static final String OUTPUT_PATH = "output/licenses";
 
     @Mock(strictness = Strictness.LENIENT)
-    private ManifestCreator manifestCreatorMock;
+    private LicenseDownloader licenseDownloaderMock;
 
     @BeforeEach
-    public void setUp() throws MalformedURLException {
-        ManifestCreatorFactory.setInstance(manifestCreatorMock);
-        doAnswer(invocation -> {
-            Path outputPath = invocation.getArgument(2, Path.class);
-            outputPath.toFile().createNewFile();
-            return null;
-        }).when(manifestCreatorMock).create(any(), any(), any(), any());
+    public void setUp() {
+        LicenseDownloaderFactory.setInstance(licenseDownloaderMock);
     }
 
     @Test
     void testConfigRoundtripDefaultFormat(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
+        project.getBuildersList().add(new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH));
         project = jenkins.configRoundtrip(project);
 
-        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        expected.setFormat(Format.PDF);
+        LicenseDownloadBuilder expected = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
         jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
     }
 
     @Test
     void testConfigRoundtripCustomFormat(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        final CreateManifestBuilder createManifestBuilder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        createManifestBuilder.setFormat(Format.HTML);
-        project.getBuildersList().add(createManifestBuilder);
+        final LicenseDownloadBuilder licenseDownloadBuilder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
+        project.getBuildersList().add(licenseDownloadBuilder);
         project = jenkins.configRoundtrip(project);
 
-        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        expected.setFormat(Format.HTML);
+        LicenseDownloadBuilder expected = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
         jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
     }
 
     @Test
     void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
+        project.getBuildersList().add(new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH));
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)), eq(DescriptorImpl.defaultFormat));
-        assertThat(build.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + "." + DescriptorImpl.defaultFormat.getExtension());
+        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, build)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)));
     }
 
     @Test
@@ -119,10 +101,7 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));
-        assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + "." + DescriptorImpl.defaultFormat.getExtension());
+        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
     }
 
     @Test
@@ -135,10 +114,7 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));
-        assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + "." + DescriptorImpl.defaultFormat.getExtension());
+        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
     }
 
 }
