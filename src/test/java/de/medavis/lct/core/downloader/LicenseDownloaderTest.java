@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * License Compliance Tool
+ * %%
+ * Copyright (C) 2022 medavis GmbH
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package de.medavis.lct.core.downloader;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
@@ -11,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +75,8 @@ class LicenseDownloaderTest {
     @TempDir
     private Path cachePath;
     @Mock
+    private Configuration configuration;
+    @Mock
     private ComponentLister componentLister;
     @Mock
     private UserLogger userLogger;
@@ -62,14 +84,12 @@ class LicenseDownloaderTest {
     private String baseUrl;
 
     @BeforeEach
-    void setup(@Mock Configuration configuration, WireMockRuntimeInfo wiremock) {
-        when(configuration.getLicenseCachePath()).thenReturn(cachePath);
-        downloader = new LicenseDownloader(componentLister, configuration);
+    void beforeEach(WireMockRuntimeInfo wiremock) {
         baseUrl = wiremock.getHttpBaseUrl();
     }
 
     @Test
-    void shouldDownloadAllLicensesFromAllComponents(WireMockRuntimeInfo wiremock) throws MalformedURLException {
+    void shouldDownloadAllLicensesFromAllComponents() throws MalformedURLException {
         setup(
                 component(
                         license("A", true, true),
@@ -104,7 +124,6 @@ class LicenseDownloaderTest {
 
         verifyLicenses("A");
         verifyDownloaded(VIEW_URL, "A");
-
     }
 
     @Test
@@ -115,16 +134,35 @@ class LicenseDownloaderTest {
 
         verifyEmptyLicenses(outputPath);
         verifyNothingDownloaded();
-
     }
 
     @Test
-    void shouldPopulateCacheAfterDownload() throws IOException {
+    void shouldPopulateCache() throws IOException {
         setup(component(license("A", true, true)));
 
         invokeDownload();
 
         verifyCache("A");
+    }
+
+    @Test
+    void shouldCreateCachePathIfNotExists() throws IOException {
+        this.cachePath = cachePath.resolve("new-subdir");
+        setup(component(license("A", true, true)));
+
+        invokeDownload();
+
+        verifyCache("A");
+    }
+
+    @Test
+    void shouldWorkWithoutCache() throws IOException {
+        setup(false, component(license("A", true, true)));
+
+        invokeDownload();
+
+        verifyLicenses("A");
+        verifyEmptyCache();
     }
 
     @Test
@@ -143,7 +181,13 @@ class LicenseDownloaderTest {
     }
 
     private void setup(ComponentData... components) {
+        setup(true, components);
+    }
+
+    private void setup(boolean cache, ComponentData... components) {
+        when(configuration.getLicenseCachePathOptional()).thenReturn(cache ? Optional.of(cachePath) : Optional.empty());
         when(componentLister.listComponents(any())).thenReturn(Arrays.asList(components));
+        downloader = new LicenseDownloader(componentLister, configuration);
     }
 
     private ComponentData component(License... licenses) {
@@ -205,5 +249,9 @@ class LicenseDownloaderTest {
                 assertThat(cachePath.resolve(license))
                         .exists()
                         .hasContent(license)));
+    }
+
+    private void verifyEmptyCache() {
+        assertThat(cachePath).isEmptyDirectory();
     }
 }

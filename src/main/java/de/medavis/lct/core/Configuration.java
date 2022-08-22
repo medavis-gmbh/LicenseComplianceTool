@@ -31,6 +31,6 @@ public interface Configuration {
 
     Optional<URL> getLicenseMappingsUrl();
 
-    Path getLicenseCachePath();
+    Optional<Path> getLicenseCachePathOptional();
 
 }

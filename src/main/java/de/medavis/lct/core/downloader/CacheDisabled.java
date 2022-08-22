@@ -17,27 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.jenkins;
+package de.medavis.lct.core.downloader;
 
-import hudson.model.TaskListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 
-import de.medavis.lct.core.UserLogger;
+class CacheDisabled implements Cache {
 
-public class JenkinsLogger implements UserLogger {
-
-    private final TaskListener listener;
-
-    public JenkinsLogger(TaskListener listener) {
-        this.listener = listener;
+    @Override
+    public Optional<File> getCachedFile(String licenseName) {
+        return Optional.empty();
     }
 
     @Override
-    public void info(String format, Object... args) {
-        listener.getLogger().printf(format, args);
-    }
-
-    @Override
-    public void error(String format, Object... args) {
-        listener.error(format, args);
+    public void addCachedFile(String licenseName, File source) throws IOException {
+        // Do nothing
     }
 }
