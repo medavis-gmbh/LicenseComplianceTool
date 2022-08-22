@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -88,12 +89,28 @@ class LicenseDownloaderTest {
     }
 
     @Test
-    void shouldUseViewUrlIfDownloadUrlIsNotSet() {
+    void shouldUseViewUrlIfDownloadUrlIsNotSet() throws MalformedURLException {
+        setup(
+                component(license("A", true, false))
+        );
+
+        invokeDownload(outputPath);
+
+        verifyLicenses(outputPath, "A");
+        verifyDownloaded(VIEW_URL, "A");
 
     }
 
     @Test
-    void shouldNotDownloadLicenseIfNoUrlIsSet() {
+    void shouldNotDownloadLicenseIfNoUrlIsSet() throws MalformedURLException {
+        setup(
+                component(license("A", false, false))
+        );
+
+        invokeDownload(outputPath);
+
+        verifyEmptyLicenses(outputPath);
+        verifyNothingDownloaded();
 
     }
 
@@ -147,8 +164,16 @@ class LicenseDownloaderTest {
                         .hasContent(license)));
     }
 
+    private void verifyEmptyLicenses(Path outputPath) {
+        assertThat(outputPath).isEmptyDirectory();
+    }
+
     private void verifyDownloaded(String prefix, String... licenses) {
-        assertSoftly(softly -> Stream.of(licenses).forEach(license ->
-                verify(1, getRequestedFor(urlEqualTo(createUrl(prefix, license))))));
+        Stream.of(licenses).forEach(license ->
+                verify(1, getRequestedFor(urlEqualTo(createUrl(prefix, license)))));
+    }
+
+    private void verifyNothingDownloaded() {
+        verify(0, getRequestedFor(anyUrl()));
     }
 }
