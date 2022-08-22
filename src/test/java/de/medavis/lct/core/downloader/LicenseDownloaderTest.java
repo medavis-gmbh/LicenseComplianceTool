@@ -45,23 +45,27 @@ class LicenseDownloaderTest {
 
     private final Set<String> stubbings = new HashSet<>();
 
+    @TempDir
+    private Path outputPath;
     @Mock
     private ComponentLister componentLister;
     private LicenseDownloader downloader;
+    private String baseUrl;
 
     @BeforeEach
-    void setup(@Mock Configuration configuration, @TempDir Path cachePath) {
+    void setup(@Mock Configuration configuration, @TempDir Path cachePath, WireMockRuntimeInfo wiremock) {
         when(configuration.getLicenseCachePath()).thenReturn(cachePath.toString());
         downloader = new LicenseDownloader(componentLister, configuration);
+        baseUrl = wiremock.getHttpBaseUrl();
     }
 
     @Test
-    void shouldDownloadAllLicensesFromAllComponents(WireMockRuntimeInfo wiremock, @TempDir Path outputPath) throws MalformedURLException {
+    void shouldDownloadAllLicensesFromAllComponents(WireMockRuntimeInfo wiremock) throws MalformedURLException {
         setup(
                 component(
-                        license("A", true, true, wiremock),
-                        license("B", true, true, wiremock)),
-                component(license("C", true, true, wiremock))
+                        license("A", true, true),
+                        license("B", true, true)),
+                component(license("C", true, true))
         );
 
         invokeDownload(outputPath);
@@ -71,8 +75,16 @@ class LicenseDownloaderTest {
     }
 
     @Test
-    void shouldDownloadSameLicenseOnlyOnce() {
+    void shouldDownloadSameLicenseOnlyOnce(WireMockRuntimeInfo wiremock) throws MalformedURLException {
+        setup(
+                component(license("A", true, true)),
+                component(license("A", true, true))
+        );
 
+        invokeDownload(outputPath);
+
+        verifyLicenses(outputPath, "A");
+        verifyDownloaded(DOWNLOAD_URL, "A");
     }
 
     @Test
@@ -102,19 +114,19 @@ class LicenseDownloaderTest {
                 Stream.of(licenses).collect(Collectors.toSet()));
     }
 
-    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl, WireMockRuntimeInfo wiremock) {
-        String viewUrl = getAndStubUrl(hasViewUrl, VIEW_URL, name, wiremock);
-        String downloadUrl = getAndStubUrl(hasDownloadUrl, DOWNLOAD_URL, name, wiremock);
+    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
+        String viewUrl = getAndStubUrl(hasViewUrl, VIEW_URL, name);
+        String downloadUrl = getAndStubUrl(hasDownloadUrl, DOWNLOAD_URL, name);
         return new License(name, viewUrl, downloadUrl);
     }
 
-    private String getAndStubUrl(boolean hasUrl, String prefix, String name, WireMockRuntimeInfo wiremock) {
+    private String getAndStubUrl(boolean hasUrl, String prefix, String name) {
         String url = null;
         if (hasUrl) {
             String relativeUrl = createUrl(prefix, name);
             if (stubbings.add(relativeUrl)) {
                 stubFor(get(relativeUrl).willReturn(aResponse().withBody(name)));
-                url = wiremock.getHttpBaseUrl() + relativeUrl;
+                url = baseUrl + relativeUrl;
             }
         }
         return url;
