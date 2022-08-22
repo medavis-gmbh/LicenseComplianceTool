@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.core.UserLogger;
 import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
@@ -55,6 +56,8 @@ class LicenseDownloaderTest {
     private Path cachePath;
     @Mock
     private ComponentLister componentLister;
+    @Mock
+    private UserLogger userLogger;
     private LicenseDownloader downloader;
     private String baseUrl;
 
@@ -174,7 +177,7 @@ class LicenseDownloaderTest {
     }
 
     private void invokeDownload() throws MalformedURLException {
-        downloader.download(System.out, INPUT, outputPath);
+        downloader.download(userLogger, INPUT, outputPath);
     }
 
     private void verifyLicenses(String... licenses) {

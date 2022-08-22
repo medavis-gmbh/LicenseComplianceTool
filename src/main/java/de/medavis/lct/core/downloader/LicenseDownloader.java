@@ -2,7 +2,6 @@ package de.medavis.lct.core.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -21,6 +20,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.core.UserLogger;
 import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
@@ -36,9 +36,8 @@ public class LicenseDownloader {
         this.cache = new FilesystemCache(configuration.getLicenseCachePath());
     }
 
-    // TODO Replace logger with a wrapper for both output and error
-    public void download(PrintStream logger, Path inputPath, Path outputPath) throws MalformedURLException {
-        logger.printf("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
+    public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws MalformedURLException {
+        userLogger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
         final List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
         Set<License> licenses = components.stream()
                 .map(ComponentData::licenses)
@@ -50,38 +49,36 @@ public class LicenseDownloader {
             Optional<File> cachedLicenseFile = cache.getCachedFile(license.name());
             cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.name(), file));
         }
-        logger.printf("Using %d licenses from cache.%n", cachedLicenses.size());
-        cachedLicenses.forEach((name, file) -> copyFromCache(name, file, logger, outputPath));
+        userLogger.info("Using %d licenses from cache.%n", cachedLicenses.size());
+        cachedLicenses.forEach((name, file) -> copyFromCache(name, file, userLogger, outputPath));
 
         Map<String, String> downloadUrls = licenses.stream()
                 .filter(license -> !cachedLicenses.containsKey(license.name()))
                 .filter(license -> !Strings.isNullOrEmpty(license.downloadUrl()) || !Strings.isNullOrEmpty(license.url()))
                 .collect(Collectors.toMap(License::name, license -> firstNonNull(license.downloadUrl(), license.url())));
-        logger.printf("Will download %d licenses.%n", downloadUrls.size());
-        downloadUrls.forEach((name, url) -> downloadFile(name, url, logger, outputPath));
+        userLogger.info("Will download %d licenses.%n", downloadUrls.size());
+        downloadUrls.forEach((name, url) -> downloadFile(name, url, userLogger, outputPath));
     }
 
-    private void copyFromCache(String licenseName, File cachedFile, PrintStream logger, Path outputPath) {
+    private void copyFromCache(String licenseName, File cachedFile, UserLogger userLogger, Path outputPath) {
         Path outputFile = outputPath.resolve(licenseName);
         try {
             Files.copy(cachedFile.toPath(), outputFile, REPLACE_EXISTING);
         } catch (IOException e) {
-            // TODO Log error as error
-            logger.printf("ERROR: %s.%n", e.getMessage());
+            userLogger.error("Could not copy license file from cache: %s.%n", e.getMessage());
         }
     }
 
-    private void downloadFile(String licenseName, String source, PrintStream logger, Path outputPath) {
+    private void downloadFile(String licenseName, String source, UserLogger userLogger, Path outputPath) {
         try {
             File outputFile = outputPath.resolve(licenseName).toFile();
-            logger.printf("Downloading from %s into %s... ", source, outputFile);
+            userLogger.info("Downloading from %s into %s... ", source, outputFile);
             URL sourceUrl = new URL(source);
             FileUtils.copyURLToFile(sourceUrl, outputFile, TIMEOUT_MILLIS, TIMEOUT_MILLIS);
             cache.addCachedFile(licenseName, outputFile);
-            logger.printf("Done.%n");
+            userLogger.info("Done.%n");
         } catch (IOException e) {
-            // TODO Log error as error
-            logger.printf("ERROR: %s.%n", e.getMessage());
+            userLogger.error("Could not download license file: %s.%n", e.getMessage());
         }
     }
 
