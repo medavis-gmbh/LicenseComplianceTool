@@ -25,6 +25,7 @@ import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -136,7 +137,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     @Override
-    public String getLicenseCachePath() {
+    public Path getLicenseCachePath() {
         // TODO Add to global config
         return null;
     }

@@ -3,10 +3,13 @@ package de.medavis.lct.core.downloader;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.common.base.Joiner;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,14 +51,16 @@ class LicenseDownloaderTest {
 
     @TempDir
     private Path outputPath;
+    @TempDir
+    private Path cachePath;
     @Mock
     private ComponentLister componentLister;
     private LicenseDownloader downloader;
     private String baseUrl;
 
     @BeforeEach
-    void setup(@Mock Configuration configuration, @TempDir Path cachePath, WireMockRuntimeInfo wiremock) {
-        when(configuration.getLicenseCachePath()).thenReturn(cachePath.toString());
+    void setup(@Mock Configuration configuration, WireMockRuntimeInfo wiremock) {
+        when(configuration.getLicenseCachePath()).thenReturn(cachePath);
         downloader = new LicenseDownloader(componentLister, configuration);
         baseUrl = wiremock.getHttpBaseUrl();
     }
@@ -69,9 +74,9 @@ class LicenseDownloaderTest {
                 component(license("C", true, true))
         );
 
-        invokeDownload(outputPath);
+        invokeDownload();
 
-        verifyLicenses(outputPath, "A", "B", "C");
+        verifyLicenses("A", "B", "C");
         verifyDownloaded(DOWNLOAD_URL, "A", "B", "C");
     }
 
@@ -82,32 +87,28 @@ class LicenseDownloaderTest {
                 component(license("A", true, true))
         );
 
-        invokeDownload(outputPath);
+        invokeDownload();
 
-        verifyLicenses(outputPath, "A");
+        verifyLicenses("A");
         verifyDownloaded(DOWNLOAD_URL, "A");
     }
 
     @Test
     void shouldUseViewUrlIfDownloadUrlIsNotSet() throws MalformedURLException {
-        setup(
-                component(license("A", true, false))
-        );
+        setup(component(license("A", true, false)));
 
-        invokeDownload(outputPath);
+        invokeDownload();
 
-        verifyLicenses(outputPath, "A");
+        verifyLicenses("A");
         verifyDownloaded(VIEW_URL, "A");
 
     }
 
     @Test
     void shouldNotDownloadLicenseIfNoUrlIsSet() throws MalformedURLException {
-        setup(
-                component(license("A", false, false))
-        );
+        setup(component(license("A", false, false)));
 
-        invokeDownload(outputPath);
+        invokeDownload();
 
         verifyEmptyLicenses(outputPath);
         verifyNothingDownloaded();
@@ -115,8 +116,27 @@ class LicenseDownloaderTest {
     }
 
     @Test
-    void shouldNotDownloadLicensesIfItExistsInCache() {
+    void shouldPopulateCacheAfterDownload() throws IOException {
+        setup(component(license("A", true, true)));
 
+        invokeDownload();
+
+        verifyCache("A");
+    }
+
+    @Test
+    void shouldNotDownloadLicensesIfItExistsInCache() throws IOException {
+        initializeCache("A");
+        setup(component(license("A", true, true)));
+
+        invokeDownload();
+
+        verifyLicenses("A");
+        verifyNothingDownloaded();
+    }
+
+    private void initializeCache(String licenseName) throws IOException {
+        Files.write(cachePath.resolve(licenseName), Collections.singletonList(licenseName));
     }
 
     private void setup(ComponentData... components) {
@@ -153,11 +173,11 @@ class LicenseDownloaderTest {
         return "/" + Joiner.on("/").join(parts);
     }
 
-    private void invokeDownload(Path outputPath) throws MalformedURLException {
+    private void invokeDownload() throws MalformedURLException {
         downloader.download(System.out, INPUT, outputPath);
     }
 
-    private void verifyLicenses(Path outputPath, String... licenses) {
+    private void verifyLicenses(String... licenses) {
         assertSoftly(softly -> Stream.of(licenses).forEach(license ->
                 assertThat(outputPath.resolve(license))
                         .exists()
@@ -175,5 +195,12 @@ class LicenseDownloaderTest {
 
     private void verifyNothingDownloaded() {
         verify(0, getRequestedFor(anyUrl()));
+    }
+
+    private void verifyCache(String... licenses) {
+        assertSoftly(softly -> Stream.of(licenses).forEach(license ->
+                assertThat(cachePath.resolve(license))
+                        .exists()
+                        .hasContent(license)));
     }
 }
