@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.permanentRedirect;
+import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
@@ -104,7 +106,7 @@ class LicenseDownloaderTest {
     }
 
     @Test
-    void shouldDownloadSameLicenseOnlyOnce(WireMockRuntimeInfo wiremock) throws MalformedURLException {
+    void shouldDownloadSameLicenseOnlyOnce() throws MalformedURLException {
         setup(
                 component(license("A", true, true)),
                 component(license("A", true, true))
@@ -132,7 +134,7 @@ class LicenseDownloaderTest {
 
         invokeDownload();
 
-        verifyEmptyLicenses(outputPath);
+        verifyEmptyLicenses();
         verifyNothingDownloaded();
     }
 
@@ -176,6 +178,25 @@ class LicenseDownloaderTest {
         verifyNothingDownloaded();
     }
 
+    @Test
+    void shouldNotCreateFileIfDownloadFails() throws IOException {
+        setup(component(license("A", true, true, UrlBehaviour.FAILURE)));
+
+        invokeDownload();
+
+        verifyEmptyCache();
+        verifyEmptyLicenses();
+    }
+
+    @Test
+    void shouldFollowRedirectWhileDownloading() throws IOException {
+        setup(component(license("A", true, true, UrlBehaviour.REDIRECT)));
+
+        invokeDownload();
+
+        verifyLicenses("A");
+    }
+
     private void initializeCache(String licenseName) throws IOException {
         Files.write(cachePath.resolve(licenseName), Collections.singletonList(licenseName));
     }
@@ -199,17 +220,33 @@ class LicenseDownloaderTest {
     }
 
     private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
-        String viewUrl = getAndStubUrl(hasViewUrl, VIEW_URL, name);
-        String downloadUrl = getAndStubUrl(hasDownloadUrl, DOWNLOAD_URL, name);
+        return license(name, hasViewUrl, hasDownloadUrl, UrlBehaviour.SUCCESS);
+    }
+
+    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl, UrlBehaviour urlBehaviour) {
+        String viewUrl = getAndStubUrl(hasViewUrl, VIEW_URL, name, urlBehaviour);
+        String downloadUrl = getAndStubUrl(hasDownloadUrl, DOWNLOAD_URL, name, urlBehaviour);
         return new License(name, viewUrl, downloadUrl);
     }
 
-    private String getAndStubUrl(boolean hasUrl, String prefix, String name) {
+    private String getAndStubUrl(boolean hasUrl, String prefix, String licenseName, UrlBehaviour urlBehaviour) {
         String url = null;
         if (hasUrl) {
-            String relativeUrl = createUrl(prefix, name);
+            String relativeUrl = createUrl(prefix, licenseName);
             if (stubbings.add(relativeUrl)) {
-                stubFor(get(relativeUrl).willReturn(aResponse().withBody(name)));
+                switch (urlBehaviour) {
+                    case SUCCESS:
+                        stubFor(get(relativeUrl).willReturn(ok(licenseName)));
+                        break;
+                    case FAILURE:
+                        stubFor(get(relativeUrl).willReturn(serverError()));
+                        break;
+                    case REDIRECT:
+                        String redirectUrl = createUrl(prefix, licenseName, "actual");
+                        stubFor(get(relativeUrl).willReturn(permanentRedirect(redirectUrl)));
+                        stubFor(get(redirectUrl).willReturn(ok(licenseName)));
+                        break;
+                }
                 url = baseUrl + relativeUrl;
             }
         }
@@ -231,7 +268,7 @@ class LicenseDownloaderTest {
                         .hasContent(license)));
     }
 
-    private void verifyEmptyLicenses(Path outputPath) {
+    private void verifyEmptyLicenses() {
         assertThat(outputPath).isEmptyDirectory();
     }
 
@@ -253,5 +290,11 @@ class LicenseDownloaderTest {
 
     private void verifyEmptyCache() {
         assertThat(cachePath).isEmptyDirectory();
+    }
+
+    private enum UrlBehaviour {
+        SUCCESS,
+        FAILURE,
+        REDIRECT;
     }
 }

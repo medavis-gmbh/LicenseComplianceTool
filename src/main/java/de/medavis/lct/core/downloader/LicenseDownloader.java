@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,7 +80,14 @@ public class LicenseDownloader {
                 .filter(license -> !Strings.isNullOrEmpty(license.downloadUrl()) || !Strings.isNullOrEmpty(license.url()))
                 .collect(Collectors.toMap(License::name, license -> firstNonNull(license.downloadUrl(), license.url())));
         userLogger.info("Will download %d licenses.%n", downloadUrls.size());
-        downloadUrls.forEach((name, url) -> downloadFile(name, url, userLogger, outputPath));
+
+        int index = 1;
+        for (Entry<String, String> entry : downloadUrls.entrySet()) {
+            String name = entry.getKey();
+            String url = entry.getValue();
+            downloadFile(name, url, userLogger, outputPath, index, downloadUrls.size());
+            index++;
+        }
     }
 
     private void copyFromCache(String licenseName, File cachedFile, UserLogger userLogger, Path outputPath) {
@@ -91,10 +99,10 @@ public class LicenseDownloader {
         }
     }
 
-    private void downloadFile(String licenseName, String source, UserLogger userLogger, Path outputPath) {
+    private void downloadFile(String licenseName, String source, UserLogger userLogger, Path outputPath, int index, int size) {
         try {
             File outputFile = outputPath.resolve(licenseName).toFile();
-            userLogger.info("Downloading from %s into %s... ", source, outputFile);
+            userLogger.info("(%d/%d) Downloading from %s into %s... ", index, size, source, outputFile);
             URL sourceUrl = new URL(source);
             FileUtils.copyURLToFile(sourceUrl, outputFile, TIMEOUT_MILLIS, TIMEOUT_MILLIS);
             cache.addCachedFile(licenseName, outputFile);
