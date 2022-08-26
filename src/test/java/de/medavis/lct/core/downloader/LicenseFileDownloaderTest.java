@@ -166,8 +166,27 @@ class LicenseFileDownloaderTest {
         verifyNothingDownloaded();
     }
 
+    @Test
+    void shouldNotDownloadLicensesIfItExistsInCacheWithExtension() throws IOException {
+        initializeCache("A", "html");
+        setup(component(license("A", true, true)));
+
+        invokeDownload();
+
+        verifyLicenses("A");
+        verifyNothingDownloaded();
+    }
+
     private void initializeCache(String licenseName) throws IOException {
-        Files.write(cachePath.resolve(licenseName), Collections.singletonList(licenseName));
+        initializeCache(licenseName, null);
+    }
+
+    private void initializeCache(String licenseName, String extension) throws IOException {
+        String filename = licenseName;
+        if (extension != null) {
+            filename = filename + "." + extension;
+        }
+        Files.write(cachePath.resolve(filename), Collections.singletonList(licenseName));
     }
 
     private void setup(ComponentData... components) {
@@ -214,7 +233,7 @@ class LicenseFileDownloaderTest {
         return "/" + Joiner.on("/").join(parts);
     }
 
-    private void invokeDownload() throws MalformedURLException {
+    private void invokeDownload() throws IOException {
         underTest.download(userLogger, INPUT, outputPath);
     }
 

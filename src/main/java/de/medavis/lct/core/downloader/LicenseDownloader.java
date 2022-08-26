@@ -21,7 +21,6 @@ package de.medavis.lct.core.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -43,7 +42,6 @@ import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 
-// TODO Change cache so that filename is ignored (because we do not know it before)
 public class LicenseDownloader {
 
     private final ComponentLister componentLister;
@@ -59,7 +57,7 @@ public class LicenseDownloader {
                 .orElseGet(CacheDisabled::new);
     }
 
-    public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws MalformedURLException {
+    public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws IOException {
         userLogger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
         final List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
         Set<License> licenses = components.stream()
