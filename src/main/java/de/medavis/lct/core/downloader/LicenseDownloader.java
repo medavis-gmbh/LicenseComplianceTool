@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,6 @@ package de.medavis.lct.core.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -34,7 +33,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import joptsimple.internal.Strings;
-import org.apache.commons.io.FileUtils;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -45,11 +43,13 @@ import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 
+// TODO Mock Downloader
+// TODO Change cache so that filename is ignored (because we do not know it before)
 public class LicenseDownloader {
 
-    private static final int TIMEOUT_MILLIS = 5000;
     private final ComponentLister componentLister;
     private final Cache cache;
+    private final Downloader downloader;
 
     public LicenseDownloader(ComponentLister componentLister, Configuration configuration) {
         this.componentLister = componentLister;
@@ -57,6 +57,7 @@ public class LicenseDownloader {
                 .map(FilesystemCache::new)
                 .map(Cache.class::cast)
                 .orElseGet(CacheDisabled::new);
+        this.downloader = new Downloader();
     }
 
     public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws MalformedURLException {
@@ -101,10 +102,8 @@ public class LicenseDownloader {
 
     private void downloadFile(String licenseName, String source, UserLogger userLogger, Path outputPath, int index, int size) {
         try {
-            File outputFile = outputPath.resolve(licenseName).toFile();
-            userLogger.info("(%d/%d) Downloading from %s into %s... ", index, size, source, outputFile);
-            URL sourceUrl = new URL(source);
-            FileUtils.copyURLToFile(sourceUrl, outputFile, TIMEOUT_MILLIS, TIMEOUT_MILLIS);
+            userLogger.info("(%d/%d) Downloading license %s from %s... ", index, size, licenseName, source);
+            File outputFile = downloader.downloadToFile(source, outputPath, licenseName);
             cache.addCachedFile(licenseName, outputFile);
             userLogger.info("Done.%n");
         } catch (IOException e) {
