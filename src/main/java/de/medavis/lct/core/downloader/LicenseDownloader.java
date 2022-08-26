@@ -19,6 +19,7 @@
  */
 package de.medavis.lct.core.downloader;
 
+import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import joptsimple.internal.Strings;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
