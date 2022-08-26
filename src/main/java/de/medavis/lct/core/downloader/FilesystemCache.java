@@ -52,7 +52,7 @@ class FilesystemCache implements Cache {
 
     @Override
     public void addCachedFile(String licenseName, File source) throws IOException {
-        final Path target = path.resolve(licenseName);
+        final Path target = path.resolve(source.getName());
         Files.createDirectories(target);
         Files.copy(source.toPath(), target, REPLACE_EXISTING);
     }
