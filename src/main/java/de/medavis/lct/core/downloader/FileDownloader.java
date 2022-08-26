@@ -16,7 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import static org.apache.http.entity.ContentType.TEXT_HTML;
 import static org.apache.http.entity.ContentType.TEXT_PLAIN;
 
-class Downloader {
+class FileDownloader {
 
     private final HttpClient httpclient = HttpClients.createDefault();
 

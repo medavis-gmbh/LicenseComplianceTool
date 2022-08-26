@@ -35,13 +35,16 @@ public class LicenseDownloaderFactory {
 
     public static LicenseDownloader getInstance(Configuration configuration) {
         if (instance == null) {
-            instance = new LicenseDownloader(new ComponentLister(
-                    new AssetLoader(),
-                    new ComponentMetaDataLoader(),
-                    new LicenseLoader(),
-                    new LicenseMappingLoader(),
-                    configuration),
-                    configuration);
+            instance = new LicenseDownloader(
+                    new ComponentLister(
+                            new AssetLoader(),
+                            new ComponentMetaDataLoader(),
+                            new LicenseLoader(),
+                            new LicenseMappingLoader(),
+                            configuration),
+                    configuration,
+                    new FileDownloader()
+            );
         }
         return instance;
     }

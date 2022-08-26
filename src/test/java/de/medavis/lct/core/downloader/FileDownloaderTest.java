@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @WireMockTest
-class DownloaderTest {
+class FileDownloaderTest {
 
     private static final String INITIAL_URL = "/download";
     private static final String REDIRECTED_URL = "/redirected";
@@ -35,7 +35,7 @@ class DownloaderTest {
     @TempDir
     private Path targetDirectory;
 
-    private final Downloader downloader = new Downloader();
+    private final FileDownloader fileDownloader = new FileDownloader();
 
     @BeforeEach
     void beforeEach(WireMockRuntimeInfo wiremock) {
@@ -113,7 +113,7 @@ class DownloaderTest {
     }
 
     private File download() throws IOException {
-        return downloader.downloadToFile(baseUrl + INITIAL_URL, targetDirectory, TARGET_FILENAME);
+        return fileDownloader.downloadToFile(baseUrl + INITIAL_URL, targetDirectory, TARGET_FILENAME);
     }
 
 }

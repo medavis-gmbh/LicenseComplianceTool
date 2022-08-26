@@ -43,21 +43,20 @@ import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 
-// TODO Mock Downloader
 // TODO Change cache so that filename is ignored (because we do not know it before)
 public class LicenseDownloader {
 
     private final ComponentLister componentLister;
     private final Cache cache;
-    private final Downloader downloader;
+    private final FileDownloader fileDownloader;
 
-    public LicenseDownloader(ComponentLister componentLister, Configuration configuration) {
+    public LicenseDownloader(ComponentLister componentLister, Configuration configuration, FileDownloader fileDownloader) {
         this.componentLister = componentLister;
+        this.fileDownloader = fileDownloader;
         this.cache = configuration.getLicenseCachePathOptional()
                 .map(FilesystemCache::new)
                 .map(Cache.class::cast)
                 .orElseGet(CacheDisabled::new);
-        this.downloader = new Downloader();
     }
 
     public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws MalformedURLException {
@@ -103,7 +102,7 @@ public class LicenseDownloader {
     private void downloadFile(String licenseName, String source, UserLogger userLogger, Path outputPath, int index, int size) {
         try {
             userLogger.info("(%d/%d) Downloading license %s from %s... ", index, size, licenseName, source);
-            File outputFile = downloader.downloadToFile(source, outputPath, licenseName);
+            File outputFile = fileDownloader.downloadToFile(source, outputPath, licenseName);
             cache.addCachedFile(licenseName, outputFile);
             userLogger.info("Done.%n");
         } catch (IOException e) {
