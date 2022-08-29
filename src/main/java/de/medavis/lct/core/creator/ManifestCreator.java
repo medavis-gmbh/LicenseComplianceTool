@@ -19,11 +19,11 @@
  */
 package de.medavis.lct.core.creator;
 
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.List;
 
+import de.medavis.lct.core.UserLogger;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 
@@ -35,11 +35,11 @@ public class ManifestCreator {
         this.componentLister = componentLister;
     }
 
-    public void create(PrintStream logger, Path inputPath, Path outputPath, Format format) throws MalformedURLException {
-        logger.printf("Exporting component manifest in format %s from '%s' to '%s'.%n", format, inputPath, outputPath);
+    public void create(UserLogger logger, Path inputPath, Path outputPath, Format format) throws MalformedURLException {
+        logger.info("Exporting component manifest in format %s from '%s' to '%s'.%n", format, inputPath, outputPath);
         List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
         OutputterFactory.getOutputter(format).output(components, outputPath);
-        logger.printf("Exported %d components.%n", components.size());
+        logger.info("Exported %d components.%n", components.size());
     }
 
 }

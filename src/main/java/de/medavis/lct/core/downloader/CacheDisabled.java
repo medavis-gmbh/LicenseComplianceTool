@@ -17,20 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core;
+package de.medavis.lct.core.downloader;
 
-import java.net.URL;
-import java.nio.file.Path;
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
-public interface Configuration {
+class CacheDisabled implements Cache {
 
-    Optional<URL> getComponentMetadataUrl();
+    @Override
+    public Optional<File> getCachedFile(String licenseName) {
+        return Optional.empty();
+    }
 
-    Optional<URL> getLicensesUrl();
-
-    Optional<URL> getLicenseMappingsUrl();
-
-    Optional<Path> getLicenseCachePathOptional();
-
+    @Override
+    public void addCachedFile(String licenseName, File source) throws IOException {
+        // Do nothing
+    }
 }

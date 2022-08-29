@@ -48,10 +48,11 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.creator.ManifestCreatorFactory;
-import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.core.creator.Format;
 import de.medavis.lct.core.creator.ManifestCreator;
+import de.medavis.lct.core.creator.ManifestCreatorFactory;
+import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
+import de.medavis.lct.jenkins.util.JenkinsLogger;
 
 import static de.medavis.lct.core.creator.Format.PDF;
 
@@ -95,7 +96,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         try {
             Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            manifestCreator.create(listener.getLogger(), inputPathAbsolute, outputPathAbsolute, format);
+            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, format);
             archiveOutput(run, workspace, launcher, listener);
         } catch (IOException e) {
             throw new AbortException("Could not create component manifest: " + e.getMessage());
@@ -116,12 +117,12 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public FormValidation doCheckInputPath(@QueryParameter String value) {
-            return checkIfNotEmpty(value);
+            return FormValidation.validateRequired(value);
         }
 
         @POST
         public FormValidation doCheckOutputPath(@QueryParameter String value) {
-            return checkIfNotEmpty(value);
+            return FormValidation.validateRequired(value);
         }
 
         public ListBoxModel doFillFormatItems() {
@@ -150,11 +151,6 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
             return Messages.CreateManifestBuilder_DescriptorImpl_displayName();
         }
 
-        private FormValidation checkIfNotEmpty(String value) {
-            return (Strings.isNullOrEmpty(value))
-                    ? FormValidation.error(Messages.CreateManifestBuilder_DescriptorImpl_error_missingValue())
-                    : FormValidation.ok();
-        }
     }
 
 }

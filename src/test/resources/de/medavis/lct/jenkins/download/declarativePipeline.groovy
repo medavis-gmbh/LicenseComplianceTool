@@ -17,20 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core;
+pipeline {
+    agent any
 
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.Optional;
-
-public interface Configuration {
-
-    Optional<URL> getComponentMetadataUrl();
-
-    Optional<URL> getLicensesUrl();
-
-    Optional<URL> getLicenseMappingsUrl();
-
-    Optional<Path> getLicenseCachePathOptional();
-
+    stages {
+        stage('Hello') {
+            steps {
+                downloadLicenses inputPath: 'input.bom', outputPath: 'output/licenses'
+            }
+        }
+    }
 }

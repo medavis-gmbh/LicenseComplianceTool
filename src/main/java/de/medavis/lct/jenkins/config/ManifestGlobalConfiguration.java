@@ -25,6 +25,9 @@ import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +46,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String componentMetadata;
     private String licenses;
     private String licenseMappings;
+    private String licenseCachePath;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -132,6 +136,33 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
             }
         } catch (MalformedURLException e) {
             return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidUrl());
+        }
+    }
+
+    public String getLicenseCachePath() {
+        return licenseCachePath;
+    }
+
+    @Override
+    public Optional<Path> getLicenseCachePathOptional() {
+        return Optional.ofNullable(licenseCachePath).map(Paths::get);
+    }
+
+    @DataBoundSetter
+    public void setLicenseCachePath(String licenseCachePath) {
+        this.licenseCachePath = licenseCachePath;
+        save();
+    }
+
+    public FormValidation doCheckLicenseCachePath(String value) {
+        if (Strings.isNullOrEmpty(value)) {
+            return FormValidation.ok();
+        }
+        try {
+            Paths.get(value);
+            return FormValidation.ok();
+        } catch (InvalidPathException e) {
+            return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidPath());
         }
     }
 }

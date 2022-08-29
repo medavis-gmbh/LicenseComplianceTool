@@ -19,18 +19,13 @@
  */
 package de.medavis.lct.core;
 
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.Optional;
+/**
+ * A logger that prints output which is meant for an end user.
+ * Use {@link org.slf4j.Logger} to log information which is not meant for end users.
+ */
+public interface UserLogger {
 
-public interface Configuration {
-
-    Optional<URL> getComponentMetadataUrl();
-
-    Optional<URL> getLicensesUrl();
-
-    Optional<URL> getLicenseMappingsUrl();
-
-    Optional<Path> getLicenseCachePathOptional();
+    void info(String format, Object... args);
+    void error(String format, Object... args);
 
 }

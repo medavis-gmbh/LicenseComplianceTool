@@ -171,8 +171,16 @@ Different components often use different names for the same license. You can use
 |The name of the license in the license information
 |===
 
+==== License cache location
+Specifies a location within the file system where license files are stored so that they do not have to be downloaded each time.
+The path is relative to the working directory of the Jenkins process.
+Note that the location is relative to the node on which the `downloadLicenses` build step is executed, so it is shared between different jobs, but not across
+build nodes.
+
+If left empty, caching will be disabled and licenses will be downloaded each run.
+
 === Create manifest
-This build step creates a component manifest file based on an input SBOM and the global configuration. You can use it in scripted or declarative pipelines as well as freestyle jobs.
+This build step creates a component manifest file based on an input SBOM and the global configuration.
 
 [source,groovy,title=Declarative pipeline example]
 ----
@@ -191,5 +199,20 @@ pipeline {
 
 
 === Download licenses
+This build step tries to download all licenses referenced in the input SBOM and the global configuration into the specified directory.
+Download URLs are preferred over view URLs. If neither URL has been specified for the license, then nothing will be downloaded.
 
-**TODO**
+The downloaded files will have an extension depending on the content type of the URL's content:
+
+|===
+|Content type | Extension
+
+|`text/plain`
+|.txt
+
+|`text/html`
+|.html
+
+|_other_
+|_none_
+|===

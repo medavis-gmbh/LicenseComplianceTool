@@ -17,20 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core;
+package de.medavis.lct.jenkins.util;
 
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.Optional;
+import hudson.model.TaskListener;
 
-public interface Configuration {
+import de.medavis.lct.core.UserLogger;
 
-    Optional<URL> getComponentMetadataUrl();
+public class JenkinsLogger implements UserLogger {
 
-    Optional<URL> getLicensesUrl();
+    private final TaskListener listener;
 
-    Optional<URL> getLicenseMappingsUrl();
+    public JenkinsLogger(TaskListener listener) {
+        this.listener = listener;
+    }
 
-    Optional<Path> getLicenseCachePathOptional();
+    @Override
+    public void info(String format, Object... args) {
+        listener.getLogger().printf(format, args);
+    }
 
+    @Override
+    public void error(String format, Object... args) {
+        listener.error(format, args);
+    }
 }
