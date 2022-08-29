@@ -8,7 +8,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <!-- See https://github.com/jenkinsci/plugin-pom/releases for latest version -->
-        <version>4.46</version>
+        <version>4.47</version>
         <relativePath />
     </parent>
 
@@ -39,7 +39,7 @@
 
     <properties>
         <!-- Jenkins versions -->
-        <jenkins.version>2.346.2</jenkins.version>
+        <jenkins.version>2.346.3</jenkins.version>
 
         <!-- Other dependency versions -->
         <cyclonedx.version>7.1.5</cyclonedx.version>
@@ -54,7 +54,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.346.x</artifactId>
-                <version>1580.v47b_429a_c853a</version>
+                <version>1607.va_c1576527071</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
