@@ -23,18 +23,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public enum Format {
-    PDF("pdf"),
-    HTML("html");
-
-    private final String extension;
-
-    Format(String extension) {
-        this.extension = extension;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
+    PDF(),
+    FREEMARKER();
 
     public static Optional<Format> fromString(String value) {
         return Stream.of(values())

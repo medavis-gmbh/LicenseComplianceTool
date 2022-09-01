@@ -42,19 +42,19 @@ public final class ComponentData {
         this.licenses = licenses;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public String version() {
+    public String getVersion() {
         return version;
     }
 
-    public String url() {
+    public String getUrl() {
         return url;
     }
 
-    public Set<License> licenses() {
+    public Set<License> getLicenses() {
         return licenses;
     }
 

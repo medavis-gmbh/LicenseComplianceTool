@@ -61,22 +61,22 @@ public class LicenseDownloader {
         userLogger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
         final List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
         Set<License> licenses = components.stream()
-                .map(ComponentData::licenses)
+                .map(ComponentData::getLicenses)
                 .flatMap(Set::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         Map<String, File> cachedLicenses = new LinkedHashMap<>();
         for (License license : licenses) {
-            Optional<File> cachedLicenseFile = cache.getCachedFile(license.name());
-            cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.name(), file));
+            Optional<File> cachedLicenseFile = cache.getCachedFile(license.getName());
+            cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.getName(), file));
         }
         userLogger.info("Using %d licenses from cache.%n", cachedLicenses.size());
         cachedLicenses.forEach((name, file) -> copyFromCache(name, file, userLogger, outputPath));
 
         Map<String, String> downloadUrls = licenses.stream()
-                .filter(license -> !cachedLicenses.containsKey(license.name()))
-                .filter(license -> !Strings.isNullOrEmpty(license.downloadUrl()) || !Strings.isNullOrEmpty(license.url()))
-                .collect(Collectors.toMap(License::name, license -> firstNonNull(license.downloadUrl(), license.url())));
+                .filter(license -> !cachedLicenses.containsKey(license.getName()))
+                .filter(license -> !Strings.isNullOrEmpty(license.getDownloadUrl()) || !Strings.isNullOrEmpty(license.getUrl()))
+                .collect(Collectors.toMap(License::getName, license -> firstNonNull(license.getDownloadUrl(), license.getUrl())));
         userLogger.info("Will download %d licenses.%n", downloadUrls.size());
 
         int index = 1;

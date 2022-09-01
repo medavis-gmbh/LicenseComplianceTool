@@ -72,14 +72,14 @@ class PDFOutputter implements Outputter {
             }
 
             data.forEach(component -> {
-                table.addCell(renderTextWithOptionalUrl(component.name(), component.url()));
-                table.addCell(new Phrase(component.version(), FONT_DEFAULT));
+                table.addCell(renderTextWithOptionalUrl(component.getName(), component.getUrl()));
+                table.addCell(new Phrase(component.getVersion(), FONT_DEFAULT));
 
                 Paragraph licenseContent = new Paragraph();
 
-                for (Iterator<License> iterator = component.licenses().iterator(); iterator.hasNext(); ) {
+                for (Iterator<License> iterator = component.getLicenses().iterator(); iterator.hasNext(); ) {
                     License licenseData = iterator.next();
-                    licenseContent.add(renderTextWithOptionalUrl(licenseData.name(), licenseData.url()));
+                    licenseContent.add(renderTextWithOptionalUrl(licenseData.getName(), licenseData.getUrl()));
                     if (iterator.hasNext()) {
                         licenseContent.add(Chunk.NEWLINE);
                     }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,15 +19,24 @@
  */
 package de.medavis.lct.core.creator;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+
 public class OutputterFactory {
 
-    private OutputterFactory() {}
+    private static final Map<Format, Outputter> outputters = ImmutableMap.<Format, Outputter>builder()
+            .put(Format.PDF, new PDFOutputter())
+            .put(Format.FREEMARKER, new FreemarkerOutputter())
+            .build();
 
-    public static Outputter getOutputter(Format format) {
-        if (format == Format.PDF) {
-            return new PDFOutputter();
-        }
-        throw new IllegalArgumentException("Format not supported yet: " + format);
+    private OutputterFactory() {
     }
 
+    public static Outputter getOutputter(Format format) {
+        if (outputters.containsKey(format)) {
+            return outputters.get(format);
+        } else {
+            throw new IllegalArgumentException("Format not supported yet: " + format);
+        }
+    }
 }

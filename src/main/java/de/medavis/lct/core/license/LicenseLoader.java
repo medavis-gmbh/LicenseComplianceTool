@@ -38,7 +38,7 @@ public class LicenseLoader {
             Map<String, License> result = objectMapper.<List<License>>readValue(licenseUrl,
                             objectMapper.getTypeFactory().constructCollectionType(List.class, License.class))
                     .stream()
-                    .collect(Collectors.toMap(License::name, Function.identity()));
+                    .collect(Collectors.toMap(License::getName, Function.identity()));
             logger.info("Imported {} licenses from {}", result.size(), licenseUrl);
             return result;
 

@@ -19,6 +19,7 @@
  */
 package de.medavis.lct.core.creator;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,6 +27,6 @@ import de.medavis.lct.core.list.ComponentData;
 
 public interface Outputter {
 
-    void output(List<ComponentData> data, Path outputFile);
+    void output(List<ComponentData> data, Path outputFile) throws IOException;
 
 }

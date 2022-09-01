@@ -46,6 +46,7 @@
         <openpdf.version>1.3.28</openpdf.version>
         <assertj.version>3.23.1</assertj.version>
         <wiremock.version>2.33.2</wiremock.version>
+        <freemarker.version>2.3.31</freemarker.version>
     </properties>
 
     <dependencyManagement>
@@ -126,6 +127,13 @@
                     <groupId>com.google.code.findbugs</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Freemarker -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
         </dependency>
 
         <!-- Jenkins test tooling -->

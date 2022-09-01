@@ -66,20 +66,20 @@ public class ComponentLister {
                 .stream()
                 .filter(component -> !isIgnored(component, componentMetadata))
                 .map(component -> enrichWithMetadata(component, componentMetadata, licenses, licenseMappings))
-                .collect(Collectors.groupingBy(ComponentData::name))
+                .collect(Collectors.groupingBy(ComponentData::getName))
                 .entrySet()
                 .stream()
                 .map(componentByName -> {
                     // ComponentMetadata has to ensure that component with same name has same url and version
-                    String url = componentByName.getValue().get(0).url();
-                    String version = componentByName.getValue().get(0).version();
+                    String url = componentByName.getValue().get(0).getUrl();
+                    String version = componentByName.getValue().get(0).getVersion();
                     Set<License> allLicenses = componentByName.getValue().stream()
-                            .flatMap(cd -> cd.licenses().stream())
+                            .flatMap(cd -> cd.getLicenses().stream())
                             .distinct()
                             .collect(Collectors.toSet());
                     return new ComponentData(componentByName.getKey(), url, version, allLicenses);
                 })
-                .sorted(Comparator.comparing(ComponentData::name, String.CASE_INSENSITIVE_ORDER))
+                .sorted(Comparator.comparing(ComponentData::getName, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
     }
 
@@ -102,8 +102,8 @@ public class ComponentLister {
 
         Set<License> convertedLicenses = actualLicenses
                 .map(license -> {
-                    String mappedLicenseName = licenseMappings.getOrDefault(license.name(), license.name());
-                    return licenses.getOrDefault(mappedLicenseName, new License(mappedLicenseName, license.url(), license.downloadUrl()));
+                    String mappedLicenseName = licenseMappings.getOrDefault(license.getName(), license.getName());
+                    return licenses.getOrDefault(mappedLicenseName, new License(mappedLicenseName, license.getUrl(), license.getDownloadUrl()));
                 })
                 .collect(Collectors.toSet());
 

@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import jenkins.tasks.SimpleBuildStep;
 import jenkins.util.BuildListenerAdapter;
+import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -104,7 +105,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void archiveOutput(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-        String archiveFilename = ARCHIVE_FILE_NAME + "." + format.getExtension();
+        String archiveFilename = ARCHIVE_FILE_NAME + "." + FilenameUtils.getExtension(outputPath);
         Map<String, String> file = Collections.singletonMap(archiveFilename, outputPath);
         run.pickArtifactManager().archive(workspace, launcher, new BuildListenerAdapter(listener), file);
     }
