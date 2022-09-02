@@ -19,6 +19,9 @@
  */
 package de.medavis.lct.core.outputter;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -32,14 +35,17 @@ import de.medavis.lct.core.list.ComponentData;
 
 public class FreemarkerOutputter {
 
-    // TODO Make configurable
     private static final String DEFAULT_TEMPLATE = "DefaultComponentManifest.ftlh";
 
     private final Configuration configuration;
 
     public FreemarkerOutputter() {
         configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-        configuration.setClassForTemplateLoading(getClass(), "");
+        MultiTemplateLoader loader = new MultiTemplateLoader(new TemplateLoader[]{
+                new ClassTemplateLoader(getClass(), "")
+                // TODO Add loader for http urls
+        });
+        configuration.setTemplateLoader(loader);
         configuration.setDefaultEncoding("UTF-8");
     }
 

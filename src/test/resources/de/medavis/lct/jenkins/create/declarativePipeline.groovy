@@ -24,7 +24,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                componentManifest inputPath: 'input.bom', outputPath: 'output.html'
+                componentManifest inputPath: 'input.bom', outputPath: 'output.html', templateUrl: 'file://template.ftl'
             }
         }
     }

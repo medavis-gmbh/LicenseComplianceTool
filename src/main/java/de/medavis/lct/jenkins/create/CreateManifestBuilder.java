@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import jenkins.util.BuildListenerAdapter;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
@@ -48,6 +50,7 @@ import de.medavis.lct.core.creator.ManifestCreator;
 import de.medavis.lct.core.creator.ManifestCreatorFactory;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
+import de.medavis.lct.jenkins.util.UrlValidator;
 
 
 public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
@@ -56,6 +59,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputPath;
     private final String outputPath;
+    private String templateUrl;
 
     private final ManifestCreator manifestCreator;
 
@@ -74,13 +78,22 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         return outputPath;
     }
 
+    public String getTemplateUrl() {
+        return templateUrl;
+    }
+
+    @DataBoundSetter
+    public void setTemplateUrl(String templateUrl) {
+        this.templateUrl = templateUrl;
+    }
+
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
             Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute);
+            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, templateUrl != null ? new URL(templateUrl) : null);
             archiveOutput(run, workspace, launcher, listener);
         } catch (IOException e) {
             throw new AbortException("Could not create component manifest: " + e.getMessage());
@@ -107,6 +120,11 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.validateRequired(value);
         }
 
+        @POST
+        public FormValidation doCheckTemplateUrl(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
@@ -115,7 +133,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         @NonNull
         @Override
         public String getDisplayName() {
-            return Messages.CreateManifestBuilder_DescriptorImpl_displayName();
+            return de.medavis.lct.jenkins.create.Messages.CreateManifestBuilder_DescriptorImpl_displayName();
         }
 
     }

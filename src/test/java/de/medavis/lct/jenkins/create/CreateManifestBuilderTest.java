@@ -25,6 +25,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Label;
 import hudson.model.Run.Artifact;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -57,6 +58,7 @@ class CreateManifestBuilderTest {
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_FILE_EXTENSION = ".html";
     private static final String OUTPUT_PATH = "output" + OUTPUT_FILE_EXTENSION;
+    private static final String TEMPLATE_URL = "file://template.ftl";
 
     @Mock(strictness = Strictness.LENIENT)
     private ManifestCreator manifestCreatorMock;
@@ -68,28 +70,33 @@ class CreateManifestBuilderTest {
             Path outputPath = invocation.getArgument(2, Path.class);
             outputPath.toFile().createNewFile();
             return null;
-        }).when(manifestCreatorMock).create(any(), any(), any());
+        }).when(manifestCreatorMock).create(any(), any(), any(), any());
     }
 
     @Test
     void testConfigRoundtripDefaultFormat(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
+        final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
+        builder.setTemplateUrl(TEMPLATE_URL);
+        project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
-        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
+        jenkins.assertEqualDataBoundBeans(builder, project.getBuildersList().get(0));
     }
 
     @Test
     void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH));
+        final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
+        builder.setTemplateUrl(TEMPLATE_URL);
+        project.getBuildersList().add(builder);
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)));
+        verify(manifestCreatorMock).create(any(),
+                eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)),
+                eq(new URL(TEMPLATE_URL)));
         assertThat(build.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -104,8 +111,10 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
+        verify(manifestCreatorMock).create(any(),
+                eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
+                eq(new URL(TEMPLATE_URL)));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -120,8 +129,10 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
+        verify(manifestCreatorMock).create(any(),
+                eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
+                eq(new URL(TEMPLATE_URL)));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }

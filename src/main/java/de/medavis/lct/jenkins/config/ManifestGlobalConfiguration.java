@@ -28,8 +28,6 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import jenkins.model.GlobalConfiguration;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -38,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.jenkins.util.UrlValidator;
 
 @Extension
 public class ManifestGlobalConfiguration extends GlobalConfiguration implements PersistentDescriptor, Configuration {
@@ -69,7 +68,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     public FormValidation doCheckComponentMetadata(@QueryParameter String value) {
-        return checkUrlInput(value);
+        return UrlValidator.validate(value);
     }
 
     public String getLicenses() {
@@ -88,7 +87,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     public FormValidation doCheckLicenses(@QueryParameter String value) {
-        return checkUrlInput(value);
+        return UrlValidator.validate(value);
     }
 
     public String getLicenseMappings() {
@@ -119,24 +118,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     public FormValidation doCheckLicenseMappings(@QueryParameter String value) {
-        return checkUrlInput(value);
-    }
-
-    private FormValidation checkUrlInput(String value) {
-        if (Strings.isNullOrEmpty(value)) {
-            return FormValidation.ok();
-        }
-        try {
-            URL asUrl = new URL(value);
-            final List<String> http = Arrays.asList("http", "https");
-            if (http.stream().noneMatch(asUrl.getProtocol()::equalsIgnoreCase)) {
-                return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidUrl());
-            } else {
-                return FormValidation.ok();
-            }
-        } catch (MalformedURLException e) {
-            return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidUrl());
-        }
+        return UrlValidator.validate(value);
     }
 
     public String getLicenseCachePath() {
@@ -162,7 +144,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
             Paths.get(value);
             return FormValidation.ok();
         } catch (InvalidPathException e) {
-            return FormValidation.error(Messages.ManifestGlobalConfiguration_error_invalidPath());
+            return FormValidation.error(de.medavis.lct.jenkins.config.Messages.ManifestGlobalConfiguration_error_invalidPath());
         }
     }
 }

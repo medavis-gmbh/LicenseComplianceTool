@@ -19,5 +19,5 @@ package de.medavis.lct.jenkins.create
  * #L%
  */
 node {
-    componentManifest inputPath: 'input.bom', outputPath: 'output.html'
+    componentManifest inputPath: 'input.bom', outputPath: 'output.html', templateUrl: 'file://template.ftl'
 }
