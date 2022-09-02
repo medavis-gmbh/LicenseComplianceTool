@@ -26,8 +26,14 @@
     <tbody>
     <#list components as component>
         <tr>
-            <td><a href="${component.url}">${component.name}</a></td>
-            <td>${component.version}</td>
+            <td>
+                <#if component.url??>
+                    <a href="${component.url}">${component.name}</a>
+                <#else>
+                    ${component.name}
+                </#if>
+            </td>
+            <td>${component.version!}</td>
             <td>
                 <#list component.licenses as license>
                     <p>

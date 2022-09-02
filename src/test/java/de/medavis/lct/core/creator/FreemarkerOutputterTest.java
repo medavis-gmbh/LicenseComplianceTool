@@ -10,11 +10,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -27,64 +29,113 @@ class FreemarkerOutputterTest {
 
     private final FreemarkerOutputter underTest = new FreemarkerOutputter();
 
-    @Test
-    void fullAttributes(@TempDir Path outputPath) throws IOException {
-        final ComponentData componentA = component("ComponentA", "1.0.0", "https://component-a.com",
-                license("LIC-A", "https://license-a.com"));
-        List<ComponentData> components = Collections.singletonList(componentA
-        );
-        final Path outputFile = outputPath.resolve("output.html");
+    @Nested
+    class ComponentTable {
+        @Test
+        void fullAttributes(@TempDir Path outputPath) throws IOException {
+            final ComponentData componentA = createComponent("ComponentA", "1.0.0", "https://component-a.com",
+                    createLicense("LIC-A", "https://license-a.com"));
+            final ComponentData componentB = createComponent("ComponentB", "2.0.0", "https://component-b.com",
+                    createLicense("LIC-B", "https://license-b.com"));
 
-        underTest.output(components, outputFile);
-
-        assertThat(outputFile).exists();
-
-        try (WebClient webClient = new WebClient()) {
-            HtmlPage manifest = webClient.getPage(outputFile.toUri().toURL());
-            HtmlTable table = manifest.getHtmlElementById("components");
-            assertThat(table.getBodies()).hasSize(1)
-                    .allSatisfy(tableBody -> {
-                        assertThat(tableBody.getRows())
-                                .hasSameSizeAs(components)
-                                .satisfiesExactly(row -> verifyComponentRow(componentA, row));
-                    });
+            createAndVerifyOutput(outputPath, componentA, componentB);
         }
-    }
 
-    private ComponentData component(String name, String version, String url, License... licenses) {
-        return new ComponentData(name, version, url, ImmutableSet.copyOf(licenses));
-    }
+        @Test
+        void missingComponentUrl(@TempDir Path outputPath) throws IOException {
+            final ComponentData component = createComponent("ComponentA", "1.0.0", null,
+                    createLicense("LIC-A", "https://license-a.com"));
 
-    private License license(String name, String url) {
-        return new License(name, url);
-    }
+            createAndVerifyOutput(outputPath, component);
+        }
 
-    private void verifyComponentRow(ComponentData component, HtmlTableRow row) {
-        assertThat(row.getCells()).hasSize(3);
-        assertThat(row.getCell(0)).satisfies(isAnchor(component.getName(), component.getUrl()));
-        assertThat(row.getCell(1).getTextContent()).isEqualToNormalizingWhitespace(component.getVersion());
-        assertThat(row.getCell(2)).satisfies(cell -> {
-            assertThat(cell.getChildElements()).hasSameSizeAs(component.getLicenses());
-            List<DomElement> children = StreamSupport.stream(cell.getChildElements().spliterator(), false).collect(Collectors.toList());
-            int i = 0;
-            for (License license : component.getLicenses()) {
-                assertThat(children.get(i))
-                        .isInstanceOf(HtmlParagraph.class)
-                        .satisfies(isAnchor(license.getName(), license.getUrl()));
-                i++;
+        @Test
+        void missingVersionUrl(@TempDir Path outputPath) throws IOException {
+            final ComponentData component = createComponent("ComponentA", null, "https://component-a.com",
+                    createLicense("LIC-A", "https://license-a.com"));
+
+            createAndVerifyOutput(outputPath, component);
+        }
+
+        @Test
+        void missingLicenseUrl(@TempDir Path outputPath) throws IOException {
+            final ComponentData component = createComponent("ComponentA", "1.0.0", null,
+                    createLicense("LIC-A", null));
+            List<ComponentData> components = Collections.singletonList(component);
+
+            createAndVerifyOutput(outputPath, component);
+        }
+
+        @Test
+        void noLicenses(@TempDir Path outputPath) throws IOException {
+            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com");
+            List<ComponentData> components = Collections.singletonList(component);
+
+            createAndVerifyOutput(outputPath, component);
+        }
+
+        private ComponentData createComponent(String name, String version, String url, License... licenses) {
+            return new ComponentData(name, version, url, ImmutableSet.copyOf(licenses));
+        }
+
+        private License createLicense(String name, String url) {
+            return new License(name, url);
+        }
+
+        private void createAndVerifyOutput(Path outputPath, ComponentData... components) throws IOException {
+            final Path outputFile = outputPath.resolve("output.html");
+            underTest.output(Arrays.asList(components), outputFile);
+            assertThat(outputFile).exists();
+            try (WebClient webClient = new WebClient()) {
+                HtmlPage manifest = webClient.getPage(outputFile.toUri().toURL());
+                HtmlTable table = manifest.getHtmlElementById("components");
+                assertThat(table.getBodies()).hasSize(1)
+                        .satisfiesExactly(tableBody -> {
+                            assertThat(tableBody.getRows()).hasSameSizeAs(components);
+                            for (int i = 0; i < tableBody.getRows().size(); i++) {
+                                ComponentData component = components[i];
+                                assertThat(tableBody.getRows().get(i)).satisfies(row -> verifyComponentRow(component, row));
+                            }
+                        });
             }
-        });
-    }
+        }
 
-    private Consumer<? super DomElement> isAnchor(String name, String url) {
-        return cell -> {
-            assertThat(StreamSupport.stream(cell.getChildElements().spliterator(), false)
-                    .filter(HtmlAnchor.class::isInstance)
-                    .map(HtmlAnchor.class::cast)
-                    .findFirst()).hasValueSatisfying(a -> {
-                assertThat(a).extracting(HtmlAnchor::getTextContent).isEqualTo(name);
-                assertThat(a).extracting(HtmlAnchor::getHrefAttribute).isEqualTo(url);
+        private void verifyComponentRow(ComponentData component, HtmlTableRow row) {
+            assertThat(row.getCells()).hasSize(3);
+            assertThat(row.getCell(0)).satisfies(component.getUrl() != null ? isAnchor(component.getName(), component.getUrl()) : isText(component.getName()));
+            assertThat(row.getCell(1)).satisfies(component.getVersion() != null ? isText(component.getVersion()) : isEmpty());
+            assertThat(row.getCell(2)).satisfies(cell -> {
+                assertThat(cell.getChildElements()).hasSameSizeAs(component.getLicenses());
+                List<DomElement> children = StreamSupport.stream(cell.getChildElements().spliterator(), false).collect(Collectors.toList());
+                int i = 0;
+                for (License license : component.getLicenses()) {
+                    assertThat(children.get(i))
+                            .isInstanceOf(HtmlParagraph.class)
+                            .satisfies(license.getUrl() != null ? isAnchor(license.getName(), license.getUrl()) : isText(license.getName()));
+                    i++;
+                }
             });
-        };
+        }
+
+        private Consumer<? super DomElement> isAnchor(String name, String url) {
+            return cell -> {
+                assertThat(StreamSupport.stream(cell.getChildElements().spliterator(), false)
+                        .filter(HtmlAnchor.class::isInstance)
+                        .map(HtmlAnchor.class::cast)
+                        .findFirst()).hasValueSatisfying(a -> {
+                    assertThat(a).extracting(HtmlAnchor::getTextContent).isEqualTo(name);
+                    assertThat(a).extracting(HtmlAnchor::getHrefAttribute).isEqualTo(url);
+                });
+            };
+        }
+
+        private Consumer<DomElement> isText(String text) {
+            return cell -> assertThat(cell.getTextContent()).isEqualToNormalizingWhitespace(text);
+        }
+
+        private Consumer<DomElement> isEmpty() {
+            return cell -> assertThat(cell.getTextContent()).isEmpty();
+        }
+
     }
 }
