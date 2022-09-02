@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core.creator;
+package de.medavis.lct.core.outputter;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -26,8 +26,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlParagraph;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,15 +39,20 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
-import de.medavis.lct.core.outputter.FreemarkerOutputter;
 
 class FreemarkerOutputterTest {
 
@@ -51,6 +60,7 @@ class FreemarkerOutputterTest {
 
     @Nested
     class ComponentTable {
+
         @Test
         void fullAttributes(@TempDir Path outputPath) throws IOException {
             final ComponentData componentA = createComponent("ComponentA", "1.0.0", "https://component-a.com",
@@ -81,7 +91,6 @@ class FreemarkerOutputterTest {
         void missingLicenseUrl(@TempDir Path outputPath) throws IOException {
             final ComponentData component = createComponent("ComponentA", "1.0.0", null,
                     createLicense("LIC-A", null));
-            List<ComponentData> components = Collections.singletonList(component);
 
             createAndVerifyOutput(outputPath, component);
         }
@@ -104,7 +113,7 @@ class FreemarkerOutputterTest {
 
         private void createAndVerifyOutput(Path outputPath, ComponentData... components) throws IOException {
             final Path outputFile = outputPath.resolve("output.html");
-            underTest.output(Arrays.asList(components), outputFile);
+            underTest.output(Arrays.asList(components), outputFile, null);
             assertThat(outputFile).exists();
             try (WebClient webClient = new WebClient()) {
                 HtmlPage manifest = webClient.getPage(outputFile.toUri().toURL());
@@ -157,5 +166,49 @@ class FreemarkerOutputterTest {
             return cell -> assertThat(cell.getTextContent()).isEmpty();
         }
 
+    }
+
+    @Nested
+    @WireMockTest
+    class Templates {
+
+        private static final String TEST_TEMPLATE_NAME = "test.ftlh";
+        private static final String TEST_TEMPLATE_CONTENT_PART = "Content part of template";
+
+        @Test
+        void fromFilesystem(@TempDir Path tempDir) throws IOException {
+            Path template = tempDir.resolve("input.ftlh");
+            FileUtils.copyURLToFile(getClass().getResource(TEST_TEMPLATE_NAME), template.toFile());
+            final Path output = tempDir.resolve("output.html");
+
+            underTest.output(Collections.emptyList(), output, template.toUri().toURL().toString());
+
+            assertThat(output)
+                    .exists()
+                    .content().contains(TEST_TEMPLATE_CONTENT_PART);
+        }
+
+        @Test
+        void fromHttp(@TempDir Path tempDir, WireMockRuntimeInfo wiremock) throws IOException {
+            String templateRelativeUrl = "/template";
+            stubFor(get(templateRelativeUrl).willReturn(ok(Resources.toString(getClass().getResource(TEST_TEMPLATE_NAME), StandardCharsets.UTF_8))));
+            final Path output = tempDir.resolve("output.html");
+
+            underTest.output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl);
+
+            assertThat(output)
+                    .exists()
+                    .content().contains(TEST_TEMPLATE_CONTENT_PART);
+        }
+
+        @Test
+        void failOnInexistentTemplate(@TempDir Path tempDir, WireMockRuntimeInfo wiremock) {
+            String templateRelativeUrl = "/template";
+            stubFor(get(templateRelativeUrl).willReturn(notFound()));
+            final Path output = tempDir.resolve("output.html");
+
+            assertThatThrownBy(() -> underTest.output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl))
+                    .isInstanceOf(IOException.class);
+        }
     }
 }

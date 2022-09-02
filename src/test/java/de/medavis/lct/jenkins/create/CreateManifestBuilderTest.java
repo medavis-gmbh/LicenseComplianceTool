@@ -96,7 +96,7 @@ class CreateManifestBuilderTest {
         verify(manifestCreatorMock).create(any(),
                 eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
                 eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)),
-                eq(new URL(TEMPLATE_URL)));
+                eq(TEMPLATE_URL));
         assertThat(build.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -114,7 +114,7 @@ class CreateManifestBuilderTest {
         verify(manifestCreatorMock).create(any(),
                 eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
                 eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
-                eq(new URL(TEMPLATE_URL)));
+                eq(TEMPLATE_URL));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -132,7 +132,7 @@ class CreateManifestBuilderTest {
         verify(manifestCreatorMock).create(any(),
                 eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
                 eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
-                eq(new URL(TEMPLATE_URL)));
+                eq(TEMPLATE_URL));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }

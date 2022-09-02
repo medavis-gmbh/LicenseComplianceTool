@@ -93,7 +93,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         try {
             Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, templateUrl != null ? new URL(templateUrl) : null);
+            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, templateUrl);
             archiveOutput(run, workspace, launcher, listener);
         } catch (IOException e) {
             throw new AbortException("Could not create component manifest: " + e.getMessage());

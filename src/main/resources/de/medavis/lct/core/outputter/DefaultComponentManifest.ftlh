@@ -18,7 +18,7 @@ limitations under the License.
 #L%
 -->
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Included third-party software</title>

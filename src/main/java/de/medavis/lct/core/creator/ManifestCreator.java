@@ -20,7 +20,6 @@
 package de.medavis.lct.core.creator;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -38,10 +37,10 @@ public class ManifestCreator {
         this.componentLister = componentLister;
     }
 
-    public void create(UserLogger logger, Path inputPath, Path outputPath, URL templateLocation) throws IOException {
+    public void create(UserLogger logger, Path inputPath, Path outputPath, String templateLocation) throws IOException {
         logger.info("Writing component manifest from '%s' to '%s'.%n", inputPath, outputPath);
         List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
-        outputter.output(components, outputPath);
+        outputter.output(components, outputPath, templateLocation);
         logger.info("Exported %d components.%n", components.size());
     }
 

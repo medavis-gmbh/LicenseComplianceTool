@@ -19,6 +19,7 @@
  */
 package de.medavis.lct.core.outputter;
 
+import com.google.common.base.MoreObjects;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -42,15 +43,16 @@ public class FreemarkerOutputter {
     public FreemarkerOutputter() {
         configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         MultiTemplateLoader loader = new MultiTemplateLoader(new TemplateLoader[]{
-                new ClassTemplateLoader(getClass(), "")
-                // TODO Add loader for http urls
+                new ClassTemplateLoader(getClass(), ""),
+                new ExternalUrlTemplateLoader()
         });
+        configuration.setLocalizedLookup(false);
         configuration.setTemplateLoader(loader);
         configuration.setDefaultEncoding("UTF-8");
     }
 
-    public void output(List<ComponentData> data, Path outputFile) throws IOException {
-        Template template = configuration.getTemplate(DEFAULT_TEMPLATE);
+    public void output(List<ComponentData> data, Path outputFile, String templateUrl) throws IOException {
+        Template template = configuration.getTemplate(MoreObjects.firstNonNull(templateUrl, DEFAULT_TEMPLATE));
         try (FileWriter writer = new FileWriter(outputFile.toFile())) {
             try {
                 template.process(Collections.singletonMap("components", data), writer);
