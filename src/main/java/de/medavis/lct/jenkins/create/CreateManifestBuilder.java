@@ -19,7 +19,6 @@
  */
 package de.medavis.lct.jenkins.create;
 
-import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -32,30 +31,24 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import jenkins.tasks.SimpleBuildStep;
 import jenkins.util.BuildListenerAdapter;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.creator.Format;
 import de.medavis.lct.core.creator.ManifestCreator;
 import de.medavis.lct.core.creator.ManifestCreatorFactory;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 
-import static de.medavis.lct.core.creator.Format.PDF;
 
 public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
@@ -64,8 +57,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     private final String inputPath;
     private final String outputPath;
 
-    private Format format = DescriptorImpl.defaultFormat;
-    private ManifestCreator manifestCreator;
+    private final ManifestCreator manifestCreator;
 
     @DataBoundConstructor
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
@@ -82,22 +74,13 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         return outputPath;
     }
 
-    public Format getFormat() {
-        return format;
-    }
-
-    @DataBoundSetter
-    public void setFormat(Format format) {
-        this.format = format;
-    }
-
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
             Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, format);
+            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute);
             archiveOutput(run, workspace, launcher, listener);
         } catch (IOException e) {
             throw new AbortException("Could not create component manifest: " + e.getMessage());
@@ -114,8 +97,6 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        public static final Format defaultFormat = PDF;
-
         @POST
         public FormValidation doCheckInputPath(@QueryParameter String value) {
             return FormValidation.validateRequired(value);
@@ -124,21 +105,6 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         @POST
         public FormValidation doCheckOutputPath(@QueryParameter String value) {
             return FormValidation.validateRequired(value);
-        }
-
-        public ListBoxModel doFillFormatItems() {
-            ListBoxModel result = new ListBoxModel();
-            Arrays.stream(Format.values()).forEach(f -> result.add(f.name()));
-            return result;
-        }
-
-        @POST
-        public FormValidation doCheckFormat(@QueryParameter String value) {
-            Optional<Format> format = Format.fromString(value);
-            if (!format.isPresent()) {
-                return FormValidation.error(Messages.CreateManifestBuilder_DescriptorImpl_error_invalidFormat());
-            }
-            return FormValidation.ok();
         }
 
         @Override

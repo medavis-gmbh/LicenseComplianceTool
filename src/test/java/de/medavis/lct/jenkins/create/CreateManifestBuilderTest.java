@@ -45,10 +45,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import de.medavis.lct.core.creator.Format;
 import de.medavis.lct.core.creator.ManifestCreator;
 import de.medavis.lct.core.creator.ManifestCreatorFactory;
-import de.medavis.lct.jenkins.create.CreateManifestBuilder.DescriptorImpl;
 
 import static de.medavis.lct.util.WorkspaceResolver.getPathRelativeToWorkspace;
 
@@ -57,7 +55,7 @@ import static de.medavis.lct.util.WorkspaceResolver.getPathRelativeToWorkspace;
 class CreateManifestBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
-    private static final String OUTPUT_FILE_EXTENSION = ".pdf";
+    private static final String OUTPUT_FILE_EXTENSION = ".html";
     private static final String OUTPUT_PATH = "output" + OUTPUT_FILE_EXTENSION;
 
     @Mock(strictness = Strictness.LENIENT)
@@ -70,7 +68,7 @@ class CreateManifestBuilderTest {
             Path outputPath = invocation.getArgument(2, Path.class);
             outputPath.toFile().createNewFile();
             return null;
-        }).when(manifestCreatorMock).create(any(), any(), any(), any());
+        }).when(manifestCreatorMock).create(any(), any(), any());
     }
 
     @Test
@@ -80,20 +78,6 @@ class CreateManifestBuilderTest {
         project = jenkins.configRoundtrip(project);
 
         CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        expected.setFormat(Format.PDF);
-        jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
-    }
-
-    @Test
-    void testConfigRoundtripCustomFormat(JenkinsRule jenkins) throws Exception {
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        final CreateManifestBuilder createManifestBuilder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        createManifestBuilder.setFormat(Format.PDF);
-        project.getBuildersList().add(createManifestBuilder);
-        project = jenkins.configRoundtrip(project);
-
-        CreateManifestBuilder expected = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        expected.setFormat(Format.PDF);
         jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
     }
 
@@ -105,7 +89,7 @@ class CreateManifestBuilderTest {
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
 
         verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)), eq(DescriptorImpl.defaultFormat));
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)));
         assertThat(build.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -121,7 +105,7 @@ class CreateManifestBuilderTest {
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }
@@ -137,7 +121,7 @@ class CreateManifestBuilderTest {
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         verify(manifestCreatorMock).create(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)), eq(DescriptorImpl.defaultFormat));
+                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
         assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
                 .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
     }

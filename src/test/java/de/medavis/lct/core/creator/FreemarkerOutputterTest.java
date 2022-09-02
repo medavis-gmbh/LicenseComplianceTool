@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import de.medavis.lct.core.license.License;
 import de.medavis.lct.core.list.ComponentData;
+import de.medavis.lct.core.outputter.FreemarkerOutputter;
 
 class FreemarkerOutputterTest {
 
