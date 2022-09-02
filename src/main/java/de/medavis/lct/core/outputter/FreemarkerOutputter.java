@@ -26,8 +26,11 @@ import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +56,7 @@ public class FreemarkerOutputter {
 
     public void output(List<ComponentData> data, Path outputFile, String templateUrl) throws IOException {
         Template template = configuration.getTemplate(MoreObjects.firstNonNull(templateUrl, DEFAULT_TEMPLATE));
-        try (FileWriter writer = new FileWriter(outputFile.toFile())) {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(outputFile.toFile().toPath()), StandardCharsets.UTF_8)) {
             try {
                 template.process(Collections.singletonMap("components", data), writer);
             } catch (TemplateException e) {
