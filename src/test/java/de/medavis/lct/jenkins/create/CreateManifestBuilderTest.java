@@ -58,7 +58,7 @@ class CreateManifestBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_FILE_EXTENSION = ".pdf";
-    private static final String OUTPUT_PATH = "output." + OUTPUT_FILE_EXTENSION;
+    private static final String OUTPUT_PATH = "output" + OUTPUT_FILE_EXTENSION;
 
     @Mock(strictness = Strictness.LENIENT)
     private ManifestCreator manifestCreatorMock;
