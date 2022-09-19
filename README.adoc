@@ -219,3 +219,18 @@ The downloaded files will have an extension depending on the content type of the
 |_other_
 |_none_
 |===
+
+[source,groovy,title=Declarative pipeline example]
+----
+pipeline {
+    agent any
+
+    stages {
+        stage('Create manifest') {
+            steps {
+                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY'
+            }
+        }
+    }
+}
+----
