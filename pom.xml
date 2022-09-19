@@ -39,7 +39,7 @@
 
     <properties>
         <!-- Jenkins versions -->
-        <jenkins.version>2.346.3</jenkins.version>
+        <jenkins.version>2.361.1</jenkins.version>
 
         <!-- Other dependency versions -->
         <cyclonedx.version>7.1.5</cyclonedx.version>
