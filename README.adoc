@@ -190,12 +190,15 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                componentManifest inputPath: 'input.json', outputPath: 'output.pdf'
+                componentManifest inputPath: 'input.json', outputPath: 'output.pdf', templateUrl: 'file://template.ftl'
             }
         }
     }
 }
 ----
+
+With the parameter `templateUrl`, you can specify a URL pointing to a custom FreeMarker template which is used to create the output. The parameter is optional.
+If it is not set, the template from link:src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
 
 
 === Download licenses

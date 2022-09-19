@@ -17,29 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core.creator;
+package de.medavis.lct.core.outputter;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import freemarker.cache.URLTemplateLoader;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-public enum Format {
-    PDF("pdf"),
-    HTML("html");
+public class ExternalUrlTemplateLoader extends URLTemplateLoader {
 
-    private final String extension;
-
-    Format(String extension) {
-        this.extension = extension;
+    @Override
+    protected URL getURL(String name) {
+        try {
+            return new URL(name);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    public static Optional<Format> fromString(String value) {
-        return Stream.of(values())
-                .filter(format -> format.name().equalsIgnoreCase(value))
-                .findFirst();
-    }
-
 }

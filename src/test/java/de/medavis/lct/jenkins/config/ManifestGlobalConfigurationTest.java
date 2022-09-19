@@ -30,7 +30,6 @@ import org.jvnet.hudson.test.JenkinsSessionRule;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-// TODO Add tests for error cases
 // Still using JUnit 4 annotations since there seems to be no JUnit 5 equivalent for JenkinsSessionRule
 public class ManifestGlobalConfigurationTest {
 

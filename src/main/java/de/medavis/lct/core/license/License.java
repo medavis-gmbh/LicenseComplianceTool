@@ -40,15 +40,15 @@ public final class License {
         this(name, url, null);
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public String url() {
+    public String getUrl() {
         return url;
     }
 
-    public String downloadUrl() {
+    public String getDownloadUrl() {
         return downloadUrl;
     }
 

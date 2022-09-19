@@ -6,9 +6,7 @@
     <f:entry title="${%outputPath}" field="outputPath" description="${%outputPath.description}">
         <f:textbox />
     </f:entry>
-    <f:advanced>
-        <f:entry title="${%format}" field="format" description="${%format.description}">
-            <f:select default="${descriptor.defaultFormat}"/>
-        </f:entry>
-    </f:advanced>
+    <f:entry title="${%templateUrl}" field="templateUrl" description="${%templateUrl.description}">
+        <f:textbox />
+    </f:entry>
 </j:jelly>
