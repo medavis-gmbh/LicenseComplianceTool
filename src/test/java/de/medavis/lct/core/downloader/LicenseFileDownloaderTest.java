@@ -20,9 +20,9 @@
 package de.medavis.lct.core.downloader;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +30,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -204,7 +203,8 @@ class LicenseFileDownloaderTest {
                 RandomStringUtils.randomAlphabetic(6),
                 RandomStringUtils.randomAlphabetic(6),
                 RandomStringUtils.randomAlphabetic(6),
-                Stream.of(licenses).collect(Collectors.toSet()));
+                ImmutableSet.copyOf(licenses),
+                Collections.emptySet());
     }
 
     private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) throws IOException {

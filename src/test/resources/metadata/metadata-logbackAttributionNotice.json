@@ -1,0 +1,9 @@
+[
+  {
+    "groupMatch": "ch\\.qos\\.logback",
+    "attributionNotices": [
+      "Copyright (c) 2015",
+      "Guaranteed Log4Shell-free"
+    ]
+  }
+]

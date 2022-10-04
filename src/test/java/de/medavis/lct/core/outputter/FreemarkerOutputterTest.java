@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -64,9 +65,9 @@ class FreemarkerOutputterTest {
         @Test
         void fullAttributes(@TempDir Path outputPath) throws IOException {
             final ComponentData componentA = createComponent("ComponentA", "1.0.0", "https://component-a.com",
-                    createLicense("LIC-A", "https://license-a.com"));
+                    createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
             final ComponentData componentB = createComponent("ComponentB", "2.0.0", "https://component-b.com",
-                    createLicense("LIC-B", "https://license-b.com"));
+                    createLicenses("LIC-B", "https://license-b.com"), ImmutableSet.of("Copyright (c) 2015", "Resistance is futile"));
 
             createAndVerifyOutput(outputPath, componentA, componentB);
         }
@@ -74,7 +75,7 @@ class FreemarkerOutputterTest {
         @Test
         void missingComponentUrl(@TempDir Path outputPath) throws IOException {
             final ComponentData component = createComponent("ComponentA", "1.0.0", null,
-                    createLicense("LIC-A", "https://license-a.com"));
+                    createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
         }
@@ -82,7 +83,7 @@ class FreemarkerOutputterTest {
         @Test
         void missingVersionUrl(@TempDir Path outputPath) throws IOException {
             final ComponentData component = createComponent("ComponentA", null, "https://component-a.com",
-                    createLicense("LIC-A", "https://license-a.com"));
+                    createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
         }
@@ -90,25 +91,33 @@ class FreemarkerOutputterTest {
         @Test
         void missingLicenseUrl(@TempDir Path outputPath) throws IOException {
             final ComponentData component = createComponent("ComponentA", "1.0.0", null,
-                    createLicense("LIC-A", null));
+                    createLicenses("LIC-A", null), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
         }
 
         @Test
         void noLicenses(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com");
-            List<ComponentData> components = Collections.singletonList(component);
+            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", Collections.emptySet(),
+                    Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
         }
 
-        private ComponentData createComponent(String name, String version, String url, License... licenses) {
-            return new ComponentData(name, version, url, ImmutableSet.copyOf(licenses));
+        @Test
+        void noAttributionNotices(@TempDir Path outputPath) throws IOException {
+            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", createLicenses("LIC-A", "https://license-a.com"),
+                    Collections.emptySet());
+
+            createAndVerifyOutput(outputPath, component);
         }
 
-        private License createLicense(String name, String url) {
-            return new License(name, url);
+        private ComponentData createComponent(String name, String version, String url, Set<License> licenses, Set<String> attributionNotices) {
+            return new ComponentData(name, version, url, licenses, attributionNotices);
+        }
+
+        private Set<License> createLicenses(String name, String url) {
+            return Collections.singleton(new License(name, url));
         }
 
         private void createAndVerifyOutput(Path outputPath, ComponentData... components) throws IOException {
@@ -130,7 +139,7 @@ class FreemarkerOutputterTest {
         }
 
         private void verifyComponentRow(ComponentData component, HtmlTableRow row) {
-            assertThat(row.getCells()).hasSize(3);
+            assertThat(row.getCells()).hasSize(4);
             assertThat(row.getCell(0)).satisfies(component.getUrl() != null ? isAnchor(component.getName(), component.getUrl()) : isText(component.getName()));
             assertThat(row.getCell(1)).satisfies(component.getVersion() != null ? isText(component.getVersion()) : isEmpty());
             assertThat(row.getCell(2)).satisfies(cell -> {
@@ -141,6 +150,17 @@ class FreemarkerOutputterTest {
                     assertThat(children.get(i))
                             .isInstanceOf(HtmlParagraph.class)
                             .satisfies(license.getUrl() != null ? isAnchor(license.getName(), license.getUrl()) : isText(license.getName()));
+                    i++;
+                }
+            });
+            assertThat(row.getCell(3)).satisfies(cell -> {
+                assertThat(cell.getChildElements()).hasSameSizeAs(component.getAttributionNotices());
+                List<DomElement> children = StreamSupport.stream(cell.getChildElements().spliterator(), false).collect(Collectors.toList());
+                int i = 0;
+                for (String attributionNotice : component.getAttributionNotices()) {
+                    assertThat(children.get(i))
+                            .isInstanceOf(HtmlParagraph.class)
+                            .satisfies(isText(attributionNotice));
                     i++;
                 }
             });

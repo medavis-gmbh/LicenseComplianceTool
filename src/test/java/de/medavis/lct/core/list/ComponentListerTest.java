@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package de.medavis.lct.core.list;
 import com.google.common.collect.ImmutableSet;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,14 +46,14 @@ class ComponentListerTest {
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -63,10 +64,10 @@ class ComponentListerTest {
                         new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -79,10 +80,10 @@ class ComponentListerTest {
                                 new License("EPL-1.0-Modified", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
                                 new License("GNU Greater General Public License", "https://greater.gnu.com")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -92,7 +93,7 @@ class ComponentListerTest {
                 .containsExactly(
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -103,14 +104,14 @@ class ComponentListerTest {
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -121,14 +122,14 @@ class ComponentListerTest {
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("LGPL", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -139,14 +140,14 @@ class ComponentListerTest {
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://my.slf4j.com/", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
 
@@ -157,15 +158,34 @@ class ComponentListerTest {
                         new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("EPL-1.0", null),
                                 new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
                                 new License("MYLICENSE", null)
-                        )),
+                        ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 new License("MIT", "https://opensource.org/licenses/MIT")
-                        ))
+                        ), Collections.emptySet())
                 );
     }
+
+    @Test
+    void canAddAttributionNotices() {
+        assertThat(executeTest("metadata-logbackAttributionNotice", "license-empty", "licensemapping-empty", "test-bom"))
+                .containsExactly(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
+                                new License("EPL-1.0", null),
+                                new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+                        ), ImmutableSet.of("Copyright (c) 2015", "Guaranteed Log4Shell-free")),
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
+                                new License("EPL-1.0", null),
+                                new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+                        ), ImmutableSet.of("Copyright (c) 2015", "Guaranteed Log4Shell-free")),
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
+                                new License("MIT", "https://opensource.org/licenses/MIT")
+                        ), Collections.emptySet())
+                );
+    }
+
 
     private Collection<ComponentData> executeTest(String metadataFile, String licenseFile, String licenseMappingFile, String bomFile) {
         Configuration configuration = Mockito.mock(Configuration.class);

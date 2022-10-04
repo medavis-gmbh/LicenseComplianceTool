@@ -64,6 +64,11 @@ limitations under the License.
                     </p>
                 </#list>
             </td>
+            <td>
+                <#list component.attributionNotices as notice>
+                    <p>${notice}</p>
+                </#list>
+            </td>
         </tr>
     </#list>
     </tbody>
