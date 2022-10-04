@@ -91,6 +91,11 @@ Entries have the following attributes:
 | Optional
 | Replace the licenses defined in the SBOM
 
+|attributionNotices
+| Array of String
+| Optional
+| Add attribution notices, e.g. copyright statements. These are often defined in files called NOTICE or NOTICE.txt.
+
 |comment
 | String
 | Optional
