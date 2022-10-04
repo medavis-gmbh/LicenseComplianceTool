@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 public final class ComponentMetadata {
@@ -39,6 +40,7 @@ public final class ComponentMetadata {
     private final String url;
     private final String comment;
     private final Set<String> licenses;
+    private final Set<String> attributionNotices;
 
     @JsonCreator
     public ComponentMetadata(
@@ -49,10 +51,9 @@ public final class ComponentMetadata {
             @JsonProperty("url") String url,
             @JsonProperty("comment") String comment,
             @JsonProperty("licenses")
-            @JsonSetter(nulls = Nulls.AS_EMPTY)
-            @JsonDeserialize(as = LinkedHashSet.class)
-            Set<String> licenses
-    ) {
+            Set<String> licenses,
+            @JsonProperty("attributionNotices")
+            Set<String> attributionNotices) {
         this.groupMatch = groupMatch;
         this.nameMatch = nameMatch;
         this.ignore = ignore;
@@ -60,6 +61,7 @@ public final class ComponentMetadata {
         this.url = url;
         this.comment = comment;
         this.licenses = licenses;
+        this.attributionNotices = attributionNotices;
     }
 
     public boolean matches(String group, String name) {
@@ -99,37 +101,49 @@ public final class ComponentMetadata {
         return licenses;
     }
 
+    @JsonProperty("attributionNotices")
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    @JsonDeserialize(as = LinkedHashSet.class)
+    public Set<String> attributionNotices() {
+        return attributionNotices;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this)
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
-        if (obj == null || obj.getClass() != this.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        ComponentMetadata that = (ComponentMetadata) obj;
-        return Objects.equals(this.groupMatch, that.groupMatch) &&
-               Objects.equals(this.nameMatch, that.nameMatch) &&
-               this.ignore == that.ignore &&
-               Objects.equals(this.mappedName, that.mappedName) &&
-               Objects.equals(this.url, that.url) &&
-               Objects.equals(this.comment, that.comment) &&
-               Objects.equals(this.licenses, that.licenses);
+        }
+        ComponentMetadata that = (ComponentMetadata) o;
+        return ignore == that.ignore
+               && Objects.equals(groupMatch, that.groupMatch)
+               && Objects.equals(nameMatch, that.nameMatch)
+               && Objects.equals(mappedName, that.mappedName)
+               && Objects.equals(url, that.url)
+               && Objects.equals(comment, that.comment)
+               && Objects.equals(licenses, that.licenses)
+               && Objects.equals(attributionNotices, that.attributionNotices);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(groupMatch, nameMatch, ignore, mappedName, url, comment, licenses);
+        return Objects.hash(groupMatch, nameMatch, ignore, mappedName, url, comment, licenses, attributionNotices);
     }
 
     @Override
     public String toString() {
-        return "ComponentMetadata[" +
-               "groupMatch=" + groupMatch + ", " +
-               "nameMatch=" + nameMatch + ", " +
-               "ignore=" + ignore + ", " +
-               "mappedName=" + mappedName + ", " +
-               "url=" + url + ", " +
-               "comment=" + comment + ", " +
-               "licenses=" + licenses + ']';
+        return new StringJoiner(", ", ComponentMetadata.class.getSimpleName() + "[", "]")
+                .add("groupMatch='" + groupMatch + "'")
+                .add("nameMatch='" + nameMatch + "'")
+                .add("ignore=" + ignore)
+                .add("mappedName='" + mappedName + "'")
+                .add("url='" + url + "'")
+                .add("comment='" + comment + "'")
+                .add("licenses=" + licenses)
+                .add("attributionNotices=" + attributionNotices)
+                .toString();
     }
 
 

@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,9 +76,11 @@ public class ComponentLister {
                     String version = componentByName.getValue().get(0).getVersion();
                     Set<License> allLicenses = componentByName.getValue().stream()
                             .flatMap(cd -> cd.getLicenses().stream())
-                            .distinct()
-                            .collect(Collectors.toSet());
-                    return new ComponentData(componentByName.getKey(), url, version, allLicenses);
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
+                    Set<String> attributionNotices = componentByName.getValue().stream()
+                            .flatMap(cd -> cd.getAttributionNotices().stream())
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
+                    return new ComponentData(componentByName.getKey(), url, version, allLicenses, attributionNotices);
                 })
                 .sorted(Comparator.comparing(ComponentData::getName, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
@@ -113,9 +116,9 @@ public class ComponentLister {
                 .map(cmd -> {
                     String exportName = !Strings.isNullOrEmpty(cmd.mappedName()) ? cmd.mappedName() : combineGroupAndName(component);
                     String url = !Strings.isNullOrEmpty(cmd.url()) ? cmd.url() : component.url();
-                    return new ComponentData(exportName, url, component.version(), convertedLicenses);
+                    return new ComponentData(exportName, url, component.version(), convertedLicenses, cmd.attributionNotices());
                 })
-                .orElse(new ComponentData(combineGroupAndName(component), component.url(), component.version(), convertedLicenses));
+                .orElse(new ComponentData(combineGroupAndName(component), component.url(), component.version(), convertedLicenses, Collections.emptySet()));
     }
 
     private String combineGroupAndName(Component component) {

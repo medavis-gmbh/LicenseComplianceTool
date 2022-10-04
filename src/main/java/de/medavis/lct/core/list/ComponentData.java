@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package de.medavis.lct.core.list;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import de.medavis.lct.core.license.License;
 
@@ -30,16 +31,19 @@ public final class ComponentData {
     private final String version;
     private final String url;
     private final Set<License> licenses;
+    private final Set<String> attributionNotices;
 
     public ComponentData(
             String name,
             String version,
             String url,
-            Set<License> licenses) {
+            Set<License> licenses,
+            Set<String> attributionNotices) {
         this.name = name;
         this.version = version;
         this.url = url;
         this.licenses = licenses;
+        this.attributionNotices = attributionNotices;
     }
 
     public String getName() {
@@ -58,31 +62,40 @@ public final class ComponentData {
         return licenses;
     }
 
+    public Set<String> getAttributionNotices() {
+        return attributionNotices;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this)
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
-        if (obj == null || obj.getClass() != this.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        ComponentData that = (ComponentData) obj;
-        return Objects.equals(this.name, that.name) &&
-               Objects.equals(this.version, that.version) &&
-               Objects.equals(this.url, that.url) &&
-               Objects.equals(this.licenses, that.licenses);
+        }
+        ComponentData that = (ComponentData) o;
+        return Objects.equals(name, that.name)
+               && Objects.equals(version, that.version)
+               && Objects.equals(url, that.url)
+               && Objects.equals(licenses, that.licenses)
+               && Objects.equals(attributionNotices, that.attributionNotices);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, url, licenses);
+        return Objects.hash(name, version, url, licenses, attributionNotices);
     }
 
     @Override
     public String toString() {
-        return "ComponentData[" +
-               "name=" + name + ", " +
-               "version=" + version + ", " +
-               "url=" + url + ", " +
-               "licenses=" + licenses + ']';
+        return new StringJoiner(", ", ComponentData.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("version='" + version + "'")
+                .add("url='" + url + "'")
+                .add("licenses=" + licenses)
+                .add("attributionNotices=" + attributionNotices)
+                .toString();
     }
 
 

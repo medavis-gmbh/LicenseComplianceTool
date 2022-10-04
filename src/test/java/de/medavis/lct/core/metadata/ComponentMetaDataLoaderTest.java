@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,9 +38,9 @@ class ComponentMetaDataLoaderTest {
 
         Assertions.assertThat(actual).containsExactly(
                 new ComponentMetadata("my\\.group", "keep", false, "KEEP!", "https://keep.com", "Keep component",
-                        ImmutableSet.of("LIC-1.0")),
+                        ImmutableSet.of("LIC-1.0"), ImmutableSet.of("Copyright (c) 2020")),
                 new ComponentMetadata("my\\.group", "ignore", true, "IGNORE!", "https://ignore.com", "Ignore component",
-                        ImmutableSet.of("LIC1-1.0", "LIC2-1.0"))
+                        ImmutableSet.of("LIC1-1.0", "LIC2-1.0"), ImmutableSet.of("Copyright (c) 2022", "Contains software by ACME Foundation"))
         );
     }
 
@@ -51,8 +51,8 @@ class ComponentMetaDataLoaderTest {
         final Collection<ComponentMetadata> actual = underTest.load(metadataUrl);
 
         Assertions.assertThat(actual).containsExactly(
-                new ComponentMetadata("my\\.group", null, false, null, null, null, Collections.emptySet()),
-                new ComponentMetadata(null, "my\\.name", false, null, null, null, Collections.emptySet())
+                new ComponentMetadata("my\\.group", null, false, null, null, null, Collections.emptySet(), Collections.emptySet()),
+                new ComponentMetadata(null, "my\\.name", false, null, null, null, Collections.emptySet(), Collections.emptySet())
         );
     }
 }
