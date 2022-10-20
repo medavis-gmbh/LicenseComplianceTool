@@ -25,8 +25,8 @@ import java.util.Optional;
 
 interface Cache {
 
-    Optional<File> getCachedFile(String licenseName) throws IOException;
+    Optional<File> getCachedFile(String name) throws IOException;
 
-    void addCachedFile(String licenseName, File source) throws IOException;
+    void addCachedFile(String name, String ext, byte[] content) throws IOException;
 
 }

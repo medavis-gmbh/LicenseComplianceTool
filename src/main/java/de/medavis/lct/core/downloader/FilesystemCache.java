@@ -27,8 +27,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.commons.io.FilenameUtils;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 class FilesystemCache implements Cache {
 
     private final Path path;
@@ -38,22 +36,21 @@ class FilesystemCache implements Cache {
     }
 
     @Override
-    public Optional<File> getCachedFile(String licenseName) throws IOException {
+    public Optional<File> getCachedFile(String name) throws IOException {
         if (!path.toFile().exists()) {
             return Optional.empty();
         }
 
         try (Stream<Path> files = Files.walk(path, 1)) {
             return files.map(Path::toFile)
-                    .filter(file -> FilenameUtils.removeExtension(file.getName()).equalsIgnoreCase(licenseName))
+                    .filter(file -> FilenameUtils.removeExtension(file.getName()).equalsIgnoreCase(name))
                     .findFirst();
         }
     }
 
     @Override
-    public void addCachedFile(String licenseName, File source) throws IOException {
-        final Path target = path.resolve(source.getName());
-        Files.createDirectories(target);
-        Files.copy(source.toPath(), target, REPLACE_EXISTING);
+    public void addCachedFile(String name, String ext, byte[] content) throws IOException {
+        Files.createDirectories(path);
+        Files.write(path.resolve(name + ext), content);
     }
 }

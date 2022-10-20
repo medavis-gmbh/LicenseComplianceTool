@@ -74,7 +74,8 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(), outputPathAbsolute);
+            // TODO Implement TargetHandler using Jenkins FilePath API
+//            licenseDownloader.download(logger, workspace.child(inputPath).read(), outputPathAbsolute);
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }

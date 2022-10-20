@@ -26,12 +26,12 @@ import java.util.Optional;
 class CacheDisabled implements Cache {
 
     @Override
-    public Optional<File> getCachedFile(String licenseName) {
+    public Optional<File> getCachedFile(String name) {
         return Optional.empty();
     }
 
     @Override
-    public void addCachedFile(String licenseName, File source) throws IOException {
+    public void addCachedFile(String name, String ext, byte[] content) throws IOException {
         // Do nothing
     }
 }
