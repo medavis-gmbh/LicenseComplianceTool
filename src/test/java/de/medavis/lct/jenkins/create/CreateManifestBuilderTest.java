@@ -20,7 +20,6 @@
 package de.medavis.lct.jenkins.create;
 
 import com.google.common.io.Resources;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Label;
 import hudson.model.Run.Artifact;
@@ -52,7 +51,6 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
-import de.medavis.lct.jenkins.factory.ComponentFactory;
 import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,10 +74,10 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        ComponentFactory.setComponentLister(componentListerMock);
+        CreateManifestBuilderFactory.setComponentLister(componentListerMock);
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
-        ComponentFactory.setOutputter(outputterMock);
+        CreateManifestBuilderFactory.setOutputter(outputterMock);
         doAnswer(invocation -> {
             Writer writer = invocation.getArgument(1, Writer.class);
             writer.write(FAKE_MANIFEST);

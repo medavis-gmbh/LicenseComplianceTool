@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.jenkins.factory;
+package de.medavis.lct.jenkins.create;
 
 import de.medavis.lct.core.license.LicenseLoader;
 import de.medavis.lct.core.license.LicenseMappingLoader;
@@ -28,12 +28,12 @@ import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
 
 // TODO Try to use dependency injection (maybe using ExtensionFinder, GuiceFinder?)
-public class ComponentFactory {
+class CreateManifestBuilderFactory {
 
     private static ComponentLister componentLister;
     private static FreemarkerOutputter outputter;
 
-    private ComponentFactory() {
+    private CreateManifestBuilderFactory() {
     }
 
     public static ComponentLister getComponentLister(Configuration configuration) {
@@ -59,14 +59,14 @@ public class ComponentFactory {
      * Should only be used for tests
      */
     public static void setComponentLister(ComponentLister componentLister) {
-        ComponentFactory.componentLister = componentLister;
+        CreateManifestBuilderFactory.componentLister = componentLister;
     }
 
     /**
      * Should only be used for tests
      */
     public static void setOutputter(FreemarkerOutputter outputter) {
-        ComponentFactory.outputter = outputter;
+        CreateManifestBuilderFactory.outputter = outputter;
     }
 
 }

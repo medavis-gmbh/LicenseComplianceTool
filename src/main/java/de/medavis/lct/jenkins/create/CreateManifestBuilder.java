@@ -51,7 +51,6 @@ import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
-import de.medavis.lct.jenkins.factory.ComponentFactory;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 import de.medavis.lct.jenkins.util.UrlValidator;
 
@@ -71,8 +70,8 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.componentLister = ComponentFactory.getComponentLister(ManifestGlobalConfiguration.getInstance());
-        this.outputter = ComponentFactory.getOutputter();
+        this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance());
+        this.outputter = CreateManifestBuilderFactory.getOutputter();
     }
 
     public String getInputPath() {
