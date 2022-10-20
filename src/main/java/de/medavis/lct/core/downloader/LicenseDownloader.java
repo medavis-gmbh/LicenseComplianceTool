@@ -22,6 +22,7 @@ package de.medavis.lct.core.downloader;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -57,9 +58,8 @@ public class LicenseDownloader {
                 .orElseGet(CacheDisabled::new);
     }
 
-    public void download(UserLogger userLogger, Path inputPath, Path outputPath) throws IOException {
-        userLogger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-        final List<ComponentData> components = componentLister.listComponents(inputPath.toUri().toURL());
+    public void download(UserLogger userLogger, InputStream inputStream, Path outputPath) throws IOException {
+        final List<ComponentData> components = componentLister.listComponents(inputStream);
         Set<License> licenses = components.stream()
                 .map(ComponentData::getLicenses)
                 .flatMap(Set::stream)

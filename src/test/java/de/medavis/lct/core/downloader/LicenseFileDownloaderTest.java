@@ -21,6 +21,7 @@ package de.medavis.lct.core.downloader;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -234,7 +235,7 @@ class LicenseFileDownloaderTest {
     }
 
     private void invokeDownload() throws IOException {
-        underTest.download(userLogger, INPUT, outputPath);
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), outputPath);
     }
 
     private void verifyLicenses(String... licenses) {

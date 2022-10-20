@@ -20,7 +20,7 @@
 package de.medavis.lct.core.list;
 
 import com.google.common.base.Strings;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,12 +57,12 @@ public class ComponentLister {
         this.configuration = configuration;
     }
 
-    public List<ComponentData> listComponents(URL bomPath) {
+    public List<ComponentData> listComponents(InputStream bomStream) {
         Collection<ComponentMetadata> componentMetadata = configuration.getComponentMetadataUrl().map(componentMetaDataLoader::load).orElse(Collections.emptyList());
         Map<String, License> licenses = configuration.getLicensesUrl().map(licenseLoader::load).orElse(Collections.emptyMap());
         Map<String, String> licenseMappings = configuration.getLicenseMappingsUrl().map(licenseMappingLoader::load).orElse(Collections.emptyMap());
 
-        return assetLoader.loadFromBom(bomPath)
+        return assetLoader.loadFromBom(bomStream)
                 .components()
                 .stream()
                 .filter(component -> !isIgnored(component, componentMetadata))

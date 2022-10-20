@@ -24,6 +24,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
+                writeFile(file: 'input.bom', text: ':Normally, this would be a CycloneDX SBOM.')
                 componentManifest inputPath: 'input.bom', outputPath: 'output.html', templateUrl: 'file://template.ftl'
             }
         }

@@ -27,11 +27,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,14 +50,12 @@ public class FreemarkerOutputter {
         configuration.setDefaultEncoding("UTF-8");
     }
 
-    public void output(List<ComponentData> data, Path outputFile, String templateUrl) throws IOException {
+    public void output(List<ComponentData> data, Writer writer, String templateUrl) throws IOException {
         Template template = configuration.getTemplate(MoreObjects.firstNonNull(templateUrl, DEFAULT_TEMPLATE));
-        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(outputFile.toFile().toPath()), StandardCharsets.UTF_8)) {
-            try {
-                template.process(Collections.singletonMap("components", data), writer);
-            } catch (TemplateException e) {
-                throw new IllegalStateException(e);
-            }
+        try {
+            template.process(Collections.singletonMap("components", data), writer);
+        } catch (TemplateException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

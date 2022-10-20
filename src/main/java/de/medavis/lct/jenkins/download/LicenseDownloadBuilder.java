@@ -71,9 +71,10 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
-            Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
             Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            licenseDownloader.download(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute);
+            final JenkinsLogger logger = new JenkinsLogger(listener);
+            logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), outputPathAbsolute);
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }

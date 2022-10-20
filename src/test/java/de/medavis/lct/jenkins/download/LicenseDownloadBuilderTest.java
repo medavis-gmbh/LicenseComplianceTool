@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,16 @@
  */
 package de.medavis.lct.jenkins.download;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Label;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Map;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -36,14 +41,16 @@ import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import de.medavis.lct.core.downloader.LicenseDownloader;
 import de.medavis.lct.core.downloader.LicenseDownloaderFactory;
+import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
-import static de.medavis.lct.util.WorkspaceResolver.getPathRelativeToWorkspace;
+import static de.medavis.lct.util.WorkspaceResolver.getWorkspacePath;
 
 @ExtendWith(MockitoExtension.class)
 @WithJenkins
@@ -51,13 +58,29 @@ class LicenseDownloadBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_PATH = "output/licenses";
+    private static final String FAKE_SBOM = ":Normally, this would be a CycloneDX SBOM.";
+    private static final Map<String, String> FAKE_LICENSES = ImmutableMap.of(
+            "license1", "This is LICENSE1",
+            "license2", "This is LICENSE2");
 
     @Mock(strictness = Strictness.LENIENT)
     private LicenseDownloader licenseDownloaderMock;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         LicenseDownloaderFactory.setInstance(licenseDownloaderMock);
+        doAnswer(invocation -> {
+            Path outputPath = invocation.getArgument(2, Path.class);
+            outputPath.toFile().mkdirs();
+            FAKE_LICENSES.forEach((name, content) -> {
+                try {
+                    Files.asCharSink(outputPath.resolve(name).toFile(), StandardCharsets.UTF_8).write(content);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return null;
+        }).when(licenseDownloaderMock).download(any(), argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)), any());
     }
 
     @Test
@@ -82,16 +105,6 @@ class LicenseDownloadBuilderTest {
     }
 
     @Test
-    void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH));
-
-        FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-
-        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, build)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)));
-    }
-
-    @Test
     void testScriptedPipelineBuild(JenkinsRule jenkins) throws Exception {
         String agentLabel = "any";
         jenkins.createOnlineSlave(Label.get(agentLabel));
@@ -101,7 +114,8 @@ class LicenseDownloadBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
+        assertThat(getWorkspacePath(run).resolve(OUTPUT_PATH)).isNotEmptyDirectory()
+                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name)).hasContent(content)));
     }
 
     @Test
@@ -114,7 +128,8 @@ class LicenseDownloadBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(licenseDownloaderMock).download(any(), eq(getPathRelativeToWorkspace(INPUT_PATH, run)), eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)));
+        assertThat(getWorkspacePath(run).resolve(OUTPUT_PATH)).isNotEmptyDirectory()
+                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name)).hasContent(content)));
     }
 
 }
