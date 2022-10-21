@@ -48,6 +48,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import de.medavis.lct.core.downloader.LicenseDownloader;
 import de.medavis.lct.core.downloader.LicenseDownloaderFactory;
+import de.medavis.lct.core.downloader.TargetHandler;
 import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
 import static de.medavis.lct.util.WorkspaceResolver.getWorkspacePath;
@@ -58,10 +59,11 @@ class LicenseDownloadBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_PATH = "output/licenses";
-    private static final String FAKE_SBOM = ":Normally, this would be a CycloneDX SBOM.";
+    private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
     private static final Map<String, String> FAKE_LICENSES = ImmutableMap.of(
             "license1", "This is LICENSE1",
             "license2", "This is LICENSE2");
+    private static final String OUTPUT_EXT = ".txt";
 
     @Mock(strictness = Strictness.LENIENT)
     private LicenseDownloader licenseDownloaderMock;
@@ -70,11 +72,10 @@ class LicenseDownloadBuilderTest {
     public void setUp() throws IOException {
         LicenseDownloaderFactory.setInstance(licenseDownloaderMock);
         doAnswer(invocation -> {
-            Path outputPath = invocation.getArgument(2, Path.class);
-            outputPath.toFile().mkdirs();
+            TargetHandler handler = invocation.getArgument(2, TargetHandler.class);
             FAKE_LICENSES.forEach((name, content) -> {
                 try {
-                    Files.asCharSink(outputPath.resolve(name).toFile(), StandardCharsets.UTF_8).write(content);
+                    handler.handle(name, OUTPUT_EXT, content.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -115,7 +116,7 @@ class LicenseDownloadBuilderTest {
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         assertThat(getWorkspacePath(run).resolve(OUTPUT_PATH)).isNotEmptyDirectory()
-                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name)).hasContent(content)));
+                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
     }
 
     @Test
@@ -129,7 +130,7 @@ class LicenseDownloadBuilderTest {
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
         assertThat(getWorkspacePath(run).resolve(OUTPUT_PATH)).isNotEmptyDirectory()
-                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name)).hasContent(content)));
+                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
     }
 
 }

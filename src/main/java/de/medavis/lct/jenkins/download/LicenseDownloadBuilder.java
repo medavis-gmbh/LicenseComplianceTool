@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,8 +32,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.OutputStream;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -71,13 +70,21 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
-            Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            // TODO Implement TargetHandler using Jenkins FilePath API
-//            licenseDownloader.download(logger, workspace.child(inputPath).read(), outputPathAbsolute);
+            licenseDownloader.download(logger, workspace.child(inputPath).read(),
+                    (licenseName, ext, content) -> addLicenseToWorkspace(workspace.child(outputPath), licenseName, ext, content));
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
+        }
+    }
+
+    private void addLicenseToWorkspace(FilePath targetDir, String licenseName, String ext, byte[] content) throws IOException {
+        try (OutputStream outputStream = targetDir.child(licenseName + ext).write()) {
+            outputStream.write(content);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Thread has been interrupted.", e);
         }
     }
 

@@ -18,6 +18,6 @@
  * #L%
  */
 node {
-    writeFile(file: 'input.bom', text: ':Normally, this would be a CycloneDX SBOM.')
+    writeFile(file: 'input.bom', text: 'Normally, this would be a CycloneDX SBOM.')
     downloadLicenses inputPath: 'input.bom', outputPath: 'output/licenses'
 }
