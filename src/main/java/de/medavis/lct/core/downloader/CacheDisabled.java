@@ -31,7 +31,7 @@ class CacheDisabled implements Cache {
     }
 
     @Override
-    public void addCachedFile(String name, String ext, byte[] content) throws IOException {
+    public void addCachedFile(String name, byte[] content) throws IOException {
         // Do nothing
     }
 }

@@ -20,14 +20,12 @@
 package de.medavis.lct.jenkins.download;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import hudson.model.FreeStyleProject;
 import hudson.model.Label;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Map;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -48,7 +46,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import de.medavis.lct.core.downloader.LicenseDownloader;
 import de.medavis.lct.core.downloader.LicenseDownloaderFactory;
-import de.medavis.lct.core.downloader.TargetHandler;
+import de.medavis.lct.core.downloader.DownloadHandler;
 import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
 import static de.medavis.lct.util.WorkspaceResolver.getWorkspacePath;
@@ -72,10 +70,10 @@ class LicenseDownloadBuilderTest {
     public void setUp() throws IOException {
         LicenseDownloaderFactory.setInstance(licenseDownloaderMock);
         doAnswer(invocation -> {
-            TargetHandler handler = invocation.getArgument(2, TargetHandler.class);
+            DownloadHandler handler = invocation.getArgument(2, DownloadHandler.class);
             FAKE_LICENSES.forEach((name, content) -> {
                 try {
-                    handler.handle(name, OUTPUT_EXT, content.getBytes(StandardCharsets.UTF_8));
+                    handler.handle(name+ OUTPUT_EXT, content.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

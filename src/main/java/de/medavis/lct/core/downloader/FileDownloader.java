@@ -37,7 +37,7 @@ class FileDownloader {
 
     private final HttpClient httpclient = HttpClients.createDefault();
 
-    void downloadToFile(String url, String targetName, TargetHandler targetHandler) throws IOException {
+    void downloadToFile(String url, String targetName, DownloadHandler downloadHandler) throws IOException {
         httpclient.execute(new HttpGet(url), response -> {
             final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -46,12 +46,11 @@ class FileDownloader {
 
             String extension = determineExtension(response.getEntity().getContentType());
             try (final InputStream input = response.getEntity().getContent()) {
-                targetHandler.handle(targetName, extension, ByteStreams.toByteArray(input));
+                downloadHandler.handle(targetName + extension, ByteStreams.toByteArray(input));
             }
             return null;
         });
     }
-
 
     private String determineExtension(Header contentTypeHeader) {
         String result = "";

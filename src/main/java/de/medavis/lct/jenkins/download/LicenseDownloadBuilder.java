@@ -73,14 +73,14 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
             licenseDownloader.download(logger, workspace.child(inputPath).read(),
-                    (licenseName, ext, content) -> addLicenseToWorkspace(workspace.child(outputPath), licenseName, ext, content));
+                    (name, content) -> addLicenseToWorkspace(workspace.child(outputPath), name, content));
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }
     }
 
-    private void addLicenseToWorkspace(FilePath targetDir, String licenseName, String ext, byte[] content) throws IOException {
-        try (OutputStream outputStream = targetDir.child(licenseName + ext).write()) {
+    private void addLicenseToWorkspace(FilePath targetDir, String name, byte[] content) throws IOException {
+        try (OutputStream outputStream = targetDir.child(name).write()) {
             outputStream.write(content);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

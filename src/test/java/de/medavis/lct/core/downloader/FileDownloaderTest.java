@@ -24,6 +24,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,6 @@ class FileDownloaderTest {
     private static final String REDIRECTED_URL = "/redirected";
     private static final String TARGET_FILENAME = "downloaded";
     private static final String DOWNLOAD_CONTENT = "You should download me.";
-    private static final int DOWNLOAD_LENGTH = DOWNLOAD_CONTENT.length();
 
     private String baseUrl;
 
@@ -60,14 +60,14 @@ class FileDownloaderTest {
     void shouldCreateEmptyFileOnEmptyContent() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(ok()));
 
-        verifyDownload(TARGET_FILENAME, "", "");
+        verifyDownload(TARGET_FILENAME, "");
     }
 
     @Test
     void shouldThrowExceptionOnServerError() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(serverError()));
 
-        assertThatThrownBy(() -> fileDownloader.downloadToFile(baseUrl + INITIAL_URL, TARGET_FILENAME, (actualName, actualExt, actualContent) -> {
+        assertThatThrownBy(() -> fileDownloader.downloadToFile(baseUrl + INITIAL_URL, TARGET_FILENAME, (name, content) -> {
         })).isInstanceOf(IOException.class);
     }
 
@@ -75,28 +75,28 @@ class FileDownloaderTest {
     void shouldDownloadWithoutExtensionOnEmptyContentType() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(okWithLength(DOWNLOAD_CONTENT)));
 
-        verifyDownload(TARGET_FILENAME, "", DOWNLOAD_CONTENT);
+        verifyDownload(TARGET_FILENAME, DOWNLOAD_CONTENT);
     }
 
     @Test
     void shouldDownloadWithHtmlExtensionOnHtmlContentType() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.TEXT_HTML.getMimeType())));
 
-        verifyDownload(TARGET_FILENAME, ".html", DOWNLOAD_CONTENT);
+        verifyDownload(TARGET_FILENAME + ".html", DOWNLOAD_CONTENT);
     }
 
     @Test
     void shouldDownloadWithTxtExtensionOnTextContentType() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.TEXT_PLAIN.getMimeType())));
 
-        verifyDownload(TARGET_FILENAME, ".txt", DOWNLOAD_CONTENT);
+        verifyDownload(TARGET_FILENAME + ".txt", DOWNLOAD_CONTENT);
     }
 
     @Test
     void shouldDownloadWithTxtExtensionOnUnexpectedContentType() throws IOException {
         stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.APPLICATION_OCTET_STREAM.getMimeType())));
 
-        verifyDownload(TARGET_FILENAME, "", DOWNLOAD_CONTENT);
+        verifyDownload(TARGET_FILENAME, DOWNLOAD_CONTENT);
     }
 
     @Test
@@ -104,13 +104,12 @@ class FileDownloaderTest {
         stubFor(get(INITIAL_URL).willReturn(permanentRedirect(REDIRECTED_URL)));
         stubFor(get(REDIRECTED_URL).willReturn(okWithLength(DOWNLOAD_CONTENT)));
 
-        verifyDownload(TARGET_FILENAME, "", DOWNLOAD_CONTENT);
+        verifyDownload(TARGET_FILENAME, DOWNLOAD_CONTENT);
     }
 
-    private void verifyDownload(String expectedName, String expectedExtension, String expectedContent) throws IOException {
-        fileDownloader.downloadToFile(baseUrl + INITIAL_URL, expectedName, (actualName, actualExt, actualContent) -> {
+    private void verifyDownload(String expectedName, String expectedContent) throws IOException {
+        fileDownloader.downloadToFile(baseUrl + INITIAL_URL, FilenameUtils.getBaseName(expectedName), (actualName, actualContent) -> {
             assertThat(actualName).isEqualTo(expectedName);
-            assertThat(actualExt).isEqualTo(expectedExtension);
             assertThat(actualContent).isEqualTo(expectedContent.getBytes(StandardCharsets.UTF_8));
         });
     }

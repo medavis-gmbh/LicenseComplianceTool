@@ -22,8 +22,8 @@ package de.medavis.lct.core.downloader;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface TargetHandler {
+public interface DownloadHandler {
 
-    void handle(String name, String extension, byte[] content) throws IOException;
+    void handle(String name, byte[] content) throws IOException;
 
 }

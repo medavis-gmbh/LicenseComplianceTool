@@ -209,8 +209,8 @@ class LicenseFileDownloaderTest {
             String relativeUrl = createUrl(prefix, licenseName);
             url = BASE_URL + relativeUrl;
             doAnswer(invocation -> {
-                TargetHandler handler = invocation.getArgument(2, TargetHandler.class);
-                handler.handle(licenseName, DOWNLOAD_EXT, licenseName.getBytes(StandardCharsets.UTF_8));
+                DownloadHandler handler = invocation.getArgument(2, DownloadHandler.class);
+                handler.handle(licenseName + DOWNLOAD_EXT, licenseName.getBytes(StandardCharsets.UTF_8));
                 return null;
             }).when(fileDownloader).downloadToFile(eq(url), any(), any());
         }
@@ -222,7 +222,7 @@ class LicenseFileDownloaderTest {
     }
 
     private void invokeDownload() throws IOException {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), (name, ext, content) -> downloads.put(name + ext, content));
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), downloads::put);
     }
 
     private void verifyLicenses(String... licenses) {

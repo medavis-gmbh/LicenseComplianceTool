@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.compress.utils.FileNameUtils;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
@@ -57,7 +56,7 @@ public class LicenseDownloader {
                 .orElseGet(CacheDisabled::new);
     }
 
-    public void download(UserLogger userLogger, InputStream inputStream, TargetHandler targetHandler) throws IOException {
+    public void download(UserLogger userLogger, InputStream inputStream, DownloadHandler downloadHandler) throws IOException {
         final List<ComponentData> components = componentLister.listComponents(inputStream);
         Set<License> licenses = components.stream()
                 .map(ComponentData::getLicenses)
@@ -70,7 +69,7 @@ public class LicenseDownloader {
             cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.getName(), file));
         }
         userLogger.info("Using %d licenses from cache.%n", cachedLicenses.size());
-        cachedLicenses.forEach((name, file) -> copyFromCache(name, file, userLogger, targetHandler));
+        cachedLicenses.forEach((name, file) -> copyFromCache(file, userLogger, downloadHandler));
 
         Map<String, String> downloadUrls = licenses.stream()
                 .filter(license -> !cachedLicenses.containsKey(license.getName()))
@@ -82,38 +81,33 @@ public class LicenseDownloader {
         for (Entry<String, String> entry : downloadUrls.entrySet()) {
             String name = entry.getKey();
             String url = entry.getValue();
-            downloadFile(name, url, userLogger, cacheDecorator(targetHandler), index, downloadUrls.size());
+            downloadFile(name, url, userLogger, cacheDecorator(downloadHandler), index, downloadUrls.size());
             index++;
         }
     }
 
-    private void copyFromCache(String licenseName, File cachedFile, UserLogger userLogger, TargetHandler targetHandler) {
-        String extension = FileNameUtils.getExtension(cachedFile.getName());
-        if (!Strings.isNullOrEmpty(extension)) {
-            // TODO Rework extension handling so that "." is not part of the extension itself
-            extension = "." + extension;
-        }
+    private void copyFromCache(File cachedFile, UserLogger userLogger, DownloadHandler downloadHandler) {
         try {
-            targetHandler.handle(licenseName, extension, Files.readAllBytes(cachedFile.toPath()));
+            downloadHandler.handle(cachedFile.getName(), Files.readAllBytes(cachedFile.toPath()));
         } catch (IOException e) {
             userLogger.error("Could not copy license file from cache: %s.%n", e.getMessage());
         }
     }
 
-    private void downloadFile(String licenseName, String source, UserLogger userLogger, TargetHandler targetHandler, int index, int size) {
+    private void downloadFile(String licenseName, String source, UserLogger userLogger, DownloadHandler downloadHandler, int index, int size) {
         try {
             userLogger.info("(%d/%d) Downloading license %s from %s... ", index, size, licenseName, source);
-            fileDownloader.downloadToFile(source, licenseName, targetHandler);
+            fileDownloader.downloadToFile(source, licenseName, downloadHandler);
             userLogger.info("Done.%n");
         } catch (IOException e) {
             userLogger.error("Could not download license file: %s.%n", e.getMessage());
         }
     }
 
-    private TargetHandler cacheDecorator(TargetHandler targetHandler) {
-        return (name, extension, content) -> {
-            cache.addCachedFile(name, extension, content);
-            targetHandler.handle(name, extension, content);
+    private DownloadHandler cacheDecorator(DownloadHandler downloadHandler) {
+        return (name, content) -> {
+            cache.addCachedFile(name, content);
+            downloadHandler.handle(name, content);
         };
     }
 

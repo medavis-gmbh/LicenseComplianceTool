@@ -49,8 +49,8 @@ class FilesystemCache implements Cache {
     }
 
     @Override
-    public void addCachedFile(String name, String ext, byte[] content) throws IOException {
+    public void addCachedFile(String name, byte[] content) throws IOException {
         Files.createDirectories(path);
-        Files.write(path.resolve(name + ext), content);
+        Files.write(path.resolve(name), content);
     }
 }
