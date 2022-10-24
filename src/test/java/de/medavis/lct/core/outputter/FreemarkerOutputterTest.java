@@ -31,7 +31,9 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +60,12 @@ import de.medavis.lct.core.list.ComponentData;
 class FreemarkerOutputterTest {
 
     private final FreemarkerOutputter underTest = new FreemarkerOutputter();
+
+    private void output(List<ComponentData> components, Path outputFile, String templateUrl) throws IOException {
+        try (Writer outputStream = Files.newBufferedWriter(outputFile)) {
+            underTest.output(components, outputStream, templateUrl);
+        }
+    }
 
     @Nested
     class ComponentTable {
@@ -122,7 +130,7 @@ class FreemarkerOutputterTest {
 
         private void createAndVerifyOutput(Path outputPath, ComponentData... components) throws IOException {
             final Path outputFile = outputPath.resolve("output.html");
-            underTest.output(Arrays.asList(components), outputFile, null);
+            output(Arrays.asList(components), outputFile, null);
             assertThat(outputFile).exists();
             try (WebClient webClient = new WebClient()) {
                 HtmlPage manifest = webClient.getPage(outputFile.toUri().toURL());
@@ -201,7 +209,7 @@ class FreemarkerOutputterTest {
             FileUtils.copyURLToFile(getClass().getResource(TEST_TEMPLATE_NAME), template.toFile());
             final Path output = tempDir.resolve("output.html");
 
-            underTest.output(Collections.emptyList(), output, template.toUri().toURL().toString());
+            output(Collections.emptyList(), output, template.toUri().toURL().toString());
 
             assertThat(output)
                     .exists()
@@ -214,7 +222,7 @@ class FreemarkerOutputterTest {
             stubFor(get(templateRelativeUrl).willReturn(ok(Resources.toString(getClass().getResource(TEST_TEMPLATE_NAME), StandardCharsets.UTF_8))));
             final Path output = tempDir.resolve("output.html");
 
-            underTest.output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl);
+            output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl);
 
             assertThat(output)
                     .exists()
@@ -227,7 +235,7 @@ class FreemarkerOutputterTest {
             stubFor(get(templateRelativeUrl).willReturn(notFound()));
             final Path output = tempDir.resolve("output.html");
 
-            assertThatThrownBy(() -> underTest.output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl))
+            assertThatThrownBy(() -> output(Collections.emptyList(), output, wiremock.getHttpBaseUrl() + templateRelativeUrl))
                     .isInstanceOf(IOException.class);
         }
     }

@@ -20,7 +20,7 @@
 package de.medavis.lct.core.asset;
 
 import com.google.common.collect.ImmutableSet;
-import java.net.URL;
+import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,9 +35,9 @@ class AssetLoaderTest {
 
     @Test
     void shouldLoadAssetFromBOM() {
-        URL sampleBomPath = getClass().getResource(SAMPLE_BOM);
+        InputStream sampleBomStream = getClass().getResourceAsStream(SAMPLE_BOM);
 
-        Asset actual = underTest.loadFromBom(sampleBomPath);
+        Asset actual = underTest.loadFromBom(sampleBomStream);
 
         assertThat(actual.name()).isEqualTo("de.medavis.bommanager");
         assertThat(actual.version()).isEqualTo("1.0-SNAPSHOT");

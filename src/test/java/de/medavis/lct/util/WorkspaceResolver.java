@@ -48,4 +48,16 @@ public class WorkspaceResolver {
                 .orElseThrow(() -> new AssertionError("Could not determine workspace location."));
     }
 
+    public static Path getWorkspacePath(WorkflowRun build) {
+        return StreamSupport.stream(new FlowGraphWalker(build.getExecution()).spliterator(), false)
+                .filter(StepStartNode.class::isInstance)
+                .flatMap(flowNode -> flowNode.getActions().stream())
+                .filter(WorkspaceActionImpl.class::isInstance)
+                .map(WorkspaceActionImpl.class::cast)
+                .map(WorkspaceActionImpl::getPath)
+                .map(Paths::get)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Could not determine workspace location."));
+    }
+
 }
