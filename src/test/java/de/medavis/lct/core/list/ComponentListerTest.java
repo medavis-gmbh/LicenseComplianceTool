@@ -20,6 +20,7 @@
 package de.medavis.lct.core.list;
 
 import com.google.common.collect.ImmutableSet;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -199,10 +200,14 @@ class ComponentListerTest {
                 new LicenseLoader(),
                 new LicenseMappingLoader(),
                 configuration);
-        return componentLister.listComponents(getResourceURL("asset", bomFile, "json"));
+        return componentLister.listComponents(getResourceStream("asset", bomFile, "json"));
     }
 
     private URL getResourceURL(String directory, String filename, String extension) {
         return getClass().getResource(String.format("/%s/%s.%s", directory, filename, extension));
+    }
+
+    private InputStream getResourceStream(String directory, String filename, String extension) {
+        return getClass().getResourceAsStream(String.format("/%s/%s.%s", directory, filename, extension));
     }
 }

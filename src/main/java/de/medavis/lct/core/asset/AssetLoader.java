@@ -20,11 +20,9 @@
 package de.medavis.lct.core.asset;
 
 import com.google.common.base.Joiner;
+import com.google.common.io.ByteStreams;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,8 +40,8 @@ import de.medavis.lct.core.license.License;
 
 public class AssetLoader {
 
-    public Asset loadFromBom(URL bomPath) {
-        Bom assetBom = parseBom(bomPath);
+    public Asset loadFromBom(InputStream bomStream) {
+        Bom assetBom = parseBom(bomStream);
         String assetName = Joiner.on(".").join(
                 assetBom.getMetadata().getComponent().getGroup(),
                 assetBom.getMetadata().getComponent().getName());
@@ -58,12 +56,12 @@ public class AssetLoader {
         return new Asset(assetName, assetVersion, components);
     }
 
-    private Bom parseBom(URL bomPath) {
+    private Bom parseBom(InputStream bomStream) {
         try {
-            final byte[] bom = Files.readAllBytes(Paths.get(bomPath.toURI()));
+            final byte[] bom = ByteStreams.toByteArray(bomStream);
             return BomParserFactory.createParser(bom).parse(bom);
-        } catch (ParseException | IOException | URISyntaxException e) {
-            throw new IllegalStateException("Cannot parse BOM file " + bomPath, e);
+        } catch (ParseException | IOException e) {
+            throw new IllegalStateException("Cannot parse BOM file " + bomStream, e);
         }
     }
 

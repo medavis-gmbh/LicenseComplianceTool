@@ -21,17 +21,18 @@ package de.medavis.lct.core.downloader;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-import java.io.File;
+import com.google.common.io.Files;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import de.medavis.lct.core.Configuration;
@@ -59,6 +61,8 @@ class LicenseFileDownloaderTest {
     private static final String VIEW_URL = "view";
     private static final String DOWNLOAD_URL = "download";
     private static final Path INPUT = Paths.get("DOES_NOT_MATTER");
+    private final static String BASE_URL = "http://my-host";
+    private static final String DOWNLOAD_EXT = ".txt";
 
     @TempDir
     private Path outputPath;
@@ -75,7 +79,8 @@ class LicenseFileDownloaderTest {
     private UserLogger userLogger;
 
     private LicenseDownloader underTest;
-    private final static String BASE_URL = "http://my-host";
+
+    private Map<String, byte[]> downloads = new LinkedHashMap<>();
 
     @Test
     void shouldDownloadAllLicensesFromAllComponents() throws IOException {
@@ -156,36 +161,21 @@ class LicenseFileDownloaderTest {
 
     @Test
     void shouldNotDownloadLicensesIfItExistsInCache() throws IOException {
-        initializeCache("A");
+        initializeCache("A", DOWNLOAD_EXT);
         setup(component(license("A", true, true)));
 
         invokeDownload();
 
         verifyLicenses("A");
         verifyNothingDownloaded();
-    }
-
-    @Test
-    void shouldNotDownloadLicensesIfItExistsInCacheWithExtension() throws IOException {
-        initializeCache("A", "html");
-        setup(component(license("A", true, true)));
-
-        invokeDownload();
-
-        verifyLicenses("A");
-        verifyNothingDownloaded();
-    }
-
-    private void initializeCache(String licenseName) throws IOException {
-        initializeCache(licenseName, null);
     }
 
     private void initializeCache(String licenseName, String extension) throws IOException {
         String filename = licenseName;
         if (extension != null) {
-            filename = filename + "." + extension;
+            filename = filename + extension;
         }
-        Files.write(cachePath.resolve(filename), Collections.singletonList(licenseName));
+        Files.asCharSink(cachePath.resolve(filename).toFile(), StandardCharsets.UTF_8).write(licenseName);
     }
 
     private void setup(ComponentData... components) {
@@ -218,13 +208,11 @@ class LicenseFileDownloaderTest {
         if (hasUrl) {
             String relativeUrl = createUrl(prefix, licenseName);
             url = BASE_URL + relativeUrl;
-            when(fileDownloader.downloadToFile(eq(url), any(), any())).thenAnswer(invocation -> {
-                Path targetDirectory = invocation.getArgument(1, Path.class);
-                String filename = invocation.getArgument(2, String.class);
-                final File outputFile = targetDirectory.resolve(filename).toFile();
-                FileUtils.write(outputFile, licenseName, StandardCharsets.UTF_8);
-                return outputFile;
-            });
+            doAnswer(invocation -> {
+                DownloadHandler handler = invocation.getArgument(2, DownloadHandler.class);
+                handler.handle(licenseName + DOWNLOAD_EXT, licenseName.getBytes(StandardCharsets.UTF_8));
+                return null;
+            }).when(fileDownloader).downloadToFile(eq(url), any(), any());
         }
         return url;
     }
@@ -234,14 +222,12 @@ class LicenseFileDownloaderTest {
     }
 
     private void invokeDownload() throws IOException {
-        underTest.download(userLogger, INPUT, outputPath);
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), downloads::put);
     }
 
     private void verifyLicenses(String... licenses) {
-        assertSoftly(softly -> Stream.of(licenses).forEach(license ->
-                assertThat(outputPath.resolve(license))
-                        .exists()
-                        .hasContent(license)));
+        assertSoftly(softly -> Stream.of(licenses)
+                .forEach(license -> assertThat(downloads).containsEntry(license + DOWNLOAD_EXT, license.getBytes(StandardCharsets.UTF_8))));
     }
 
     private void verifyEmptyLicenses() {
@@ -250,7 +236,7 @@ class LicenseFileDownloaderTest {
 
     private void verifyDownloaded(String prefix, String... licenses) throws IOException {
         for (String license : licenses) {
-            Mockito.verify(fileDownloader).downloadToFile(eq(BASE_URL + createUrl(prefix, license)), any(), eq(license));
+            Mockito.verify(fileDownloader).downloadToFile(eq(BASE_URL + createUrl(prefix, license)), any(), any());
         }
     }
 
@@ -260,7 +246,7 @@ class LicenseFileDownloaderTest {
 
     private void verifyCache(String... licenses) {
         assertSoftly(softly -> Stream.of(licenses).forEach(license ->
-                assertThat(cachePath.resolve(license))
+                assertThat(cachePath.resolve(license + DOWNLOAD_EXT))
                         .exists()
                         .hasContent(license)));
     }

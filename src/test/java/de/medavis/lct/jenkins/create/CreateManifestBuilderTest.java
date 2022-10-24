@@ -20,14 +20,15 @@
 package de.medavis.lct.jenkins.create;
 
 import com.google.common.io.Resources;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Label;
 import hudson.model.Run.Artifact;
 import java.io.IOException;
-import java.net.URL;
+import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import jenkins.util.VirtualFile;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -41,15 +42,16 @@ import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-import de.medavis.lct.core.creator.ManifestCreator;
-import de.medavis.lct.core.creator.ManifestCreatorFactory;
-
-import static de.medavis.lct.util.WorkspaceResolver.getPathRelativeToWorkspace;
+import de.medavis.lct.core.list.ComponentData;
+import de.medavis.lct.core.list.ComponentLister;
+import de.medavis.lct.core.outputter.FreemarkerOutputter;
+import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
 @ExtendWith(MockitoExtension.class)
 @WithJenkins
@@ -58,19 +60,29 @@ class CreateManifestBuilderTest {
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_FILE_EXTENSION = ".html";
     private static final String OUTPUT_PATH = "output" + OUTPUT_FILE_EXTENSION;
+    private static final String ARCHIVE_FILENAME = CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION;
     private static final String TEMPLATE_URL = "file://template.ftl";
+    private static final List<ComponentData> COMPONENT_LIST = Collections.singletonList(
+            new ComponentData("name", "version", "url", Collections.emptySet(), Collections.emptySet()));
+    private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
+    private static final String FAKE_MANIFEST = "IRL, I would be the manifest";
 
     @Mock(strictness = Strictness.LENIENT)
-    private ManifestCreator manifestCreatorMock;
+    private ComponentLister componentListerMock;
+    @Mock(strictness = Strictness.LENIENT)
+    private FreemarkerOutputter outputterMock;
 
     @BeforeEach
     public void setUp() throws IOException {
-        ManifestCreatorFactory.setInstance(manifestCreatorMock);
+        CreateManifestBuilderFactory.setComponentLister(componentListerMock);
+        when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
+
+        CreateManifestBuilderFactory.setOutputter(outputterMock);
         doAnswer(invocation -> {
-            Path outputPath = invocation.getArgument(2, Path.class);
-            outputPath.toFile().createNewFile();
+            Writer writer = invocation.getArgument(1, Writer.class);
+            writer.write(FAKE_MANIFEST);
             return null;
-        }).when(manifestCreatorMock).create(any(), any(), any(), any());
+        }).when(outputterMock).output(any(), any(), any());
     }
 
     @Test
@@ -85,23 +97,6 @@ class CreateManifestBuilderTest {
     }
 
     @Test
-    void testFreeStyleBuild(JenkinsRule jenkins) throws Exception {
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
-        builder.setTemplateUrl(TEMPLATE_URL);
-        project.getBuildersList().add(builder);
-
-        FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-
-        verify(manifestCreatorMock).create(any(),
-                eq(getPathRelativeToWorkspace(INPUT_PATH, build)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, build)),
-                eq(TEMPLATE_URL));
-        assertThat(build.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
-    }
-
-    @Test
     void testScriptedPipelineBuild(JenkinsRule jenkins) throws Exception {
         String agentLabel = "any";
         jenkins.createOnlineSlave(Label.get(agentLabel));
@@ -111,12 +106,14 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(),
-                eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
-                eq(TEMPLATE_URL));
-        assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
+        assertThat(run.getArtifacts()).extracting(Artifact::getFileName).containsExactly(ARCHIVE_FILENAME);
+        final VirtualFile outputFile = run.getArtifactManager().root().child(ARCHIVE_FILENAME);
+        try {
+            assertThat(outputFile.canRead()).isTrue();
+            assertThat(outputFile.open()).hasContent(FAKE_MANIFEST);
+        } catch (IOException e) {
+            fail("Unexpected exception", e);
+        }
     }
 
     @Test
@@ -129,12 +126,14 @@ class CreateManifestBuilderTest {
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
 
-        verify(manifestCreatorMock).create(any(),
-                eq(getPathRelativeToWorkspace(INPUT_PATH, run)),
-                eq(getPathRelativeToWorkspace(OUTPUT_PATH, run)),
-                eq(TEMPLATE_URL));
-        assertThat(run.getArtifacts()).extracting(Artifact::getFileName)
-                .containsExactly(CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION);
+        assertThat(run.getArtifacts()).extracting(Artifact::getFileName).containsExactly(ARCHIVE_FILENAME);
+        final VirtualFile outputFile = run.getArtifactManager().root().child(ARCHIVE_FILENAME);
+        try {
+            assertThat(outputFile.canRead()).isTrue();
+            assertThat(outputFile.open()).hasContent(FAKE_MANIFEST);
+        } catch (IOException e) {
+            fail("Unexpected exception", e);
+        }
     }
 
 }

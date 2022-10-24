@@ -32,10 +32,12 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import jenkins.tasks.SimpleBuildStep;
 import jenkins.util.BuildListenerAdapter;
@@ -46,8 +48,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.creator.ManifestCreator;
-import de.medavis.lct.core.creator.ManifestCreatorFactory;
+import de.medavis.lct.core.list.ComponentData;
+import de.medavis.lct.core.list.ComponentLister;
+import de.medavis.lct.core.outputter.FreemarkerOutputter;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 import de.medavis.lct.jenkins.util.UrlValidator;
@@ -61,13 +64,15 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     private final String outputPath;
     private String templateUrl;
 
-    private final ManifestCreator manifestCreator;
+    private final ComponentLister componentLister;
+    private final FreemarkerOutputter outputter;
 
     @DataBoundConstructor
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.manifestCreator = ManifestCreatorFactory.getInstance(ManifestGlobalConfiguration.getInstance());
+        this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance());
+        this.outputter = CreateManifestBuilderFactory.getOutputter();
     }
 
     public String getInputPath() {
@@ -91,10 +96,15 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
         try {
-            Path inputPathAbsolute = Paths.get(workspace.child(inputPath).toURI());
-            Path outputPathAbsolute = Paths.get(workspace.child(outputPath).toURI());
-            manifestCreator.create(new JenkinsLogger(listener), inputPathAbsolute, outputPathAbsolute, templateUrl);
-            archiveOutput(run, workspace, launcher, listener);
+            final JenkinsLogger logger = new JenkinsLogger(listener);
+            logger.info("Writing component manifest from '%s' to '%s'.%n", inputPath, outputPath);
+            try (InputStream bomStream = workspace.child(inputPath).read()) {
+                List<ComponentData> components = componentLister.listComponents(bomStream);
+                try (Writer manifestWriter = new OutputStreamWriter(workspace.child(outputPath).write(), StandardCharsets.UTF_8)) {
+                    outputter.output(components, manifestWriter, templateUrl);
+                }
+                archiveOutput(run, workspace, launcher, listener);
+            }
         } catch (IOException e) {
             throw new AbortException("Could not create component manifest: " + e.getMessage());
         }

@@ -19,19 +19,11 @@
  */
 package de.medavis.lct.core.downloader;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
-class CacheDisabled implements Cache {
+@FunctionalInterface
+public interface DownloadHandler {
 
-    @Override
-    public Optional<File> getCachedFile(String name) {
-        return Optional.empty();
-    }
+    void handle(String name, byte[] content) throws IOException;
 
-    @Override
-    public void addCachedFile(String name, byte[] content) throws IOException {
-        // Do nothing
-    }
 }
