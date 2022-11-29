@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Test plugin') {
             steps {
-                createManifest inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/manifest.html'
+                componentManifest inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/manifest.html'
                 downloadLicenses inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/licenses'
             }
         }
