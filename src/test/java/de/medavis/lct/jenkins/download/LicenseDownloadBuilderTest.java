@@ -45,7 +45,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import de.medavis.lct.core.downloader.LicenseDownloader;
-import de.medavis.lct.core.downloader.LicenseDownloaderFactory;
 import de.medavis.lct.core.downloader.DownloadHandler;
 import de.medavis.lct.util.InputStreamContentArgumentMatcher;
 
@@ -68,7 +67,7 @@ class LicenseDownloadBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        LicenseDownloaderFactory.setInstance(licenseDownloaderMock);
+        LicenseDownloadBuilderFactory.setLicenseDownloaderFactory(configuration -> licenseDownloaderMock);
         doAnswer(invocation -> {
             DownloadHandler handler = invocation.getArgument(2, DownloadHandler.class);
             FAKE_LICENSES.forEach((name, content) -> {

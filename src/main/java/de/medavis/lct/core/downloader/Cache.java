@@ -29,4 +29,5 @@ interface Cache {
 
     void addCachedFile(String name, byte[] content) throws IOException;
 
+    String getName();
 }

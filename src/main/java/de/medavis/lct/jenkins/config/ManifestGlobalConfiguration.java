@@ -127,7 +127,9 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
 
     @Override
     public Optional<Path> getLicenseCachePathOptional() {
-        return Optional.ofNullable(licenseCachePath).map(Paths::get);
+        return !Strings.isNullOrEmpty(licenseCachePath)
+                ? Optional.of(licenseCachePath).map(Paths::get)
+                : Optional.empty();
     }
 
     @DataBoundSetter

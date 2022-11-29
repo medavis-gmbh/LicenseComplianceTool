@@ -74,10 +74,10 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentLister(componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory(configuration -> componentListerMock);
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
-        CreateManifestBuilderFactory.setOutputter(outputterMock);
+        CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
         doAnswer(invocation -> {
             Writer writer = invocation.getArgument(1, Writer.class);
             writer.write(FAKE_MANIFEST);
@@ -98,30 +98,19 @@ class CreateManifestBuilderTest {
 
     @Test
     void testScriptedPipelineBuild(JenkinsRule jenkins) throws Exception {
-        String agentLabel = "any";
-        jenkins.createOnlineSlave(Label.get(agentLabel));
-        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
-        String pipelineScript = Resources.toString(getClass().getResource("scriptedPipeline.groovy"), Charset.defaultCharset());
-        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
-
-        WorkflowRun run = jenkins.buildAndAssertSuccess(job);
-
-        assertThat(run.getArtifacts()).extracting(Artifact::getFileName).containsExactly(ARCHIVE_FILENAME);
-        final VirtualFile outputFile = run.getArtifactManager().root().child(ARCHIVE_FILENAME);
-        try {
-            assertThat(outputFile.canRead()).isTrue();
-            assertThat(outputFile.open()).hasContent(FAKE_MANIFEST);
-        } catch (IOException e) {
-            fail("Unexpected exception", e);
-        }
+        runAndAssertPipelineJob(jenkins, "scriptedPipeline.groovy");
     }
 
     @Test
     void testDeclarativePipelineBuild(JenkinsRule jenkins) throws Exception {
+        runAndAssertPipelineJob(jenkins, "declarativePipeline.groovy");
+    }
+
+    private void runAndAssertPipelineJob(JenkinsRule jenkins, String pipelineFile) throws Exception {
         String agentLabel = "any";
         jenkins.createOnlineSlave(Label.get(agentLabel));
-        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-declarative-pipeline");
-        String pipelineScript = Resources.toString(getClass().getResource("declarativePipeline.groovy"), Charset.defaultCharset());
+        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
+        String pipelineScript = Resources.toString(getClass().getResource(pipelineFile), Charset.defaultCharset());
         job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
 
         WorkflowRun run = jenkins.buildAndAssertSuccess(job);
