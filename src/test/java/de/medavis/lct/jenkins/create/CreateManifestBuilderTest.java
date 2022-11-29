@@ -74,10 +74,10 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentLister(componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory(configuration -> componentListerMock);
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
-        CreateManifestBuilderFactory.setOutputter(outputterMock);
+        CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
         doAnswer(invocation -> {
             Writer writer = invocation.getArgument(1, Writer.class);
             writer.write(FAKE_MANIFEST);

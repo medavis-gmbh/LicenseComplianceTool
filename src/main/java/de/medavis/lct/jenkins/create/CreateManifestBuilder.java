@@ -47,6 +47,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
@@ -60,6 +62,8 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
     public static final String ARCHIVE_FILE_NAME = "componentManifest";
 
+    private static final Logger log = LoggerFactory.getLogger(CreateManifestBuilder.class);
+
     private final String inputPath;
     private final String outputPath;
     private String templateUrl;
@@ -72,7 +76,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
         this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance());
-        this.outputter = CreateManifestBuilderFactory.getOutputter();
+        this.outputter = CreateManifestBuilderFactory.getOutputterFactory();
     }
 
     public String getInputPath() {
@@ -106,6 +110,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
                 archiveOutput(run, workspace, launcher, listener);
             }
         } catch (IOException e) {
+            log.error("Could not create manifest.", e);
             throw new AbortException("Could not create component manifest: " + e.getMessage());
         }
     }

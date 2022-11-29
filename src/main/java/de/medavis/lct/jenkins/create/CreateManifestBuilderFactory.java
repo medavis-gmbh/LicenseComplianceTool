@@ -19,6 +19,9 @@
  */
 package de.medavis.lct.jenkins.create;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import de.medavis.lct.core.license.LicenseLoader;
 import de.medavis.lct.core.license.LicenseMappingLoader;
 import de.medavis.lct.core.Configuration;
@@ -30,43 +33,37 @@ import de.medavis.lct.core.outputter.FreemarkerOutputter;
 // TODO Try to use dependency injection (maybe using ExtensionFinder, GuiceFinder?)
 class CreateManifestBuilderFactory {
 
-    private static ComponentLister componentLister;
-    private static FreemarkerOutputter outputter;
+    private static Function<Configuration, ComponentLister> componentListerFactory = configuration -> new ComponentLister(
+            new AssetLoader(),
+            new ComponentMetaDataLoader(),
+            new LicenseLoader(),
+            new LicenseMappingLoader(),
+            configuration);
+    private static Supplier<FreemarkerOutputter> outputterFactory = FreemarkerOutputter::new;
 
     private CreateManifestBuilderFactory() {
     }
 
     public static ComponentLister getComponentLister(Configuration configuration) {
-        if (componentLister == null) {
-            componentLister = new ComponentLister(
-                    new AssetLoader(),
-                    new ComponentMetaDataLoader(),
-                    new LicenseLoader(),
-                    new LicenseMappingLoader(),
-                    configuration);
-        }
-        return componentLister;
+        return componentListerFactory.apply(configuration);
     }
 
-    public static FreemarkerOutputter getOutputter() {
-        if (outputter == null) {
-            outputter = new FreemarkerOutputter();
-        }
-        return outputter;
+    public static FreemarkerOutputter getOutputterFactory() {
+        return outputterFactory.get();
     }
 
     /**
      * Should only be used for tests
      */
-    public static void setComponentLister(ComponentLister componentLister) {
-        CreateManifestBuilderFactory.componentLister = componentLister;
+    static void setComponentListerFactory(Function<Configuration, ComponentLister> componentListerFactory) {
+        CreateManifestBuilderFactory.componentListerFactory = componentListerFactory;
     }
 
     /**
      * Should only be used for tests
      */
-    public static void setOutputter(FreemarkerOutputter outputter) {
-        CreateManifestBuilderFactory.outputter = outputter;
+    static void setOutputterFactory(Supplier<FreemarkerOutputter> outputterFactory) {
+        CreateManifestBuilderFactory.outputterFactory = outputterFactory;
     }
 
 }
