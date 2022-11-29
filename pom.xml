@@ -8,7 +8,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <!-- See https://github.com/jenkinsci/plugin-pom/releases for latest version -->
-        <version>4.47</version>
+        <version>4.51</version>
         <relativePath />
     </parent>
 
@@ -39,12 +39,12 @@
 
     <properties>
         <!-- Jenkins versions -->
-        <jenkins.version>2.361.1</jenkins.version>
+        <jenkins.version>2.361.4</jenkins.version>
 
         <!-- Other dependency versions -->
-        <cyclonedx.version>7.1.5</cyclonedx.version>
+        <cyclonedx.version>7.2.1</cyclonedx.version>
         <assertj.version>3.23.1</assertj.version>
-        <wiremock.version>2.33.2</wiremock.version>
+        <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
     </properties>
 
@@ -53,8 +53,8 @@
             <!-- See https://github.com/jenkinsci/bom/releases for latest version -->
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.346.x</artifactId>
-                <version>1607.va_c1576527071</version>
+                <artifactId>bom-2.361.x</artifactId>
+                <version>1723.vcb_9fee52c9fc</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -147,7 +147,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
