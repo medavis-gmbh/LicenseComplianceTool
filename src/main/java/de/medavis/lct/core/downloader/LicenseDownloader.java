@@ -44,12 +44,14 @@ import de.medavis.lct.core.list.ComponentLister;
 public class LicenseDownloader {
 
     private final ComponentLister componentLister;
-    private final Cache cache;
     private final FileDownloader fileDownloader;
+    private final boolean cacheEnabled;
+    private final Cache cache;
 
     public LicenseDownloader(ComponentLister componentLister, Configuration configuration, FileDownloader fileDownloader) {
         this.componentLister = componentLister;
         this.fileDownloader = fileDownloader;
+        this.cacheEnabled = configuration.getLicenseCachePathOptional().isPresent();
         this.cache = configuration.getLicenseCachePathOptional()
                 .map(FilesystemCache::new)
                 .map(Cache.class::cast)
@@ -64,12 +66,16 @@ public class LicenseDownloader {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         Map<String, File> cachedLicenses = new LinkedHashMap<>();
-        for (License license : licenses) {
-            Optional<File> cachedLicenseFile = cache.getCachedFile(license.getName());
-            cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.getName(), file));
+        if (cacheEnabled) {
+            for (License license : licenses) {
+                Optional<File> cachedLicenseFile = cache.getCachedFile(license.getName());
+                cachedLicenseFile.ifPresent(file -> cachedLicenses.put(license.getName(), file));
+            }
+            userLogger.info("Using %d licenses from cache %s.%n", cachedLicenses.size(), cache.getName());
+            cachedLicenses.forEach((name, file) -> copyFromCache(file, userLogger, downloadHandler));
+        } else {
+            userLogger.info("License cache is disabled.%n");
         }
-        userLogger.info("Using %d licenses from cache.%n", cachedLicenses.size());
-        cachedLicenses.forEach((name, file) -> copyFromCache(file, userLogger, downloadHandler));
 
         Map<String, String> downloadUrls = licenses.stream()
                 .filter(license -> !cachedLicenses.containsKey(license.getName()))

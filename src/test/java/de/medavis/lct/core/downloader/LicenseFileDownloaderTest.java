@@ -60,7 +60,6 @@ class LicenseFileDownloaderTest {
 
     private static final String VIEW_URL = "view";
     private static final String DOWNLOAD_URL = "download";
-    private static final Path INPUT = Paths.get("DOES_NOT_MATTER");
     private final static String BASE_URL = "http://my-host";
     private static final String DOWNLOAD_EXT = ".txt";
 

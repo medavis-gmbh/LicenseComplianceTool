@@ -34,4 +34,9 @@ class CacheDisabled implements Cache {
     public void addCachedFile(String name, byte[] content) throws IOException {
         // Do nothing
     }
+
+    @Override
+    public String getName() {
+        return "Cache disabled";
+    }
 }

@@ -53,4 +53,9 @@ class FilesystemCache implements Cache {
         Files.createDirectories(path);
         Files.write(path.resolve(name), content);
     }
+
+    @Override
+    public String getName() {
+        return String.format("Local filesystem (%s)", path);
+    }
 }
