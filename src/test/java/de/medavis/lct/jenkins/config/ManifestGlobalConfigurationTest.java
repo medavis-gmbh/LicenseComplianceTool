@@ -61,18 +61,35 @@ public class ManifestGlobalConfigurationTest {
     }
 
     private void verifyStoredConfig(String stage) {
-        final ManifestGlobalConfiguration manifestGlobalConfiguration = ManifestGlobalConfiguration.getInstance();
-        assertThat(manifestGlobalConfiguration).as(stage).satisfies(storedConfig -> {
-            assertSoftly(softly -> {
-                softly.assertThat(storedConfig.getComponentMetadata()).isEqualTo(COMPONENT_METADATA_URL);
-                softly.assertThat(storedConfig.getComponentMetadataUrl()).map(URL::toString).hasValue(COMPONENT_METADATA_URL);
-                softly.assertThat(storedConfig.getLicenses()).isEqualTo(LICENSES_URL);
-                softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
-                softly.assertThat(storedConfig.getLicenseMappings()).isEqualTo(LICENSES_MAPPING_URL);
-                softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
-                softly.assertThat(storedConfig.getLicenseCachePath()).isEqualTo(LICENSES_CACHE_PATH);
-                softly.assertThat(storedConfig.getLicenseCachePathOptional()).hasValue(Paths.get(LICENSES_CACHE_PATH));
-            });
+        assertThat(ManifestGlobalConfiguration.getInstance()).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
+            softly.assertThat(storedConfig.getComponentMetadata()).isEqualTo(COMPONENT_METADATA_URL);
+            softly.assertThat(storedConfig.getComponentMetadataUrl()).map(URL::toString).hasValue(COMPONENT_METADATA_URL);
+            softly.assertThat(storedConfig.getLicenses()).isEqualTo(LICENSES_URL);
+            softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
+            softly.assertThat(storedConfig.getLicenseMappings()).isEqualTo(LICENSES_MAPPING_URL);
+            softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
+            softly.assertThat(storedConfig.getLicenseCachePath()).isEqualTo(LICENSES_CACHE_PATH);
+            softly.assertThat(storedConfig.getLicenseCachePathOptional()).hasValue(Paths.get(LICENSES_CACHE_PATH));
+        }));
+    }
+
+    @Test
+    public void handleEmptyConfig() throws Throwable {
+        jenkinsSession.then(jenkins -> {
+            HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
+            jenkins.submit(config);
+
+            assertThat(ManifestGlobalConfiguration.getInstance()).satisfies(storedConfig -> assertSoftly(softly -> {
+                softly.assertThat(storedConfig.getComponentMetadata()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getComponentMetadataUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getLicenses()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getLicenseMappings()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getLicenseCachePath()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getLicenseCachePathOptional()).isNotPresent();
+            }));
         });
     }
+
 }
