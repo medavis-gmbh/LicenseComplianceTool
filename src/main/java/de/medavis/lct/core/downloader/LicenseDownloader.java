@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
@@ -42,6 +44,8 @@ import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 
 public class LicenseDownloader {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ComponentLister componentLister;
     private final FileDownloader fileDownloader;
@@ -96,7 +100,8 @@ public class LicenseDownloader {
         try {
             downloadHandler.handle(cachedFile.getName(), Files.readAllBytes(cachedFile.toPath()));
         } catch (IOException e) {
-            userLogger.error("Could not copy license file from cache: %s.%n", e.getMessage());
+            log.error(String.format("Could not copy license file %s from cache.", cachedFile), e);
+            userLogger.error("%s - %s.%n", e.getClass(), e.getMessage());
         }
     }
 
@@ -106,7 +111,8 @@ public class LicenseDownloader {
             fileDownloader.downloadToFile(source, licenseName, downloadHandler);
             userLogger.info("Done.%n");
         } catch (IOException e) {
-            userLogger.error("Could not download license file: %s.%n", e.getMessage());
+            log.error(String.format("Could not download license file %s from %s.", licenseName, source), e);
+            userLogger.error("%s - %s.%n", e.getClass(), e.getMessage());
         }
     }
 
