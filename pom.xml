@@ -34,7 +34,7 @@
     <name>License Compliance Tool</name>
     <description>Generate component manifest and license files for compliance with licenses of third-party software</description>
     <url>https://github.com/medavis-gmbh/LicenseComplianceTool</url>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-licdownload</version>
     <packaging>hpi</packaging>
 
     <properties>
