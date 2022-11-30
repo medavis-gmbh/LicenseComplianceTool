@@ -23,8 +23,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                writeFile(file: 'input.bom', text: 'Normally, this would be a CycloneDX SBOM.')
-                downloadLicenses inputPath: 'input.bom', outputPath: 'output/licenses'
+                downloadLicenses inputPath: 'input.json', outputPath: 'output/licenses'
             }
         }
     }

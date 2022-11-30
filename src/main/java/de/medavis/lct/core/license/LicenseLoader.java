@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class LicenseLoader {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(LicenseLoader.class);
 
     public Map<String, License> load(URL licenseUrl) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -39,7 +39,7 @@ public class LicenseLoader {
                             objectMapper.getTypeFactory().constructCollectionType(List.class, License.class))
                     .stream()
                     .collect(Collectors.toMap(License::getName, Function.identity()));
-            logger.info("Imported {} licenses from {}", result.size(), licenseUrl);
+            log.info("Imported {} licenses from {}", result.size(), licenseUrl);
             return result;
 
         } catch (Exception e) {

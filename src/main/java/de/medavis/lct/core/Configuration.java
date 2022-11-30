@@ -31,6 +31,7 @@ public interface Configuration {
 
     Optional<URL> getLicenseMappingsUrl();
 
+    // TDDO Remove cache configuration
     Optional<Path> getLicenseCachePathOptional();
 
 }

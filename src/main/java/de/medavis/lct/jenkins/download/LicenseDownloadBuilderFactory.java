@@ -23,8 +23,8 @@ import java.util.function.Function;
 
 import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.asset.AssetLoader;
-import de.medavis.lct.core.downloader.FileDownloader;
-import de.medavis.lct.core.downloader.LicenseDownloader;
+import de.medavis.lct.core.downloader.LicenseFileDownloader;
+import de.medavis.lct.core.downloader.LicensesDownloader;
 import de.medavis.lct.core.license.LicenseLoader;
 import de.medavis.lct.core.license.LicenseMappingLoader;
 import de.medavis.lct.core.list.ComponentLister;
@@ -33,29 +33,28 @@ import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 // TODO Try to use dependency injection (maybe using ExtensionFinder, GuiceFinder?)
 class LicenseDownloadBuilderFactory {
 
-    private static Function<Configuration, LicenseDownloader> licenseDownloaderFactory = configuration -> new LicenseDownloader(
+    private static Function<Configuration, LicensesDownloader> licensesDownloaderFactory = configuration -> new LicensesDownloader(
             new ComponentLister(
                     new AssetLoader(),
                     new ComponentMetaDataLoader(),
                     new LicenseLoader(),
                     new LicenseMappingLoader(),
                     configuration),
-            configuration,
-            new FileDownloader()
+            new LicenseFileDownloader()
     );
 
     private LicenseDownloadBuilderFactory() {
     }
 
-    public static LicenseDownloader getLicenseDownloader(Configuration configuration) {
-        return licenseDownloaderFactory.apply(configuration);
+    public static LicensesDownloader getLicensesDownloader(Configuration configuration) {
+        return licensesDownloaderFactory.apply(configuration);
     }
 
     /**
      * Should only be used for tests
      */
-    static void setLicenseDownloaderFactory(Function<Configuration, LicenseDownloader> licenseDownloaderFactory) {
-        LicenseDownloadBuilderFactory.licenseDownloaderFactory = licenseDownloaderFactory;
+    static void setLicensesDownloaderFactory(Function<Configuration, LicensesDownloader> licensesDownloaderFactory) {
+        LicenseDownloadBuilderFactory.licensesDownloaderFactory = licensesDownloaderFactory;
     }
 
 }

@@ -19,15 +19,13 @@
  */
 package de.medavis.lct.core.downloader;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
-interface Cache {
+public interface LicenseFileHandler {
 
-    Optional<File> getCachedFile(String name) throws IOException;
+    boolean isCached(String license) throws IOException;
 
-    void addCachedFile(String name, byte[] content) throws IOException;
+    void save(String license, String extension, byte[] content) throws IOException;
 
-    String getName();
+    void copyFromCache(String license) throws IOException;
 }
