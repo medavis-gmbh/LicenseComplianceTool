@@ -18,9 +18,7 @@
  * #L%
  */
 pipeline {
-    agent {
-        label "MartinLeimNotebook"
-    }
+    agent any
 
     stages {
         stage('Test plugin') {
