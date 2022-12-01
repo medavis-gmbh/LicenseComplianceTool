@@ -28,17 +28,16 @@ import org.apache.commons.io.FilenameUtils;
 
 import de.medavis.lct.core.downloader.LicenseFileHandler;
 
-// TODO Add tests
 class JenkinsLicenseFileHandler implements LicenseFileHandler {
+
+    private static final String CACHE_PATH = ".lct/cache/licenses";
 
     private final FilePath workspace;
     private final String outputPath;
-    private final String cachePath;
 
-    public JenkinsLicenseFileHandler(FilePath workspace, String outputPath, String cachePath) {
+    public JenkinsLicenseFileHandler(FilePath workspace, String outputPath) {
         this.workspace = workspace;
         this.outputPath = outputPath;
-        this.cachePath = cachePath;
     }
 
     @Override
@@ -48,8 +47,13 @@ class JenkinsLicenseFileHandler implements LicenseFileHandler {
 
     @Override
     public void save(String license, String extension, byte[] content) throws IOException {
-        // TODO Store file in cache
-        try (OutputStream outputStream = workspace.child(outputPath).child(license + extension).write()) {
+        writeFile(outputPath, license, extension, content);
+        writeFile(CACHE_PATH, license, extension, content);
+    }
+
+    private void writeFile(String targetPath, String license, String extension, byte[] content) throws IOException {
+        final FilePath target = workspace.child(targetPath);
+        try (OutputStream outputStream = target.child(license + extension).write()) {
             outputStream.write(content);
         } catch (InterruptedException e) {
             throw rethrowAsIOException(e);
@@ -61,7 +65,7 @@ class JenkinsLicenseFileHandler implements LicenseFileHandler {
         try {
             Optional<FilePath> cachedFile = getCachedFile(license);
             if (cachedFile.isPresent()) {
-                cachedFile.get().child(license).copyTo(workspace.child(outputPath));
+                cachedFile.get().copyTo(workspace.child(outputPath).child(cachedFile.get().getName()));
             }
         } catch (InterruptedException e) {
             throw rethrowAsIOException(e);
@@ -70,11 +74,11 @@ class JenkinsLicenseFileHandler implements LicenseFileHandler {
 
     private Optional<FilePath> getCachedFile(String license) throws IOException {
         try {
-            if (!workspace.child(cachePath).exists()) {
+            if (!workspace.child(CACHE_PATH).exists()) {
                 return Optional.empty();
             }
 
-            FilePath[] matches = workspace.child(cachePath).list(license + "*");
+            FilePath[] matches = workspace.child(CACHE_PATH).list(license + "*");
             return Stream.of(matches)
                     .filter(file -> FilenameUtils.removeExtension(file.getName()).equalsIgnoreCase(license))
                     .findFirst();

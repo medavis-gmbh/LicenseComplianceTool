@@ -46,15 +46,12 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputPath;
     private final String outputPath;
-    private final String cachePath;
     private final LicensesDownloader licenseDownloader;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        // TODO Extract into constant
-        this.cachePath = "cache/licenses";
         this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(ManifestGlobalConfiguration.getInstance());
     }
 
@@ -73,7 +70,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath, cachePath));
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath));
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }
