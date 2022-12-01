@@ -20,7 +20,6 @@
 package de.medavis.lct.core;
 
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Optional;
 
 public interface Configuration {
@@ -30,7 +29,5 @@ public interface Configuration {
     Optional<URL> getLicensesUrl();
 
     Optional<URL> getLicenseMappingsUrl();
-
-    Optional<Path> getLicenseCachePathOptional();
 
 }

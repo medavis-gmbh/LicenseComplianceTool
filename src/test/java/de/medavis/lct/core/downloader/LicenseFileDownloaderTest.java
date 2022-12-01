@@ -19,244 +19,138 @@
  */
 package de.medavis.lct.core.downloader;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Files;
-import java.io.ByteArrayInputStream;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.entity.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
-import org.mockito.Mock.Strictness;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.okForContentType;
+import static com.github.tomakehurst.wiremock.client.WireMock.permanentRedirect;
+import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.medavis.lct.core.Configuration;
-import de.medavis.lct.core.UserLogger;
-import de.medavis.lct.core.license.License;
-import de.medavis.lct.core.list.ComponentData;
-import de.medavis.lct.core.list.ComponentLister;
-
+@WireMockTest
 @ExtendWith(MockitoExtension.class)
 class LicenseFileDownloaderTest {
 
-    private static final String VIEW_URL = "view";
-    private static final String DOWNLOAD_URL = "download";
-    private final static String BASE_URL = "http://my-host";
-    private static final String DOWNLOAD_EXT = ".txt";
+    private static final String INITIAL_URL = "/download";
+    private static final String REDIRECTED_URL = "/redirected";
+    private static final String LICENSE = "downloaded";
+    private static final String DOWNLOAD_CONTENT = "You should download me.";
 
-    @TempDir
-    private Path outputPath;
-    @TempDir
-    private Path cachePath;
+    private String baseUrl;
 
     @Mock
-    private Configuration configuration;
-    @Mock
-    private ComponentLister componentLister;
-    @Mock(strictness = Strictness.LENIENT)
-    private FileDownloader fileDownloader;
-    @Mock
-    private UserLogger userLogger;
+    private LicenseFileHandler handlerMock;
 
-    private LicenseDownloader underTest;
+    private final LicenseFileDownloader fileDownloader = new LicenseFileDownloader();
 
-    private Map<String, byte[]> downloads = new LinkedHashMap<>();
-
-    @Test
-    void shouldDownloadAllLicensesFromAllComponents() throws IOException {
-        setup(
-                component(
-                        license("A", true, true),
-                        license("B", true, true)),
-                component(license("C", true, true))
-        );
-
-        invokeDownload();
-
-        verifyLicenses("A", "B", "C");
-        verifyDownloaded(DOWNLOAD_URL, "A", "B", "C");
+    @BeforeEach
+    void beforeEach(WireMockRuntimeInfo wiremock) {
+        baseUrl = wiremock.getHttpBaseUrl();
     }
 
     @Test
-    void shouldDownloadSameLicenseOnlyOnce() throws IOException {
-        setup(
-                component(license("A", true, true)),
-                component(license("A", true, true))
-        );
+    void shouldCreateEmptyFileOnEmptyContent() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(ok()));
 
-        invokeDownload();
+        download();
 
-        verifyLicenses("A");
-        verifyDownloaded(DOWNLOAD_URL, "A");
+        verifyDownload(LICENSE, "", "");
     }
 
     @Test
-    void shouldUseViewUrlIfDownloadUrlIsNotSet() throws IOException {
-        setup(component(license("A", true, false)));
+    void shouldThrowExceptionOnServerError() {
+        stubFor(get(INITIAL_URL).willReturn(serverError()));
 
-        invokeDownload();
-
-        verifyLicenses("A");
-        verifyDownloaded(VIEW_URL, "A");
+        assertThatThrownBy(this::download).isInstanceOf(IOException.class);
     }
 
     @Test
-    void shouldNotDownloadLicenseIfNoUrlIsSet() throws IOException {
-        setup(component(license("A", false, false)));
+    void shouldDownloadWithoutExtensionOnEmptyContentType() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(okWithLength(DOWNLOAD_CONTENT)));
 
-        invokeDownload();
+        download();
 
-        verifyEmptyLicenses();
-        verifyNothingDownloaded();
+        verifyDownload(LICENSE, "", DOWNLOAD_CONTENT);
     }
 
     @Test
-    void shouldPopulateCache() throws IOException {
-        setup(component(license("A", true, true)));
+    void shouldDownloadWithHtmlExtensionOnHtmlContentType() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.TEXT_HTML.getMimeType())));
 
-        invokeDownload();
+        download();
 
-        verifyCache("A");
+        verifyDownload(LICENSE, ".html", DOWNLOAD_CONTENT);
     }
 
     @Test
-    void shouldCreateCachePathIfNotExists() throws IOException {
-        this.cachePath = cachePath.resolve("new-subdir");
-        setup(component(license("A", true, true)));
+    void shouldDownloadWithTxtExtensionOnTextContentType() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.TEXT_PLAIN.getMimeType())));
 
-        invokeDownload();
+        download();
 
-        verifyCache("A");
+        verifyDownload(LICENSE, ".txt", DOWNLOAD_CONTENT);
     }
 
     @Test
-    void shouldWorkWithoutCache() throws IOException {
-        setup(false, component(license("A", true, true)));
+    void shouldDownloadWithTxtExtensionOnUnexpectedContentType() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(okWithLengthAndType(DOWNLOAD_CONTENT, ContentType.APPLICATION_OCTET_STREAM.getMimeType())));
 
-        invokeDownload();
+        download();
 
-        verifyLicenses("A");
-        verifyEmptyCache();
+        verifyDownload(LICENSE, "", DOWNLOAD_CONTENT);
     }
 
     @Test
-    void shouldNotDownloadLicensesIfItExistsInCache() throws IOException {
-        initializeCache("A", DOWNLOAD_EXT);
-        setup(component(license("A", true, true)));
+    void shouldFollowRedirectWhileDownloading() throws IOException {
+        stubFor(get(INITIAL_URL).willReturn(permanentRedirect(REDIRECTED_URL)));
+        stubFor(get(REDIRECTED_URL).willReturn(okWithLength(DOWNLOAD_CONTENT)));
 
-        invokeDownload();
+        download();
 
-        verifyLicenses("A");
-        verifyNothingDownloaded();
+        verifyDownload(LICENSE, "", DOWNLOAD_CONTENT);
     }
 
-    private void initializeCache(String licenseName, String extension) throws IOException {
-        String filename = licenseName;
-        if (extension != null) {
-            filename = filename + extension;
-        }
-        Files.asCharSink(cachePath.resolve(filename).toFile(), StandardCharsets.UTF_8).write(licenseName);
+    @Test
+    void shouldNotDownloadCachedLicenseFile() throws IOException {
+        when(handlerMock.isCached(LICENSE)).thenReturn(true);
+
+        download();
+
+        verify(handlerMock).copyFromCache(LICENSE);
+        verify(handlerMock, never()).save(any(), any(), any());
     }
 
-    private void setup(ComponentData... components) {
-        setup(true, components);
+    private void download() throws IOException {
+        fileDownloader.downloadToFile(baseUrl + INITIAL_URL, LICENSE, handlerMock);
     }
 
-    private void setup(boolean cache, ComponentData... components) {
-        when(configuration.getLicenseCachePathOptional()).thenReturn(cache ? Optional.of(cachePath) : Optional.empty());
-        when(componentLister.listComponents(any())).thenReturn(Arrays.asList(components));
-        underTest = new LicenseDownloader(componentLister, configuration, fileDownloader);
+    private void verifyDownload(String license, String extension, String expectedContent) throws IOException {
+        verify(handlerMock).save(license, extension, expectedContent.getBytes(StandardCharsets.UTF_8));
     }
 
-    private ComponentData component(License... licenses) {
-        return new ComponentData(
-                RandomStringUtils.randomAlphabetic(6),
-                RandomStringUtils.randomAlphabetic(6),
-                RandomStringUtils.randomAlphabetic(6),
-                ImmutableSet.copyOf(licenses),
-                Collections.emptySet());
+    private ResponseDefinitionBuilder okWithLength(String downloadContent) {
+        return ok(downloadContent).withHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(downloadContent.length()));
     }
 
-    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) throws IOException {
-        String viewUrl = stubDownload(hasViewUrl, VIEW_URL, name);
-        String downloadUrl = stubDownload(hasDownloadUrl, DOWNLOAD_URL, name);
-        return new License(name, viewUrl, downloadUrl);
+    private ResponseDefinitionBuilder okWithLengthAndType(String downloadContent, String contentType) {
+        return okForContentType(contentType, downloadContent).withHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(downloadContent.length()));
     }
 
-    private String stubDownload(boolean hasUrl, String prefix, String licenseName) throws IOException {
-        String url = null;
-        if (hasUrl) {
-            String relativeUrl = createUrl(prefix, licenseName);
-            url = BASE_URL + relativeUrl;
-            doAnswer(invocation -> {
-                DownloadHandler handler = invocation.getArgument(2, DownloadHandler.class);
-                handler.handle(licenseName + DOWNLOAD_EXT, licenseName.getBytes(StandardCharsets.UTF_8));
-                return null;
-            }).when(fileDownloader).downloadToFile(eq(url), any(), any());
-        }
-        return url;
-    }
-
-    private String createUrl(String... parts) {
-        return "/" + Joiner.on("/").join(parts);
-    }
-
-    private void invokeDownload() throws IOException {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), downloads::put);
-    }
-
-    private void verifyLicenses(String... licenses) {
-        assertSoftly(softly -> Stream.of(licenses)
-                .forEach(license -> assertThat(downloads).containsEntry(license + DOWNLOAD_EXT, license.getBytes(StandardCharsets.UTF_8))));
-    }
-
-    private void verifyEmptyLicenses() {
-        assertThat(outputPath).isEmptyDirectory();
-    }
-
-    private void verifyDownloaded(String prefix, String... licenses) throws IOException {
-        for (String license : licenses) {
-            Mockito.verify(fileDownloader).downloadToFile(eq(BASE_URL + createUrl(prefix, license)), any(), any());
-        }
-    }
-
-    private void verifyNothingDownloaded() {
-        Mockito.verifyNoInteractions(fileDownloader);
-    }
-
-    private void verifyCache(String... licenses) {
-        assertSoftly(softly -> Stream.of(licenses).forEach(license ->
-                assertThat(cachePath.resolve(license + DOWNLOAD_EXT))
-                        .exists()
-                        .hasContent(license)));
-    }
-
-    private void verifyEmptyCache() {
-        assertThat(cachePath).isEmptyDirectory();
-    }
-
-    private enum UrlBehaviour {
-        SUCCESS,
-        FAILURE,
-        REDIRECT;
-    }
 }

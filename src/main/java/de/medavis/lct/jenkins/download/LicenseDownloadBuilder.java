@@ -32,14 +32,13 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import java.io.IOException;
-import java.io.OutputStream;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.downloader.LicenseDownloader;
+import de.medavis.lct.core.downloader.LicensesDownloader;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 
@@ -47,13 +46,13 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputPath;
     private final String outputPath;
-    private final LicenseDownloader licenseDownloader;
+    private final LicensesDownloader licenseDownloader;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicenseDownloader(ManifestGlobalConfiguration.getInstance());
+        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(ManifestGlobalConfiguration.getInstance());
     }
 
     public String getInputPath() {
@@ -71,19 +70,9 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(),
-                    (name, content) -> addLicenseToWorkspace(workspace.child(outputPath), name, content));
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath));
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
-        }
-    }
-
-    private void addLicenseToWorkspace(FilePath targetDir, String name, byte[] content) throws IOException {
-        try (OutputStream outputStream = targetDir.child(name).write()) {
-            outputStream.write(content);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Thread has been interrupted.", e);
         }
     }
 

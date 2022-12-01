@@ -45,7 +45,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String componentMetadata;
     private String licenses;
     private String licenseMappings;
-    private String licenseCachePath;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -121,32 +120,4 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
         return UrlValidator.validate(value);
     }
 
-    public String getLicenseCachePath() {
-        return licenseCachePath;
-    }
-
-    @Override
-    public Optional<Path> getLicenseCachePathOptional() {
-        return !Strings.isNullOrEmpty(licenseCachePath)
-                ? Optional.of(licenseCachePath).map(Paths::get)
-                : Optional.empty();
-    }
-
-    @DataBoundSetter
-    public void setLicenseCachePath(String licenseCachePath) {
-        this.licenseCachePath = licenseCachePath;
-        save();
-    }
-
-    public FormValidation doCheckLicenseCachePath(String value) {
-        if (Strings.isNullOrEmpty(value)) {
-            return FormValidation.ok();
-        }
-        try {
-            Paths.get(value);
-            return FormValidation.ok();
-        } catch (InvalidPathException e) {
-            return FormValidation.error(de.medavis.lct.jenkins.config.Messages.ManifestGlobalConfiguration_error_invalidPath());
-        }
-    }
 }

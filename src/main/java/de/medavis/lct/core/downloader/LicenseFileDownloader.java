@@ -33,23 +33,30 @@ import org.apache.http.impl.client.HttpClients;
 import static org.apache.http.entity.ContentType.TEXT_HTML;
 import static org.apache.http.entity.ContentType.TEXT_PLAIN;
 
-public class FileDownloader {
+public class LicenseFileDownloader {
 
-    private final HttpClient httpclient = HttpClients.createDefault();
+    private final transient HttpClient httpclient = HttpClients.createDefault();
 
-    void downloadToFile(String url, String targetName, DownloadHandler downloadHandler) throws IOException {
-        httpclient.execute(new HttpGet(url), response -> {
-            final int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode < 200 || statusCode >= 300) {
-                throw new IOException("Download not successful: Status " + statusCode);
-            }
 
-            String extension = determineExtension(response.getEntity().getContentType());
-            try (final InputStream input = response.getEntity().getContent()) {
-                downloadHandler.handle(targetName + extension, ByteStreams.toByteArray(input));
-            }
-            return null;
-        });
+    Result downloadToFile(String url, String license, LicenseFileHandler licenseFileHandler) throws IOException {
+        if (!licenseFileHandler.isCached(license)) {
+            httpclient.execute(new HttpGet(url), response -> {
+                final int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    throw new IOException("Download not successful: Status " + statusCode);
+                }
+
+                String extension = determineExtension(response.getEntity().getContentType());
+                try (final InputStream input = response.getEntity().getContent()) {
+                    licenseFileHandler.save(license, extension, ByteStreams.toByteArray(input));
+                }
+                return null;
+            });
+            return Result.DOWNLOADED;
+        } else {
+            licenseFileHandler.copyFromCache(license);
+            return Result.FROM_CACHE;
+        }
     }
 
     private String determineExtension(Header contentTypeHeader) {
@@ -72,6 +79,11 @@ public class FileDownloader {
             // Ignore error and assume unknown content type
             return null;
         }
+    }
+
+    enum Result {
+        DOWNLOADED,
+        FROM_CACHE
     }
 
 }

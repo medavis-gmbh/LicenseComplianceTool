@@ -11,8 +11,5 @@
         <f:entry field="licenseMappings" title="${%licenseMappings}">
             <f:textbox />
         </f:entry>
-        <f:entry field="licenseCachePath" title="${%licenseCachePath}">
-            <f:textbox />
-        </f:entry>
     </f:section>
 </j:jelly>
