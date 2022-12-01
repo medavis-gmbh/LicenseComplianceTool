@@ -68,8 +68,6 @@ public class ManifestGlobalConfigurationTest {
             softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
             softly.assertThat(storedConfig.getLicenseMappings()).isEqualTo(LICENSES_MAPPING_URL);
             softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
-            softly.assertThat(storedConfig.getLicenseCachePath()).isEqualTo(LICENSES_CACHE_PATH);
-            softly.assertThat(storedConfig.getLicenseCachePathOptional()).hasValue(Paths.get(LICENSES_CACHE_PATH));
         }));
     }
 
@@ -86,8 +84,6 @@ public class ManifestGlobalConfigurationTest {
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappings()).isNullOrEmpty();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
-                softly.assertThat(storedConfig.getLicenseCachePath()).isNullOrEmpty();
-                softly.assertThat(storedConfig.getLicenseCachePathOptional()).isNotPresent();
             }));
         });
     }
