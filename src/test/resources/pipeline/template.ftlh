@@ -34,6 +34,9 @@ limitations under the License.
     </style>
 </head>
 <body>
+<div>
+    Place your legal bla-bla here
+</div>
 <table id="components">
     <thead>
     <tr>
