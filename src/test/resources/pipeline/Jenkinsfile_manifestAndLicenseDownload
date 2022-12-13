@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Test plugin') {
             steps {
-                componentManifest inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/manifest.html'
+                componentManifest inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/manifest.html', templateUrl: 'https://raw.githubusercontent.com/medavis-gmbh/LicenseComplianceTool/test-template-url/src/test/resources/pipeline/template.ftlh'
                 downloadLicenses inputPath: 'src/test/resources/asset/test-bom.json', outputPath: 'output/licenses'
             }
         }
