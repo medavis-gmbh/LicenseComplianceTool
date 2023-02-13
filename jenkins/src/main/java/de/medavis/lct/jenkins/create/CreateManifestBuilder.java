@@ -68,8 +68,8 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     private final String outputPath;
     private String templateUrl;
 
-    private final ComponentLister componentLister;
-    private final FreemarkerOutputter outputter;
+    private final transient ComponentLister componentLister;
+    private final transient FreemarkerOutputter outputter;
 
     @DataBoundConstructor
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {

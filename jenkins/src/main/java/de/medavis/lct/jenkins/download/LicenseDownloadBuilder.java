@@ -46,7 +46,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputPath;
     private final String outputPath;
-    private final LicensesDownloader licenseDownloader;
+    private final transient LicensesDownloader licenseDownloader;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
