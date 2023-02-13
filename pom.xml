@@ -34,12 +34,14 @@
     <name>License Compliance Tool</name>
     <description>Generate component manifest and license files for compliance with licenses of third-party software</description>
     <url>https://github.com/medavis-gmbh/LicenseComplianceTool</url>
-    <version>1.1.0</version>
-    <packaging>hpi</packaging>
+    <version>1.2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <properties>
         <!-- Use Java 11 -->
-        <maven.compiler.release>1.11</maven.compiler.release>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>1.11</maven.compiler.source>
+        <maven.compiler.target>1.11</maven.compiler.target>
 
         <!-- Jenkins versions -->
         <jenkins.version>2.361.4</jenkins.version>
@@ -50,6 +52,11 @@
         <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
     </properties>
+
+    <modules>
+        <module>core</module>
+        <module>jenkins</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -63,114 +70,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <!-- Required Jenkins plugins -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>structs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkinsci.plugins</groupId>
-            <artifactId>pipeline-model-definition</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>commons-lang3-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>apache-httpcomponents-client-4-api</artifactId>
-        </dependency>
-
-        <!-- Required for BOM parsing -->
-        <dependency>
-            <groupId>org.cyclonedx</groupId>
-            <artifactId>cyclonedx-core-java</artifactId>
-            <version>${cyclonedx.version}</version>
-            <exclusions>
-                <!-- These dependencies are already delivered by Jenkins or other plugins -->
-                <exclusion>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-io</artifactId>
-                    <groupId>commons-io</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.dataformat</groupId>
-                    <artifactId>jackson-dataformat-xml</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Freemarker -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>${freemarker.version}</version>
-        </dependency>
-
-        <!-- Jenkins test tooling -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-basic-steps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-durable-task-step</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>pipeline-utility-steps</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Other test dependencies -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
-            <version>${wiremock.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
 
     <repositories>
         <repository>
