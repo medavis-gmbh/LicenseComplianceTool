@@ -44,7 +44,6 @@
         <dependency>
             <groupId>org.cyclonedx</groupId>
             <artifactId>cyclonedx-core-java</artifactId>
-            <version>${cyclonedx.version}</version>
             <exclusions>
                 <!-- These dependencies are already delivered by Jenkins or other plugins -->
                 <exclusion>
@@ -72,6 +71,11 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Jenkins test tooling -->
@@ -110,13 +114,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 

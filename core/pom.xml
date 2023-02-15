@@ -15,25 +15,22 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Required for BOM parsing -->
+        <!-- SBOM -->
         <dependency>
             <groupId>org.cyclonedx</groupId>
             <artifactId>cyclonedx-core-java</artifactId>
-            <version>${cyclonedx.version}</version>
         </dependency>
 
         <!-- HTTP Client -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
         </dependency>
 
         <!-- Freemarker -->
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>${freemarker.version}</version>
         </dependency>
 
         <!-- Other test dependencies -->
@@ -45,13 +42,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 

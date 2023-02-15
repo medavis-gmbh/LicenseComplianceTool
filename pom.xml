@@ -51,22 +51,59 @@
         <assertj.version>3.23.1</assertj.version>
         <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
+        <httpclient.version>4.5.13</httpclient.version>
     </properties>
 
     <modules>
         <module>core</module>
         <module>jenkins</module>
+        <module>cli</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <!-- See https://github.com/jenkinsci/bom/releases for latest version -->
+            <!-- Jenkins Tools - See https://github.com/jenkinsci/bom/releases for latest version -->
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.361.x</artifactId>
                 <version>1723.vcb_9fee52c9fc</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+
+            <!-- SBOM -->
+            <dependency>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-core-java</artifactId>
+                <version>${cyclonedx.version}</version>
+            </dependency>
+
+            <!-- HTTP Client -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+
+            <!-- Freemarker -->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
