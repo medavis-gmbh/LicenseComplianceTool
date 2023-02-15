@@ -33,6 +33,12 @@
             <artifactId>freemarker</artifactId>
         </dependency>
 
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- Other test dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>

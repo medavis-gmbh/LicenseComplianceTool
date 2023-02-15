@@ -52,6 +52,7 @@
         <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
         <httpclient.version>4.5.13</httpclient.version>
+        <guava.version>31.1-jre</guava.version>
     </properties>
 
     <modules>
@@ -90,6 +91,13 @@
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
                 <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- Guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
 
             <!-- Test dependencies -->
