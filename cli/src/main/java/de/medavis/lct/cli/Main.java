@@ -31,7 +31,8 @@ class Main {
 
         final CommandLine commandLine = new CommandLine(this);
         commandLine.addSubcommand(new HelpCommand());
-        commandLine.addSubcommand(new CreateComponentManifest());
+        commandLine.addSubcommand(new CreateManifest());
+        commandLine.addSubcommand(new DownloadLicenses());
         System.exit(commandLine.execute(args));
     }
 
