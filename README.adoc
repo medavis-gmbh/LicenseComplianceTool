@@ -195,7 +195,7 @@ pipeline {
 ----
 
 With the parameter `templateUrl`, you can specify a URL pointing to a custom FreeMarker template which is used to create the output. The parameter is optional.
-If it is not set, the template from link:src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
+If it is not set, the template from link:core/src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
 
 
 === Download licenses
@@ -231,3 +231,45 @@ pipeline {
     }
 }
 ----
+
+== CLI tool
+You can also run the tool as a standalone CLI tool.
+This is especially useful when you want to test out changes to component or license metadata since you do not have to switch back and forth between Jenkins
+and your development environment.
+You can run the CLI tool using
+[source]
+----
+java -jar license-compliance-tool-cli.jar
+----
+
+Examples:
+
+* Create a component manifest from a BOM on a server with a template:
+[source]
+----
+  java -jar license-compliance-tool-cli.jar create-manifest --in=htps://your.server.url/path/to/bom --out=manifest.html --template=htps://your.server.url/path/to/template
+----
+* Create a component manifest from a local BOM with metadata from a server:
+[source]
+----
+  java -jar license-compliance-tool-cli.jar
+    create-manifest
+    --in=path/to/bom
+    --out.manifest.html
+    --licensesUrl=htps://your.server.url/licenses.json
+    --licenseMappingsUrl=htps://your.server.url/licenseMapping.json
+----
+* Download licenses
+[source]
+----
+  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out.manifest.html --template=htps://your.server.url/path/to/template
+----
+* Get usage help
+[source]
+----
+  java -jar license-compliance-tool-cli.jar
+----
+
+Consult the help to learn about more options.
+
+Note that it requires **Java 11** or later.
