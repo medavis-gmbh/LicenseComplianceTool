@@ -4,14 +4,6 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <!-- See https://github.com/jenkinsci/plugin-pom/releases for latest version -->
-        <version>4.51</version>
-        <relativePath />
-    </parent>
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -40,19 +32,20 @@
     <properties>
         <!-- Use Java 11 -->
         <maven.compiler.release>11</maven.compiler.release>
-        <maven.compiler.source>1.11</maven.compiler.source>
-        <maven.compiler.target>1.11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
 
-        <!-- Jenkins versions -->
-        <jenkins.version>2.361.4</jenkins.version>
-
-        <!-- Other dependency versions -->
+        <!-- Dependency versions -->
         <cyclonedx.version>7.2.1</cyclonedx.version>
         <assertj.version>3.23.1</assertj.version>
         <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
         <httpclient.version>4.5.13</httpclient.version>
         <guava.version>31.1-jre</guava.version>
+        <junit-jupiter.version>5.9.2</junit-jupiter.version>
+        <mockito.version>4.9.0</mockito.version>
+        <htmlunit.version>2.56.0</htmlunit.version>
+        <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
     <modules>
@@ -63,20 +56,23 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Jenkins Tools - See https://github.com/jenkinsci/bom/releases for latest version -->
-            <dependency>
-                <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.361.x</artifactId>
-                <version>1723.vcb_9fee52c9fc</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-
             <!-- SBOM -->
             <dependency>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-core-java</artifactId>
                 <version>${cyclonedx.version}</version>
+            </dependency>
+
+            <!-- Logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <!-- HTTP Client -->
@@ -102,6 +98,18 @@
 
             <!-- Test dependencies -->
             <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
@@ -113,21 +121,14 @@
                 <version>${wiremock.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
+                <version>${htmlunit.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <plugins>
