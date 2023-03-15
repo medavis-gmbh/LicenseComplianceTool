@@ -217,6 +217,10 @@ The downloaded files will have an extension depending on the content type of the
 |_none_
 |===
 
+Be aware that this task might download harmful content. Bundling the downloaded files into your redistribution package could allow an attacker to plant
+malware. To safeguard against that risk, add license URLs after a manual review to your license configuration and run the task with `failOnDynamicLicense` option.
+It will then fail if it encounters a license that is not part of your license configuration .
+
 [source,groovy,title=Declarative pipeline example]
 ----
 pipeline {
@@ -225,7 +229,7 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY'
+                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY', failOnDynamicLicense: true
             }
         }
     }

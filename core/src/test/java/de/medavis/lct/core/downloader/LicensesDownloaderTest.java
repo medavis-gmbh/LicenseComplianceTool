@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -66,12 +67,12 @@ class LicensesDownloaderTest {
     void shouldDownloadAllLicensesFromAllComponents() throws IOException {
         setup(
                 component(
-                        license("A", true, true),
-                        license("B", true, true)),
-                component(license("C", true, true))
+                        configuredLicense("A", true, true),
+                        configuredLicense("B", true, true)),
+                component(configuredLicense("C", true, true))
         );
 
-        invokeDownload();
+        invokeDownload(false);
 
         verifyDownloaded(DOWNLOAD_URL, "A", "B", "C");
     }
@@ -79,31 +80,40 @@ class LicensesDownloaderTest {
     @Test
     void shouldDownloadSameLicenseOnlyOnce() throws IOException {
         setup(
-                component(license("A", true, true)),
-                component(license("A", true, true))
+                component(configuredLicense("A", true, true)),
+                component(configuredLicense("A", true, true))
         );
 
-        invokeDownload();
+        invokeDownload(false);
 
         verifyDownloaded(DOWNLOAD_URL, "A");
     }
 
     @Test
     void shouldUseViewUrlIfDownloadUrlIsNotSet() throws IOException {
-        setup(component(license("A", true, false)));
+        setup(component(configuredLicense("A", true, false)));
 
-        invokeDownload();
+        invokeDownload(false);
 
         verifyDownloaded(VIEW_URL, "A");
     }
 
     @Test
     void shouldNotDownloadLicenseIfNoUrlIsSet() throws IOException {
-        setup(component(license("A", false, false)));
+        setup(component(configuredLicense("A", false, false)));
 
-        invokeDownload();
+        invokeDownload(false);
 
         verifyNothingDownloaded();
+    }
+
+    @Test
+    void shouldOptionallyFailOnDynamicLicense() throws IOException {
+        setup(component(dynamicLicense("A", true, true)));
+
+        Assertions.assertThatThrownBy(() -> invokeDownload(true))
+                .isInstanceOf(IllegalArgumentException.class);
+
     }
 
     private void setup(ComponentData... components) {
@@ -120,10 +130,18 @@ class LicensesDownloaderTest {
                 Collections.emptySet());
     }
 
-    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
+    private License configuredLicense(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
+        return license(name, hasViewUrl, hasDownloadUrl, true);
+    }
+
+    private License dynamicLicense(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
+        return license(name, hasViewUrl, hasDownloadUrl, false);
+    }
+
+    private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl, boolean fromConfig) {
         String viewUrl = stubDownload(hasViewUrl, VIEW_URL, name);
         String downloadUrl = stubDownload(hasDownloadUrl, DOWNLOAD_URL, name);
-        return new License(name, viewUrl, downloadUrl);
+        return fromConfig ? License.fromConfig(name, viewUrl, downloadUrl) : License.dynamic(name, viewUrl, downloadUrl);
     }
 
     private String stubDownload(boolean hasUrl, String prefix, String licenseName) {
@@ -139,8 +157,8 @@ class LicensesDownloaderTest {
         return "/" + Joiner.on("/").join(parts);
     }
 
-    private void invokeDownload() {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class));
+    private void invokeDownload(boolean failOnUnconfiguredLicense) {
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense);
     }
 
     private void verifyDownloaded(String prefix, String... licenses) throws IOException {

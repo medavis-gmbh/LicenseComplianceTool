@@ -51,13 +51,22 @@ public class LicensesDownloader {
         this.fileDownloader = fileDownloader;
     }
 
-    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler) {
+    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnDynamicLicense) {
         final List<ComponentData> components = componentLister.listComponents(inputStream);
         Set<License> licenses = components.stream()
                 .map(ComponentData::getLicenses)
                 .flatMap(Set::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
+        if (failOnDynamicLicense) {
+            var dynamicLicenses = licenses.stream()
+                    .filter(License::isDynamic)
+                    .map(License::getName)
+                    .collect(Collectors.toList());
+            if (!dynamicLicenses.isEmpty()) {
+                throw new IllegalArgumentException("Option failOnDynamicLicense was given, encountered the following dynamic licenses: " + dynamicLicenses);
+            }
+        }
 
         Map<String, String> downloadUrls = licenses.stream()
                 .filter(license -> !Strings.isNullOrEmpty(license.getDownloadUrl()) || !Strings.isNullOrEmpty(license.getUrl()))

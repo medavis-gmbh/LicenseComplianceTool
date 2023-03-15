@@ -35,6 +35,7 @@ import java.io.IOException;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
@@ -47,6 +48,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     private final String inputPath;
     private final String outputPath;
     private final transient LicensesDownloader licenseDownloader;
+    private boolean failOnDynamicLicense;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
@@ -63,6 +65,14 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         return outputPath;
     }
 
+    public boolean isFailOnDynamicLicense() {
+        return failOnDynamicLicense;
+    }
+
+    @DataBoundSetter
+    public void setFailOnDynamicLicense(boolean failOnDynamicLicense) {
+        this.failOnDynamicLicense = failOnDynamicLicense;
+    }
 
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
@@ -70,7 +80,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath));
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath), failOnDynamicLicense);
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }
