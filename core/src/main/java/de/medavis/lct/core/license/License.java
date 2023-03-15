@@ -29,7 +29,7 @@ public final class License {
     private final String name;
     private final String url;
     private final String downloadUrl;
-    private final boolean fromConfig;
+    private final boolean configured;
 
     @JsonCreator
     public static License fromConfig(@JsonProperty("name") String name, @JsonProperty("url") String url, @JsonProperty("downloadUrl") String downloadUrl) {
@@ -44,11 +44,11 @@ public final class License {
         return new License(name, url, null, false);
     }
 
-    private License(String name, String url, String downloadUrl, boolean fromConfig) {
+    private License(String name, String url, String downloadUrl, boolean configured) {
         this.name = name;
         this.url = url;
         this.downloadUrl = downloadUrl;
-        this.fromConfig = fromConfig;
+        this.configured = configured;
     }
 
     public String getName() {
@@ -63,8 +63,12 @@ public final class License {
         return downloadUrl;
     }
 
-    public boolean isFromConfig() {
-        return fromConfig;
+    public boolean isConfigured() {
+        return configured;
+    }
+
+    public boolean isDynamic() {
+        return !configured;
     }
 
     @Override
@@ -76,13 +80,13 @@ public final class License {
             return false;
         }
         License license = (License) o;
-        return fromConfig == license.fromConfig && Objects.equals(name, license.name) && Objects.equals(url, license.url)
+        return configured == license.configured && Objects.equals(name, license.name) && Objects.equals(url, license.url)
                && Objects.equals(downloadUrl, license.downloadUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, url, downloadUrl, fromConfig);
+        return Objects.hash(name, url, downloadUrl, configured);
     }
 
     @Override
@@ -91,7 +95,7 @@ public final class License {
                 .add("name='" + name + "'")
                 .add("url='" + url + "'")
                 .add("downloadUrl='" + downloadUrl + "'")
-                .add("fromConfig=" + fromConfig)
+                .add("configured=" + configured)
                 .toString();
     }
 

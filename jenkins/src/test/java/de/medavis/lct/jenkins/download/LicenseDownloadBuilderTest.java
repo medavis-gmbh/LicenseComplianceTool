@@ -21,10 +21,12 @@ package de.medavis.lct.jenkins.download;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import hudson.FilePath;
 import hudson.model.FreeStyleProject;
+import hudson.model.Result;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -77,24 +79,14 @@ class LicenseDownloadBuilderTest {
     }
 
     @Test
-    void testConfigRoundtripDefaultFormat(JenkinsRule jenkins) throws Exception {
+    void testConfigRoundtrip(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH));
+        final LicenseDownloadBuilder builder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
+        builder.setFailOnDynamicLicense(true);
+        project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
-        LicenseDownloadBuilder expected = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
-        jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
-    }
-
-    @Test
-    void testConfigRoundtripCustomFormat(JenkinsRule jenkins) throws Exception {
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        final LicenseDownloadBuilder licenseDownloadBuilder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
-        project.getBuildersList().add(licenseDownloadBuilder);
-        project = jenkins.configRoundtrip(project);
-
-        LicenseDownloadBuilder expected = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
-        jenkins.assertEqualDataBoundBeans(expected, project.getBuildersList().get(0));
+        jenkins.assertEqualDataBoundBeans(builder, project.getBuildersList().get(0));
     }
 
     @Test
@@ -107,10 +99,19 @@ class LicenseDownloadBuilderTest {
         executePipelineAndVerifyResult(jenkins, softly, "declarativePipeline.groovy");
     }
 
+    @Test
+    void testDeclarativePipelineBuildFailingOnDynamicLicenses(JenkinsRule jenkins, SoftAssertions softly) throws Exception {
+        WorkflowJob job = createJob(jenkins, "declarativePipelineFailOnDynamicLicense.groovy");
+        jenkins.jenkins.getWorkspaceFor(job).child("input.json").write(getModifiedInputBom(), StandardCharsets.UTF_8.name());
+
+        var run = jenkins.buildAndAssertStatus(Result.FAILURE, job);
+        assertThat(run.getLog())
+                .contains("failOnDynamicLicense")
+                .contains(Joiner.on(", ").join(FAKE_LICENSES.keySet()));
+    }
+
     private void executePipelineAndVerifyResult(JenkinsRule jenkins, SoftAssertions softly, String pipelineFile) throws Exception {
-        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-pipeline");
-        String pipelineScript = Resources.toString(getClass().getResource(pipelineFile), Charset.defaultCharset());
-        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
+        WorkflowJob job = createJob(jenkins, pipelineFile);
         final FilePath workspace = jenkins.jenkins.getWorkspaceFor(job);
         workspace.child("input.json").write(getModifiedInputBom(), StandardCharsets.UTF_8.name());
 
@@ -119,6 +120,13 @@ class LicenseDownloadBuilderTest {
         assertThat(Paths.get(workspace.toURI()).resolve(OUTPUT_PATH))
                 .isNotEmptyDirectory()
                 .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> softly.assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
+    }
+
+    private WorkflowJob createJob(JenkinsRule jenkins, String name) throws IOException {
+        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-pipeline");
+        String pipelineScript = Resources.toString(getClass().getResource(name), Charset.defaultCharset());
+        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
+        return job;
     }
 
     private String getModifiedInputBom() throws IOException {

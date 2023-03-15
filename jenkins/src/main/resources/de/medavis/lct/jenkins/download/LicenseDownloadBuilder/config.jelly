@@ -6,4 +6,7 @@
     <f:entry title="${%outputPath}" field="outputPath" description="${%outputPath.description}">
         <f:textbox />
     </f:entry>
+    <f:entry title="${%failOnDynamicLicense}" field="failOnDynamicLicense" description="${%failOnDynamicLicense.description}">
+        <f:checkbox />
+    </f:entry>
 </j:jelly>
