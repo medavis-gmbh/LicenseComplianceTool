@@ -51,7 +51,7 @@ class DownloadLicenses implements Callable<Void> {
                 configurationOptions);
         LicensesDownloader licensesDownloader = new LicensesDownloader(componentLister, new LicenseFileDownloader());
         try (var bomInputStream = new FileInputStream(inputFile)) {
-            licensesDownloader.download(new ConsoleUserLogger(), bomInputStream, new FilesystemLicenseFileHandler(outputPath));
+            licensesDownloader.download(new ConsoleUserLogger(), bomInputStream, new FilesystemLicenseFileHandler(outputPath), false);
         }
         return null;
     }

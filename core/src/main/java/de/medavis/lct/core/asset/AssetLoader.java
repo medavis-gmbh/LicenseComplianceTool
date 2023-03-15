@@ -87,7 +87,7 @@ public class AssetLoader {
             return null;
         }
 
-        return new License(name, license.getUrl(), null);
+        return License.dynamic(name, license.getUrl(), null);
     }
 
     private String getWebsite(List<ExternalReference> externalReferences) {

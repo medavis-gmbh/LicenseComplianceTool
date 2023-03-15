@@ -43,15 +43,15 @@ class AssetLoaderTest {
         assertThat(actual.version()).isEqualTo("1.0-SNAPSHOT");
         assertThat(actual.components()).containsExactlyInAnyOrder(
                 new Component("ch.qos.logback", "logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
-                        new License("EPL-1.0", null),
-                        new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+                        License.dynamic("EPL-1.0", null),
+                        License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                 )),
                 new Component("ch.qos.logback", "logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
-                        new License("EPL-1.0", null),
-                        new License("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+                        License.dynamic("EPL-1.0", null),
+                        License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                 )),
                 new Component("org.slf4j", "slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
-                        new License("MIT", "https://opensource.org/licenses/MIT")))
+                        License.dynamic("MIT", "https://opensource.org/licenses/MIT")))
         );
     }
 }

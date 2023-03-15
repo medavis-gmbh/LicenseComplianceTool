@@ -123,7 +123,7 @@ class LicensesDownloaderTest {
     private License license(String name, boolean hasViewUrl, boolean hasDownloadUrl) {
         String viewUrl = stubDownload(hasViewUrl, VIEW_URL, name);
         String downloadUrl = stubDownload(hasDownloadUrl, DOWNLOAD_URL, name);
-        return new License(name, viewUrl, downloadUrl);
+        return License.fromConfig(name, viewUrl, downloadUrl);
     }
 
     private String stubDownload(boolean hasUrl, String prefix, String licenseName) {
@@ -140,7 +140,7 @@ class LicensesDownloaderTest {
     }
 
     private void invokeDownload() {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class));
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), false);
     }
 
     private void verifyDownloaded(String prefix, String... licenses) throws IOException {

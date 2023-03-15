@@ -125,7 +125,7 @@ class FreemarkerOutputterTest {
         }
 
         private Set<License> createLicenses(String name, String url) {
-            return Collections.singleton(new License(name, url));
+            return Collections.singleton(License.dynamic(name, url));
         }
 
         private void createAndVerifyOutput(Path outputPath, ComponentData... components) throws IOException {

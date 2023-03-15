@@ -37,7 +37,7 @@ class LicenseLoaderTest {
 
         final Map<String, License> actual = underTest.load(licenseUrl);
 
-        assertThat(actual).containsExactly(entry("LGPL", new License("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")));
+        assertThat(actual).containsExactly(entry("LGPL", License.fromConfig("LGPL", "https://my.lgpl.link", "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt")));
     }
 
     @Test
@@ -46,6 +46,6 @@ class LicenseLoaderTest {
 
         final Map<String, License> actual = underTest.load(licenseUrl);
 
-        assertThat(actual).containsExactly(entry("LGPL", new License("LGPL", null, null)));
+        assertThat(actual).containsExactly(entry("LGPL", License.fromConfig("LGPL", null, null)));
     }
 }

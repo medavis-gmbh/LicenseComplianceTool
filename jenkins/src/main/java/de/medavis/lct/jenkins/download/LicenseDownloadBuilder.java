@@ -70,7 +70,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath));
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath), false);
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }

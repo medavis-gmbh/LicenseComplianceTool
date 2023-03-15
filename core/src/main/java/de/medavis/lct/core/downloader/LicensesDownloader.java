@@ -51,7 +51,7 @@ public class LicensesDownloader {
         this.fileDownloader = fileDownloader;
     }
 
-    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler) {
+    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnUnconfiguredLicense) {
         final List<ComponentData> components = componentLister.listComponents(inputStream);
         Set<License> licenses = components.stream()
                 .map(ComponentData::getLicenses)

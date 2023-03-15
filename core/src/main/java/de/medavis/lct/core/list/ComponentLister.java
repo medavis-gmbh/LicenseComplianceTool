@@ -100,13 +100,13 @@ public class ComponentLister {
                 .filter(cmd -> cmd.matches(component.group(), component.name()))
                 .filter(cmd -> !cmd.licenses().isEmpty())
                 .findFirst()
-                .map(cmd -> cmd.licenses().stream().map(licenseName -> new License(licenseName, null, null)))
+                .map(cmd -> cmd.licenses().stream().map(licenseName -> License.dynamic(licenseName, null, null)))
                 .orElse(component.licenses().stream());
 
         Set<License> convertedLicenses = actualLicenses
                 .map(license -> {
                     String mappedLicenseName = licenseMappings.getOrDefault(license.getName(), license.getName());
-                    return licenses.getOrDefault(mappedLicenseName, new License(mappedLicenseName, license.getUrl(), license.getDownloadUrl()));
+                    return licenses.getOrDefault(mappedLicenseName, License.dynamic(mappedLicenseName, license.getUrl(), license.getDownloadUrl()));
                 })
                 .collect(Collectors.toSet());
 
