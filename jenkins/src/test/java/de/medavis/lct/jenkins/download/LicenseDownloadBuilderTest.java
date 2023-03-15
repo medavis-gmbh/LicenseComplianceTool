@@ -19,24 +19,26 @@
  */
 package de.medavis.lct.jenkins.download;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+import com.sun.net.httpserver.HttpServer;
 import hudson.FilePath;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Executors;
 import org.apache.http.entity.ContentType;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +48,12 @@ import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.okForContentType;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.medavis.lct.core.downloader.LicensesDownloader;
 
 @ExtendWith(MockitoExtension.class)
 @WithJenkins
-@WireMockTest
 @ExtendWith(SoftAssertionsExtension.class)
 class LicenseDownloadBuilderTest {
 
@@ -70,12 +68,36 @@ class LicenseDownloadBuilderTest {
     @Mock(strictness = Strictness.LENIENT)
     private LicensesDownloader licenseDownloaderMock;
     private String baseUrl;
+    private HttpServer httpServer;
 
     @BeforeEach
-    void configureWireMock(WireMockRuntimeInfo wiremock) {
-        baseUrl = wiremock.getHttpBaseUrl();
-        FAKE_LICENSES.forEach((licenseName, licenseText) ->
-                stubFor(get("/" + licenseName).willReturn(okForContentType(ContentType.TEXT_PLAIN.getMimeType(), licenseText))));
+    void configureWebserver() throws IOException {
+        httpServer = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        httpServer.createContext("/", exchange -> {
+            var path = exchange.getRequestURI().getPath();
+            var licenseMatch = FAKE_LICENSES.entrySet().stream()
+                    .filter(license -> path.substring(1).equals(license.getKey()))
+                    .map(Entry::getValue)
+                    .findFirst();
+            var status = licenseMatch.isPresent() ? 200 : 404;
+            var body = licenseMatch.orElse("");
+            exchange.getResponseHeaders().add("Content-Type", ContentType.TEXT_PLAIN.getMimeType());
+            exchange.sendResponseHeaders(status, body.length());
+            try (var response = exchange.getResponseBody()) {
+                exchange.getResponseBody().write(body.getBytes(StandardCharsets.UTF_8));
+                exchange.getResponseBody().flush();
+            }
+
+        });
+        httpServer.setExecutor(Executors.newSingleThreadExecutor());
+        httpServer.start();
+
+        baseUrl = String.format("http://%s:%d", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort());
+    }
+
+    @AfterEach
+    void tearDown() {
+        httpServer.stop(1);
     }
 
     @Test
@@ -107,7 +129,7 @@ class LicenseDownloadBuilderTest {
         var run = jenkins.buildAndAssertStatus(Result.FAILURE, job);
         assertThat(run.getLog())
                 .contains("failOnDynamicLicense")
-                .contains(Joiner.on(", ").join(FAKE_LICENSES.keySet()));
+                .contains(FAKE_LICENSES.keySet());
     }
 
     private void executePipelineAndVerifyResult(JenkinsRule jenkins, SoftAssertions softly, String pipelineFile) throws Exception {

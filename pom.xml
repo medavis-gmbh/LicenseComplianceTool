@@ -37,7 +37,7 @@
 
         <!-- Dependency versions -->
         <cyclonedx.version>7.2.1</cyclonedx.version>
-        <assertj.version>3.23.1</assertj.version>
+        <assertj.version>3.24.2</assertj.version>
         <wiremock.version>2.35.0</wiremock.version>
         <freemarker.version>2.3.31</freemarker.version>
         <httpclient.version>4.5.13</httpclient.version>
