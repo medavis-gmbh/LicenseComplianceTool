@@ -20,11 +20,14 @@
 package de.medavis.lct.core.list;
 
 import com.google.common.collect.ImmutableSet;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -54,6 +57,19 @@ class ComponentListerTest {
                         ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
                                 License.dynamic("MIT", "https://opensource.org/licenses/MIT")
+                        ), Collections.emptySet())
+                );
+    }
+
+    @Test
+    void ignoreEmptyGroup() {
+        assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-empty", "test-bom-depWithoutGroup"))
+                .containsExactly(
+                        new ComponentData("dep-emptygroup", "2.0.0", null, Set.of(
+                                License.dynamic("EPL-1.0", null)
+                        ), Collections.emptySet()),
+                        new ComponentData("dep-nogroup", "1.0.0", null, Set.of(
+                                License.dynamic("EPL-1.0", null)
                         ), Collections.emptySet())
                 );
     }
@@ -186,7 +202,6 @@ class ComponentListerTest {
                         ), Collections.emptySet())
                 );
     }
-
 
     private Collection<ComponentData> executeTest(String metadataFile, String licenseFile, String licenseMappingFile, String bomFile) {
         Configuration configuration = Mockito.mock(Configuration.class);
