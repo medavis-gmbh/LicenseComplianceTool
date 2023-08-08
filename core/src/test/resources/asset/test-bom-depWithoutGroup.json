@@ -46,9 +46,22 @@
   },
   "components" : [
     {
-      "name": "my-dependency",
+      "name": "dep-nogroup",
       "version": "1.0.0",
       "description": "Dummy dependency without group",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-1.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "",
+      "name": "dep-emptygroup",
+      "version": "2.0.0",
+      "description": "Dummy dependency with empty group",
       "licenses": [
         {
           "license": {

@@ -65,7 +65,10 @@ class ComponentListerTest {
     void ignoreEmptyGroup() {
         assertThat(executeTest("metadata-empty", "license-empty", "licensemapping-empty", "test-bom-depWithoutGroup"))
                 .containsExactly(
-                        new ComponentData("my-dependency", "1.0.0", null, Set.of(
+                        new ComponentData("dep-nogroup", "1.0.0", null, Set.of(
+                                License.dynamic("EPL-1.0", null)
+                        ), Collections.emptySet()),
+                        new ComponentData("dep-emptygroup", "2.0.0", null, Set.of(
                                 License.dynamic("EPL-1.0", null)
                         ), Collections.emptySet())
                 );
