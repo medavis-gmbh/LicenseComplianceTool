@@ -260,13 +260,15 @@ Examples:
     create-manifest
     --in=path/to/bom
     --out=manifest.html
+    --componentMetadata=https://your.server.url/componentMetadata.json
     --licenses=https://your.server.url/licenses.json
     --licenseMapping=https://your.server.url/licenseMapping.json
+    --template=https://your.server.url/path/to/template
 ----
 * Download licenses
 [source]
 ----
-  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html --template=https://your.server.url/path/to/template
+  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html
 ----
 * Get usage help
 [source]
