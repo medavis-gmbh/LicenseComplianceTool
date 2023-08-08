@@ -251,7 +251,7 @@ Examples:
 * Create a component manifest from a BOM on a server with a template:
 [source]
 ----
-  java -jar license-compliance-tool-cli.jar create-manifest --in=htps://your.server.url/path/to/bom --out=manifest.html --template=htps://your.server.url/path/to/template
+  java -jar license-compliance-tool-cli.jar create-manifest --in=https://your.server.url/path/to/bom --out=manifest.html --template=htps://your.server.url/path/to/template
 ----
 * Create a component manifest from a local BOM with metadata from a server:
 [source]
@@ -259,14 +259,14 @@ Examples:
   java -jar license-compliance-tool-cli.jar
     create-manifest
     --in=path/to/bom
-    --out.manifest.html
-    --licensesUrl=htps://your.server.url/licenses.json
-    --licenseMappingsUrl=htps://your.server.url/licenseMapping.json
+    --out=manifest.html
+    --licenses=https://your.server.url/licenses.json
+    --licenseMappings=https://your.server.url/licenseMapping.json
 ----
 * Download licenses
 [source]
 ----
-  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out.manifest.html --template=htps://your.server.url/path/to/template
+  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html --template=https://your.server.url/path/to/template
 ----
 * Get usage help
 [source]
