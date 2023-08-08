@@ -1,0 +1,61 @@
+{
+  "bomFormat" : "CycloneDX",
+  "specVersion" : "1.4",
+  "serialNumber" : "urn:uuid:221ec8a8-97b9-468d-9687-043e71d5cccd",
+  "version" : 1,
+  "metadata" : {
+    "timestamp" : "2022-07-12T11:18:26Z",
+    "tools" : [
+      {
+        "vendor" : "OWASP Foundation",
+        "name" : "CycloneDX Maven plugin",
+        "version" : "2.6.2",
+        "hashes" : [
+          {
+            "alg" : "MD5",
+            "content" : "ff29fc50797fce0b33058a6b2b283f64"
+          },
+          {
+            "alg" : "SHA-1",
+            "content" : "597e59ebf21c3b8bfb1faeb622569df324eca956"
+          },
+          {
+            "alg" : "SHA-256",
+            "content" : "3cf9130fcac45a7beb6df2ae9c3fc9c062d1fddd0731d6a302968586f0aa586e"
+          },
+          {
+            "alg" : "SHA-384",
+            "content" : "8111a6788c959305af23daecbc79defd4478c1e274cba65bfe860e09b30cd9fe29822d5d3d3eea608e4926a9418f92e3"
+          },
+          {
+            "alg" : "SHA-512",
+            "content" : "2bea87b7bcd70897bf46a28a806b6064a6708d0a45e884e1ceddc25f97ca7bdf4ed190f30d9a28cc9416b6c66176d518c5876fd25bc06bdcb00d39367215e56e"
+          }
+        ]
+      }
+    ],
+    "component" : {
+      "group" : "de.medavis",
+      "name" : "bommanager",
+      "version" : "1.0-SNAPSHOT",
+      "licenses" : [ ],
+      "purl" : "pkg:maven/de.medavis/bommanager@1.0-SNAPSHOT?type=jar",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/de.medavis/bommanager@1.0-SNAPSHOT?type=jar"
+    }
+  },
+  "components" : [
+    {
+      "name": "my-dependency",
+      "version": "1.0.0",
+      "description": "Dummy dependency without group",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-1.0"
+          }
+        }
+      ]
+    }
+  ]
+}
