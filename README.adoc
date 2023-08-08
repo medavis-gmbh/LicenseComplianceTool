@@ -261,7 +261,7 @@ Examples:
     --in=path/to/bom
     --out=manifest.html
     --licenses=https://your.server.url/licenses.json
-    --licenseMappings=https://your.server.url/licenseMapping.json
+    --licenseMapping=https://your.server.url/licenseMapping.json
 ----
 * Download licenses
 [source]
