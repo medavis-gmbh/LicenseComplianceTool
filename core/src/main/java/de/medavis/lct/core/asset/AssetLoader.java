@@ -30,11 +30,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.cyclonedx.BomParserFactory;
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.ExternalReference.Type;
+import org.cyclonedx.parsers.BomParserFactory;
 
 import de.medavis.lct.core.license.License;
 
@@ -96,10 +96,10 @@ public class AssetLoader {
                         .orElse(null));
     }
 
-    private Optional<String> getUrl(List<ExternalReference> externalReferences, Type vcs) {
+    private Optional<String> getUrl(List<ExternalReference> externalReferences, Type type) {
         return externalReferences != null ?
                 externalReferences.stream()
-                        .filter(ref -> ref.getType() == vcs)
+                        .filter(ref -> ref.getType() == type)
                         .map(ExternalReference::getUrl)
                         .findFirst()
                 : Optional.empty();

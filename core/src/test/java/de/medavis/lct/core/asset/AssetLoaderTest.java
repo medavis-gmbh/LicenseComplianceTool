@@ -22,6 +22,9 @@ package de.medavis.lct.core.asset;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,29 +32,31 @@ import de.medavis.lct.core.license.License;
 
 class AssetLoaderTest {
 
-    private final static String SAMPLE_BOM = "/asset/test-bom.json";
+    private final static String SAMPLE_BOM = "/asset/test-bom";
 
     private final AssetLoader underTest = new AssetLoader();
 
-    @Test
-    void shouldLoadAssetFromBOM() {
-        InputStream sampleBomStream = getClass().getResourceAsStream(SAMPLE_BOM);
+    @ParameterizedTest
+    @ValueSource(strings = {"-1.4", "-1.5"})
+    void shouldLoadAssetFromBOM(String bomSuffix) {
+        InputStream sampleBomStream = getClass().getResourceAsStream(SAMPLE_BOM  + bomSuffix + ".json");
 
         Asset actual = underTest.loadFromBom(sampleBomStream);
 
-        assertThat(actual.name()).isEqualTo("de.medavis.bommanager");
-        assertThat(actual.version()).isEqualTo("1.0-SNAPSHOT");
-        assertThat(actual.components()).containsExactlyInAnyOrder(
-                new Component("ch.qos.logback", "logback-classic", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
-                        License.dynamic("EPL-1.0", null),
-                        License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+        assertThat(actual.name()).isEqualTo("de.medavis.license-compliance-tool-core");
+        assertThat(actual.version()).isEqualTo("1.4.0");
+        assertThat(actual.components()).contains(
+                new Component("org.cyclonedx", "cyclonedx-core-java", "9.0.0", "https://github.com/CycloneDX/cyclonedx-core-java.git", ImmutableSet.of(
+                        License.dynamic("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
                 )),
-                new Component("ch.qos.logback", "logback-core", "1.2.11", "https://github.com/ceki/logback", ImmutableSet.of(
-                        License.dynamic("EPL-1.0", null),
-                        License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+                new Component("org.codehaus.woodstox", "stax2-api", "4.2.2", "http://github.com/FasterXML/stax2-api", ImmutableSet.of(
+                        License.dynamic("BSD-2-Clause", null)
                 )),
-                new Component("org.slf4j", "slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", ImmutableSet.of(
-                        License.dynamic("MIT", "https://opensource.org/licenses/MIT")))
+                new Component("org.slf4j", "slf4j-api", "2.0.13", "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api", ImmutableSet.of(
+                        License.dynamic("MIT", "https://opensource.org/licenses/MIT"),
+                        License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")))
         );
     }
+
+
 }

@@ -36,16 +36,16 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <!-- Dependency versions -->
-        <cyclonedx.version>7.2.1</cyclonedx.version>
-        <assertj.version>3.24.2</assertj.version>
-        <wiremock.version>2.35.0</wiremock.version>
-        <freemarker.version>2.3.31</freemarker.version>
-        <httpclient.version>4.5.13</httpclient.version>
-        <guava.version>31.1-jre</guava.version>
-        <junit-jupiter.version>5.9.2</junit-jupiter.version>
-        <mockito.version>4.9.0</mockito.version>
-        <htmlunit.version>2.56.0</htmlunit.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <cyclonedx.version>9.0.0</cyclonedx.version>
+        <assertj.version>3.25.3</assertj.version>
+        <wiremock.version>3.0.1</wiremock.version>
+        <freemarker.version>2.3.32</freemarker.version>
+        <httpclient.version>4.5.14</httpclient.version>
+        <guava.version>33.2.0-jre</guava.version>
+        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <mockito.version>5.12.0</mockito.version>
+        <htmlunit.version>2.70.0</htmlunit.version>
+        <slf4j.version>2.0.13</slf4j.version>
     </properties>
 
     <modules>
@@ -100,6 +100,12 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
