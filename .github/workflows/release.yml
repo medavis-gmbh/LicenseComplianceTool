@@ -25,7 +25,7 @@ jobs:
       run: mvn -B package
       
     - name: Create release package
-      uses: qcastel/github-actions-maven-release@62a22ba7a81acae2733e681822b1048bc237b39d
+      uses: qcastel/github-actions-maven-release@681756a2798ce7fc477d2db2fefcdec6670f6fed
       env:
         JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
       with:
