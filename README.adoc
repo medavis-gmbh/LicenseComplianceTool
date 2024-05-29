@@ -4,6 +4,11 @@
 
 = License Compliance Tool
 
+image:https://github.com/medavis-gmbh/LicenseComplianceTool/actions/workflows/build.yml/badge.svg[link="https://github.com/medavis-gmbh/LicenseComplianceTool/actions"]
+image:https://img.shields.io/github/issues-raw/medavis-gmbh/LicenseComplianceTool[link="https://github.com/medavis-gmbh/LicenseComplianceTool/issues"]
+image:https://img.shields.io/github/release/medavis-gmbh/LicenseComplianceTool.svg[link="https://github.com/medavis-gmbh/LicenseComplianceTool/releases"]
+image:https://img.shields.io/badge/Maintained%3F-yes-green.svg[link="https://github.com/medavis-gmbh/LicenseComplianceTool/graphs/commit-activity"]
+image:https://img.shields.io/badge/license-apache%20v2-brightgreen.svg[link=""]
 
 When you are using open-source third-party software components, you have to conform to their license.
 For most licenses, this means three things:
