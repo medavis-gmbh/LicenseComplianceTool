@@ -19,8 +19,6 @@
  */
 package de.medavis.lct.core.patcher;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import de.medavis.lct.core.patcher.model.SpdxLicenses;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,8 +59,7 @@ public class SpdxRestClient extends AbstractRestClient {
             LOGGER.info("Fetching licenses");
             HttpRequest request = createDefaultGET(uri);
 
-            return executeRequest(request, new TypeReference<>() {
-            });
+            return executeRequest(request, SpdxLicenses.class);
         } catch (IOException | InterruptedException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }

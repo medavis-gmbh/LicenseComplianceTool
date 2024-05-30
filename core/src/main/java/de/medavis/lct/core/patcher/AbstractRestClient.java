@@ -19,7 +19,6 @@
  */
 package de.medavis.lct.core.patcher;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
@@ -89,21 +88,21 @@ public abstract class AbstractRestClient {
      * Execute a HTTP request and return the JSON result as a Java object.
      *
      * @param request The HTTP request
-     * @param valueTypeRef Encapsulated Java object type
+     * @param classType Class type to return
      * @return JSON mapped Java object
      * @param <T> Java object type to be returned
      * @throws IOException Thrown if an I/ O error occurs when sending or receiving
      * @throws InterruptedException Thrown if the operation is interrupted
      */
     @NotNull
-    protected <T> T executeRequest(@NotNull HttpRequest request, TypeReference<T> valueTypeRef) throws IOException, InterruptedException {
+    protected <T> T executeRequest(@NotNull HttpRequest request, Class<T> classType) throws IOException, InterruptedException {
         try {
             String content = executeRequest(request);
 
             LOGGER.trace("HTTP response body={}", content);
 
             ObjectMapper objectMapper = Json5MapperFactory.create();
-            return objectMapper.readValue(content, valueTypeRef);
+            return objectMapper.readValue(content, classType);
         } catch (Exception ex) {
             LOGGER.error("Error on url request '{}' occurred.", request.uri());
             throw ex;
