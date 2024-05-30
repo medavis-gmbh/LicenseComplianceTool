@@ -19,8 +19,11 @@
  */
 package de.medavis.lct.cli;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
+import java.util.Set;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -37,17 +40,34 @@ class ConfigurationOptions implements Configuration {
     private String licensesUrl;
     @Option(names = {"--licenseMapping", "-lm"})
     private String licenseMappingsUrl;
+    @Option(names = {"--skipGroupNames", "-sgn"})
+    private Set<String> skipGroupNames;
+    @Option(names = {"--spdxLicenseListUri", "-sllu"})
+    private URI spdxLicenseListUri;
 
+    @Override
     public Optional<URL> getComponentMetadataUrl() {
         return convert(componentMetadataUrl);
     }
 
+    @Override
     public Optional<URL> getLicensesUrl() {
         return convert(licensesUrl);
     }
 
+    @Override
     public Optional<URL> getLicenseMappingsUrl() {
         return convert(licenseMappingsUrl);
+    }
+
+    @Override
+    public Optional<Set<String>> getSkipGroupNames() {
+        return Optional.ofNullable(skipGroupNames);
+    }
+
+    @Override
+    public Optional<URI> getSpdxLicenseListUri() {
+        return Optional.ofNullable(spdxLicenseListUri);
     }
 
 }

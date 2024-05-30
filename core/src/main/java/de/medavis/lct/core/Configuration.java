@@ -19,8 +19,10 @@
  */
 package de.medavis.lct.core;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
+import java.util.Set;
 
 public interface Configuration {
 
@@ -29,5 +31,25 @@ public interface Configuration {
     Optional<URL> getLicensesUrl();
 
     Optional<URL> getLicenseMappingsUrl();
+
+    /**
+     * Used by the {@link de.medavis.lct.core.patcher.BomPatcher}.
+     * When true, then license expression will be resolved and mapped into licenses
+     */
+    boolean isResolveExpression = false;
+
+    /**
+     * Used by the {@link de.medavis.lct.core.patcher.BomPatcher}.
+     *
+     * @return Returns a optional comma separated list of group names which will skipped during BOM patching.
+     */
+    Optional<Set<String>> getSkipGroupNames();
+
+    /**
+     * Used by the {@link de.medavis.lct.core.patcher.BomPatcher}.
+     *
+     * @return Returns the optional SpdxLicenseManager URI. If not set, then local copy will be used
+     */
+    Optional<URI> getSpdxLicenseListUri();
 
 }

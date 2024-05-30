@@ -40,10 +40,11 @@
         <!-- Dependency versions -->
         <cyclonedx.version>9.0.1</cyclonedx.version>
         <assertj.version>3.26.0</assertj.version>
-        <wiremock.version>3.0.1</wiremock.version>
+        <wiremock.version>3.0.3</wiremock.version>
         <freemarker.version>2.3.32</freemarker.version>
         <httpclient.version>4.5.14</httpclient.version>
         <guava.version>33.2.0-jre</guava.version>
+        <jetbrains.version>24.1.0</jetbrains.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <mockito.version>5.12.0</mockito.version>
         <htmlunit.version>2.70.0</htmlunit.version>
@@ -96,6 +97,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains.version}</version>
             </dependency>
 
             <!-- Test dependencies -->
