@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -83,6 +84,12 @@ public class LicenseMapper {
         } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
+    }
+
+    public void load(@NotNull URI uri) {
+        LicenseManagerRestClient client = new LicenseManagerRestClient();
+        Rules rules = client.fetchRules(uri);
+        setMapping(rules);
     }
 
     public void load(@NotNull Path file) {

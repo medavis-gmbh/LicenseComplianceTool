@@ -19,11 +19,35 @@
  */
 package de.medavis.lct.core.patcher;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.entity.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.junit.jupiter.api.Assertions.*;
 
+@WireMockTest
 class LicenseMapperTest {
+
+    private static final String URI_PATH = "/rules.json";
+
+    private String baseUrl;
+
+    @BeforeEach
+    void beforeEach(WireMockRuntimeInfo wiremock) {
+        baseUrl = wiremock.getHttpBaseUrl();
+    }
 
     @Test
     void testMappings() {
@@ -42,5 +66,20 @@ class LicenseMapperTest {
 
         mapper.validateRules(SpdxLicenseManager.create(null));
 
+    }
+
+    @Test
+    void testLoadFromURI() throws IOException {
+        String licenses = IOUtils.resourceToString("de/medavis/lct/core/patcher/DefaultLicenseMapping.json5", StandardCharsets.UTF_8, SpdxLicenseManagerTest.class.getClassLoader());
+
+        stubFor(get(URI_PATH).
+                willReturn(ok(licenses)
+                        .withHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(licenses.length()))
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())));
+
+        LicenseMapper mapper = LicenseMapper.create();
+        mapper.load(URI.create(baseUrl + URI_PATH));
+
+        assertEquals("MIT", mapper.patchId("Lesser General Public License (LGPL)").get());
     }
 }

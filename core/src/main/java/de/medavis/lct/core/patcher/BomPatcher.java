@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +68,7 @@ public class BomPatcher {
         spdxLicenseManager = SpdxLicenseManager.create(configuration.getSpdxLicenseListUri().orElse(null));
 
         licenseMapper = LicenseMapper.create();
+        configuration.getLicenseMappingsUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
         licenseMapper.validateRules(spdxLicenseManager);
     }
 
