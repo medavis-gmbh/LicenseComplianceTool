@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LicenseMapperTest {
 
     @Test
-    void create() {
+    void testMappings() {
 
         LicenseMapper mapper = LicenseMapper.create();
 

@@ -50,7 +50,7 @@ class SpdxLicenseManagerTest {
     }
 
     @Test
-    void createWithExternal() throws IOException {
+    void testCreateWithExternal() throws IOException {
         String licenses = IOUtils.resourceToString("de/medavis/lct/core/patcher/SpdxLicenseList.json5", StandardCharsets.UTF_8, SpdxLicenseManagerTest.class.getClassLoader());
 
         stubFor(get(SPDX_LICENSE_PATH).
@@ -65,7 +65,7 @@ class SpdxLicenseManagerTest {
     }
 
     @Test
-    void createWithInternal() throws IOException {
+    void testCreateWithInternal() throws IOException {
         String licenses = IOUtils.resourceToString("de/medavis/lct/core/patcher/SpdxLicenseList.json5", StandardCharsets.UTF_8, SpdxLicenseManagerTest.class.getClassLoader());
         assertNotNull(licenses);
         SpdxLicenseManager manager = SpdxLicenseManager.create(null);
