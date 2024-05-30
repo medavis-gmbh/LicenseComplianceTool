@@ -24,10 +24,8 @@ import hudson.Extension;
 import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
 
 import jenkins.model.GlobalConfiguration;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -45,8 +43,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String componentMetadata;
     private String licenses;
     private String licenseMappings;
-    private Set<String> skipGroupNames;
-    private URI spdxLicenseListUri;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -104,26 +100,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     public void setLicenseMappings(String licenseMappings) {
         this.licenseMappings = licenseMappings;
         save();
-    }
-
-    @Override
-    public Optional<Set<String>> getSkipGroupNames() {
-        return Optional.empty();
-    }
-
-    @DataBoundSetter
-    public void setSkipGroupNames(Set<String> skipGroupNames) {
-        this.skipGroupNames = skipGroupNames;
-    }
-
-    @Override
-    public Optional<URI> getSpdxLicenseListUri() {
-        return Optional.empty();
-    }
-
-    @DataBoundSetter
-    public void setSpdxLicenseListUri(URI spdxLicenseListUri) {
-        this.spdxLicenseListUri = spdxLicenseListUri;
     }
 
     private Optional<URL> toURL(String url) {

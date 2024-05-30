@@ -1,8 +1,8 @@
 /*-
  * #%L
- * License Compliance Tool
+ * License Compliance Tool - Command Line Interface
  * %%
- * Copyright (C) 2022 medavis GmbH
+ * Copyright (C) 2022 - 2024 medavis GmbH
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core;
+package de.medavis.lct.cli;
 
-import java.net.URI;
-import java.net.URL;
-import java.util.Optional;
-import java.util.Set;
+import org.junit.jupiter.api.Test;
 
-public interface Configuration {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    Optional<URL> getComponentMetadataUrl();
+class MainTest {
 
-    Optional<URL> getLicensesUrl();
+    @Test
+    void testPatchSBOM() {
 
-    Optional<URL> getLicenseMappingsUrl();
+        int exitCode = new Main().run(new String[] {
+                "patch-sbom",
+                "--in=src/test/resources/test-bom.json",
+                "--out=target//test-patched.json",
+                "-sgn=de.medavis",
+                "--resolveExpressions"
+        });
 
+        assertEquals(0, exitCode);
+    }
 }

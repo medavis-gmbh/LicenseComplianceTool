@@ -24,10 +24,8 @@ import de.medavis.lct.core.Configuration;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,23 +46,13 @@ class BomPatcherTest {
         public Optional<URL> getLicenseMappingsUrl() {
             return Optional.empty();
         }
-
-        @Override
-        public Optional<Set<String>> getSkipGroupNames() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<URI> getSpdxLicenseListUri() {
-            return Optional.empty();
-        }
     };
 
     @Test
     void testCycloneDXSchema() {
-        BomPatcher patcher = new BomPatcher(c);
-        assertThrows(IllegalArgumentException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-version.json"), NullOutputStream.nullOutputStream()));
-        assertThrows(IllegalArgumentException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-format.json"), NullOutputStream.nullOutputStream()));
+        BomPatcher patcher = new BomPatcher(c, null, null, true);
+        assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-version.json"), NullOutputStream.nullOutputStream()));
+        assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-format.json"), NullOutputStream.nullOutputStream()));
     }
 
 }
