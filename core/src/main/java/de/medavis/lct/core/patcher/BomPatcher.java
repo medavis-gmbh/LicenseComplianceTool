@@ -96,7 +96,6 @@ public class BomPatcher {
             boolean result = patch(in, out);
 
             LOGGER.info("Writing patched file '{}'", targetFile);
-            Files.createDirectories(targetFile.getParent());
             Files.writeString(targetFile, out.toString(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
 
             return result;
