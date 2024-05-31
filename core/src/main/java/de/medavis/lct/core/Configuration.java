@@ -19,7 +19,6 @@
  */
 package de.medavis.lct.core;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
@@ -32,8 +31,32 @@ public interface Configuration {
 
     Optional<URL> getLicenseMappingsUrl();
 
+    /**
+     * Used by license patcher feature.
+     *
+     * @return Optional URL
+     */
     Optional<URL> getLicensePatchingRulesUrl();
 
+    /**
+     * Used by license patcher feature.
+     *
+     * @return Optional URL
+     */
     Optional<URL> getSpdxLicensesUrl();
+
+    /**
+     * Used by license patcher feature.
+     *
+     * @return Optional set of to be skipped group names;
+     */
+    Optional<Set<String>> getSkipGroupNameSet();
+
+    /**
+     * Used by license patcher feature.
+     *
+     * @return Boolean
+     */
+    boolean isResolveExpressions();
 
 }

@@ -26,7 +26,6 @@ import picocli.CommandLine.Option;
 import de.medavis.lct.core.patcher.BomPatcher;
 
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 @Command(name = "patch-sbom", description = "Patch SBOM with licenses mapping rules")
@@ -36,20 +35,12 @@ public class PatchSBOM implements Callable<Void> {
     private Path inputFile;
     @Option(names = {"--out", "-o"}, required = true)
     private Path outputFile;
-    @Option(names = {"--skipGroupNames", "-sgn"}, description = "Comma separated list of group names which will skipped during BOM patching")
-    private Set<String> skipGroupNames;
-    @Option(names = {"--resolveExpressions", "-re"}, description = "When set, then license expression will be resolved and mapped into licenses")
-    private boolean resolveExpressions;
     @Mixin
     private ConfigurationOptions configurationOptions;
 
     @Override
     public Void call() throws Exception {
-        BomPatcher patcher = new BomPatcher(
-                configurationOptions,
-                skipGroupNames,
-                resolveExpressions
-        );
+        BomPatcher patcher = new BomPatcher(configurationOptions);
         patcher.patch(inputFile, outputFile);
 
         return null;

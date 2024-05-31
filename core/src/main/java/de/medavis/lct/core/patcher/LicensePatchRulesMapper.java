@@ -20,6 +20,7 @@
 package de.medavis.lct.core.patcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 
 import de.medavis.lct.core.patcher.model.Rule;
 import de.medavis.lct.core.patcher.model.Rules;
@@ -41,22 +42,18 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LicenseMapper {
+public class LicensePatchRulesMapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LicenseMapper.class);
-    private static final String DEFAULT_MAPPING_RESOURCE = "/de/medavis/lct/core/patcher/DefaultLicenseMapping.json5";
+    private static final Logger LOGGER = LoggerFactory.getLogger(LicensePatchRulesMapper.class);
+    private static final String DEFAULT_MAPPING_RESOURCE = "de/medavis/lct/core/patcher/DefaultLicenseMapping.json5";
     private final ObjectMapper objectMapper = Json5MapperFactory.create();
     private final Map<String, String> idPatchRulesMap = new HashMap<>();
     private final Map<String, String> namePatchRulesMap = new HashMap<>();
     private final Map<String, String> urlMappingRules = new HashMap<>();
     private final Map<String, Rule> purlMappingRules = new HashMap<>();
 
-    private LicenseMapper() {
-        loadEmbeddedMapping();
-    }
-
-    public static LicenseMapper create() {
-        return new LicenseMapper();
+    public static LicensePatchRulesMapper create() {
+        return new LicensePatchRulesMapper();
     }
 
     private void clear() {
@@ -75,11 +72,11 @@ public class LicenseMapper {
         rules.getPurlMappingRules().forEach(r -> purlMappingRules.put(r.getMatch(), r));
     }
 
-    private void loadEmbeddedMapping() {
+    public void loadDefaultRules() {
         try {
             LOGGER.info("Loading embedded mappings");
 
-            Rules rules = objectMapper.readValue(getClass().getResource(DEFAULT_MAPPING_RESOURCE), Rules.class);
+            Rules rules = objectMapper.readValue(Resources.getResource(DEFAULT_MAPPING_RESOURCE), Rules.class);
             setMapping(rules);
         } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
@@ -87,7 +84,7 @@ public class LicenseMapper {
     }
 
     public void load(@NotNull URI uri) {
-        LicenseManagerRestClient client = new LicenseManagerRestClient();
+        LicensePatchRulesRestClient client = new LicensePatchRulesRestClient();
         Rules rules = client.fetchRules(uri);
         setMapping(rules);
     }
@@ -127,7 +124,7 @@ public class LicenseMapper {
 
         Files.createDirectories(file.getParent());
 
-        try (InputStream in = LicenseMapper.class.getResourceAsStream(DEFAULT_MAPPING_RESOURCE)) {
+        try (InputStream in = LicensePatchRulesMapper.class.getResourceAsStream(DEFAULT_MAPPING_RESOURCE)) {
             Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);

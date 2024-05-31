@@ -70,7 +70,7 @@ class SpdxLicenseManagerTest {
     void testCreateWithInternal() throws IOException {
         String licenses = IOUtils.resourceToString("de/medavis/lct/core/patcher/SpdxLicenseList.json5", StandardCharsets.UTF_8, SpdxLicenseManagerTest.class.getClassLoader());
         assertNotNull(licenses);
-        SpdxLicenseManager manager = SpdxLicenseManager.create();
+        SpdxLicenseManager manager = SpdxLicenseManager.create().loadDefaults();
 
         assertTrue(manager.containsId("Apache-2.0"));
         assertFalse(manager.containsId("Commercial-42"));

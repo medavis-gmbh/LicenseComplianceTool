@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,11 +57,21 @@ class BomPatcherTest {
         public Optional<URL> getSpdxLicensesUrl() {
             return Optional.empty();
         }
+
+        @Override
+        public Optional<Set<String>> getSkipGroupNameSet() {
+            return Optional.empty();
+        }
+
+        @Override
+        public boolean isResolveExpressions() {
+            return true;
+        }
     };
 
     @Test
     void testCycloneDXSchema() {
-        BomPatcher patcher = new BomPatcher(c, null, true);
+        BomPatcher patcher = new BomPatcher(c);
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-version.json"), NullOutputStream.nullOutputStream()));
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-format.json"), NullOutputStream.nullOutputStream()));
     }

@@ -44,10 +44,14 @@ public class SpdxLicenseManager {
         return new SpdxLicenseManager();
     }
 
-    private SpdxLicenseManager() {
+    public SpdxLicenseManager loadDefaults() {
         try {
             LOGGER.info("Loading local copy of SPDX licenses");
-            String resource = IOUtils.resourceToString("/de/medavis/lct/core/patcher/SpdxLicenseList.json5", StandardCharsets.UTF_8);
+            String resource = IOUtils.resourceToString(
+                    "de/medavis/lct/core/patcher/SpdxLicenseList.json5",
+                    StandardCharsets.UTF_8,
+                    ClassLoader.getSystemClassLoader()
+            );
             SpdxLicenses licenses = Json5MapperFactory
                     .create()
                     .readValue(resource, SpdxLicenses.class);
@@ -56,9 +60,11 @@ public class SpdxLicenseManager {
 
             idSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getLicenseId).collect(Collectors.toList()));
             nameSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getName).collect(Collectors.toList()));
-         } catch (IOException ex) {
+        } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
+
+        return this;
     }
 
     public SpdxLicenseManager load(@NotNull URI uri) {

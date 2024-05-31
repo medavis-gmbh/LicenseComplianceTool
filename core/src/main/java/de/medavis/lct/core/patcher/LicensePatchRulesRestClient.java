@@ -29,9 +29,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 
-public class LicenseManagerRestClient extends AbstractRestClient {
+public class LicensePatchRulesRestClient extends AbstractRestClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LicenseManagerRestClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LicensePatchRulesRestClient.class);
 
     /**
      * Request the license mapping rules from the server.

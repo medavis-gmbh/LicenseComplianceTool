@@ -38,7 +38,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.junit.jupiter.api.Assertions.*;
 
 @WireMockTest
-class LicenseMapperTest {
+class LicensePatchRulesMapperTest {
 
     private static final String URI_PATH = "/rules.json";
 
@@ -52,7 +52,8 @@ class LicenseMapperTest {
     @Test
     void testMappings() {
 
-        LicenseMapper mapper = LicenseMapper.create();
+        LicensePatchRulesMapper mapper = LicensePatchRulesMapper.create();
+        mapper.loadDefaultRules();
 
         assertTrue(mapper.mapIdByPURL("TriTraTrullalla").isEmpty());
         assertTrue(mapper.mapIdByUrl("TriTraTrullalla").isEmpty());
@@ -64,7 +65,7 @@ class LicenseMapperTest {
         assertEquals("MIT", mapper.patchId("Lesser General Public License (LGPL)").get());
         assertEquals("Apache License 2.0", mapper.patchName("Apache License, 2.0").get());
 
-        mapper.validateRules(SpdxLicenseManager.create());
+        mapper.validateRules(SpdxLicenseManager.create().loadDefaults());
 
     }
 
@@ -77,7 +78,7 @@ class LicenseMapperTest {
                         .withHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(licenses.length()))
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())));
 
-        LicenseMapper mapper = LicenseMapper.create();
+        LicensePatchRulesMapper mapper = LicensePatchRulesMapper.create();
         mapper.load(URI.create(baseUrl + URI_PATH));
 
         assertEquals("MIT", mapper.patchId("Lesser General Public License (LGPL)").get());

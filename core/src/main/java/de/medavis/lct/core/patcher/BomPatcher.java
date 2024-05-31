@@ -32,7 +32,6 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.parsers.BomParserFactory;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -50,8 +49,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,32 +59,34 @@ public class BomPatcher {
     private static final Pattern EXPRESSION_OR_PATTERN = Pattern.compile("^\\((?<id1>.*) OR (?<id2>.*)\\)$");
 
     private final SpdxLicenseManager spdxLicenseManager;
-    private final LicenseMapper licenseMapper;
+    private final LicensePatchRulesMapper licensePatchRulesMapper;
 
-    private Optional<Set<String>> skipGroupNames;
-    private boolean resolveExpressions;
+    private final Configuration configuration;
 
-    public BomPatcher(
-            @NotNull Configuration configuration,
-            @Nullable Set<String> skipGroupNames,
-            boolean resolveExpressions) {
-        this.skipGroupNames = Optional.ofNullable(skipGroupNames);
-        this.resolveExpressions = resolveExpressions;
+
+    public BomPatcher(@NotNull Configuration configuration) {
+        this.configuration = configuration;
 
         spdxLicenseManager = SpdxLicenseManager.create();
-        configuration.getSpdxLicensesUrl().ifPresent(url -> spdxLicenseManager.load(URI.create(url.toString())));
-
-        licenseMapper = LicenseMapper.create();
-        configuration.getLicensePatchingRulesUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
-        licenseMapper.validateRules(spdxLicenseManager);
+        licensePatchRulesMapper = LicensePatchRulesMapper.create();
     }
 
-    public void setSkipGroupNames(@Nullable Set<String> skipGroupNames) {
-        this.skipGroupNames = Optional.ofNullable(skipGroupNames);
-    }
+    private void init() {
+        configuration
+                .getSpdxLicensesUrl()
+                .ifPresentOrElse(
+                        url -> spdxLicenseManager.load(URI.create(url.toString())),
+                        spdxLicenseManager::loadDefaults
+                );
 
-    public void setResolveExpressions(boolean resolveExpressions) {
-        this.resolveExpressions = resolveExpressions;
+        configuration
+                .getLicensePatchingRulesUrl()
+                .ifPresentOrElse(
+                        uri -> licensePatchRulesMapper.load(URI.create(uri.toString())),
+                        licensePatchRulesMapper::loadDefaultRules
+                );
+
+        licensePatchRulesMapper.validateRules(spdxLicenseManager);
     }
 
     /**
@@ -98,6 +97,8 @@ public class BomPatcher {
      * @return Returns true if patching was successful. False, when BOM leaved untouched.
      */
     public boolean patch(@NotNull Path sourceFile, @NotNull Path targetFile) {
+        init();
+
         try (InputStream in = Files.newInputStream(sourceFile)) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -113,16 +114,6 @@ public class BomPatcher {
         }
     }
 
-    @NotNull
-    private Bom parseBom(@NotNull InputStream bomStream) {
-        try {
-            final byte[] bom = ByteStreams.toByteArray(bomStream);
-            return BomParserFactory.createParser(bom).parse(bom);
-        } catch (ParseException | IOException e) {
-            throw new IllegalStateException("Cannot parse BOM file " + bomStream, e);
-        }
-    }
-
     /**
      * Patches a BOM stream.
      *
@@ -131,6 +122,8 @@ public class BomPatcher {
      * @return Returns true if patching was successful. False, when BOM leaved untouched.
      */
     public boolean patch(@NotNull InputStream in, @NotNull OutputStream out) {
+        init();
+
         try {
             final byte[] bomBytes = ByteStreams.toByteArray(in);
             Bom bom = BomParserFactory.createParser(bomBytes).parse(bomBytes);
@@ -152,14 +145,14 @@ public class BomPatcher {
                 components
                         .stream()
                         // TODO Check if it will always be true
-                        .filter(component -> skipGroupNames.map(gn -> gn.contains(component.getGroup())).orElse(true))
+                        .filter(component -> configuration.getSkipGroupNameSet().map(gn -> gn.contains(component.getGroup())).orElse(true))
                         .forEach(component -> {
                     String purl = Objects.toString(component.getPurl(), "");
 
                     if (component.getLicenses() != null) {
                         patchLicenses(purl, component.getLicenses());
                     } else {
-                        licenseMapper
+                        licensePatchRulesMapper
                                 .mapIdByPURL(purl)
                                 .ifPresentOrElse(
                                         licenseId -> createLicenses(licenseId, component),
@@ -183,6 +176,16 @@ public class BomPatcher {
         }
     }
 
+    @NotNull
+    private Bom parseBom(@NotNull InputStream bomStream) {
+        try {
+            final byte[] bom = ByteStreams.toByteArray(bomStream);
+            return BomParserFactory.createParser(bom).parse(bom);
+        } catch (ParseException | IOException e) {
+            throw new IllegalStateException("Cannot parse BOM file " + bomStream, e);
+        }
+    }
+
     private void createLicenses(@NotNull String licenseId, @NotNull Component component) {
         License license = new License();
         license.setId(licenseId);
@@ -196,7 +199,7 @@ public class BomPatcher {
         if (licensesChoice.getLicenses() != null && !licensesChoice.getLicenses().isEmpty()) {
             licensesChoice.getLicenses().forEach(license -> patchLicense(purl, license));
         } else if (licensesChoice.getLicenses() != null && StringUtils.isNotBlank(licensesChoice.getExpression().getValue())) {
-            if (resolveExpressions) {
+            if (configuration.isResolveExpressions()) {
                 patchLicenseByExpression(licensesChoice);
             }
         } else {
@@ -236,27 +239,27 @@ public class BomPatcher {
             return;
         }
 
-        licenseMapper.mapIdByPURL(purl).ifPresentOrElse(id -> {
+        licensePatchRulesMapper.mapIdByPURL(purl).ifPresentOrElse(id -> {
                     LOGGER.debug("Patching by purl '{}' with id '{}'", purl, id);
                     license.setId("id");
                     license.setName(null);
                 }, () -> {
                     if (StringUtils.isNotBlank(licenseId) && !spdxLicenseManager.containsId(licenseId)) {
-                        licenseMapper.patchId(licenseId).ifPresentOrElse(
+                        licensePatchRulesMapper.patchId(licenseId).ifPresentOrElse(
                                 id -> {
                                     LOGGER.debug("Patching {} by id '{}' with id '{}'", purl, licenseId, id);
                                     license.setId(id);
-                                }, () -> licenseMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
+                                }, () -> licensePatchRulesMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
                                     LOGGER.debug("Patching {} by url '{}' with name '{}'", purl, licenseUrl, id);
                                     license.setId(id);
                                 }, () -> LOGGER.warn("No rule for unsupported SPIDX ID '{}' of purl '{}' found", licenseId, purl))
                         );
                     } else if (StringUtils.isNotBlank(licenseName) && !spdxLicenseManager.containsName(licenseName)) {
-                        licenseMapper.patchName(licenseName).ifPresentOrElse(
+                        licensePatchRulesMapper.patchName(licenseName).ifPresentOrElse(
                                 name -> {
                                     LOGGER.debug("Patching {} by name '{}' with name '{}'", purl, licenseName, name);
                                     license.setName(name);
-                                }, () -> licenseMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
+                                }, () -> licensePatchRulesMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
                                     LOGGER.debug("Patching {} by url '{}' with name '{}'", purl, licenseUrl, id);
                                     license.setId(id);
                                     license.setName(null);
