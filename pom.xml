@@ -41,7 +41,7 @@
         <wiremock.version>3.0.1</wiremock.version>
         <freemarker.version>2.3.32</freemarker.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <guava.version>33.2.0-jre</guava.version>
+        <guava.version>33.2.1-jre</guava.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <mockito.version>5.12.0</mockito.version>
         <htmlunit.version>2.70.0</htmlunit.version>
