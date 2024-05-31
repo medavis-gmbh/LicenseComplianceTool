@@ -43,8 +43,8 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String componentMetadata;
     private String licenses;
     private String licenseMappings;
-    private String licenseMappingRulesUrl;
-    private String spdxLicensesUrl;
+    private String licensePatchingRules;
+    private String spdxLicenses;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -104,25 +104,33 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
         save();
     }
 
+    public String getLicensePatchingRules() {
+        return licensePatchingRules;
+    }
+
     @Override
-    public Optional<URL> getLicenseMappingRulesUrl() {
-        return toURL(licenseMappingRulesUrl);
+    public Optional<URL> getLicensePatchingRulesUrl() {
+        return toURL(licensePatchingRules);
     }
 
     @DataBoundSetter
-    public void setLicenseMappingRulesUrl(String licenseMappingRulesUrl) {
-        this.licenseMappingRulesUrl = licenseMappingRulesUrl;
+    public void setLicensePatchingRules(String licensePatchingRules) {
+        this.licensePatchingRules = licensePatchingRules;
         save();
+    }
+
+    public String getSpdxLicenses() {
+        return spdxLicenses;
     }
 
     @Override
     public Optional<URL> getSpdxLicensesUrl() {
-        return toURL(spdxLicensesUrl);
+        return toURL(spdxLicenses);
     }
 
     @DataBoundSetter
-    public void setSpdxLicensesUrl(String spdxLicensesUrl) {
-        this.spdxLicensesUrl = spdxLicensesUrl;
+    public void setSpdxLicenses(String spdxLicenses) {
+        this.spdxLicenses = spdxLicenses;
         save();
     }
 

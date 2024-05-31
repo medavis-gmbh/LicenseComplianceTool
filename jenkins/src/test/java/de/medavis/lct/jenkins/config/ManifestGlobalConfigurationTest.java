@@ -37,6 +37,9 @@ public class ManifestGlobalConfigurationTest {
     private static final String LICENSES_URL = "https://licenses.url";
     private static final String LICENSES_MAPPING_URL = "https://licenses.mapping.url";
 
+    private static final String LICENSE_PATCHING_RULES_URL = "https://licenses.patching.rules.url";
+    private static final String SPDX_LICENSES_URL = "https://spdx.licenses.url";
+
     @Rule
     public JenkinsSessionRule jenkinsSession = new JenkinsSessionRule();
 
@@ -47,6 +50,8 @@ public class ManifestGlobalConfigurationTest {
             setInputValue(config, "_.componentMetadata", COMPONENT_METADATA_URL);
             setInputValue(config, "_.licenses", LICENSES_URL);
             setInputValue(config, "_.licenseMappings", LICENSES_MAPPING_URL);
+            setInputValue(config, "_.licensePatchingRules", LICENSE_PATCHING_RULES_URL);
+            setInputValue(config, "_.spdxLicenses", SPDX_LICENSES_URL);
             jenkins.submit(config);
             verifyStoredConfig("After submit");
         });
@@ -66,6 +71,10 @@ public class ManifestGlobalConfigurationTest {
             softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
             softly.assertThat(storedConfig.getLicenseMappings()).isEqualTo(LICENSES_MAPPING_URL);
             softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
+            softly.assertThat(storedConfig.getLicensePatchingRules()).isEqualTo(LICENSE_PATCHING_RULES_URL);
+            softly.assertThat(storedConfig.getLicensePatchingRulesUrl()).map(URL::toString).hasValue(LICENSE_PATCHING_RULES_URL);
+            softly.assertThat(storedConfig.getSpdxLicenses()).isEqualTo(SPDX_LICENSES_URL);
+            softly.assertThat(storedConfig.getSpdxLicensesUrl()).map(URL::toString).hasValue(SPDX_LICENSES_URL);
         }));
     }
 
@@ -82,6 +91,10 @@ public class ManifestGlobalConfigurationTest {
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappings()).isNullOrEmpty();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getLicensePatchingRules()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getLicensePatchingRulesUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getSpdxLicenses()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getSpdxLicensesUrl()).isNotPresent();
             }));
         });
     }

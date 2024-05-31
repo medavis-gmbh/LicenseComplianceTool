@@ -48,7 +48,7 @@ class BomPatcherTest {
         }
 
         @Override
-        public Optional<URL> getLicenseMappingRulesUrl() {
+        public Optional<URL> getLicensePatchingRulesUrl() {
             return Optional.empty();
         }
 

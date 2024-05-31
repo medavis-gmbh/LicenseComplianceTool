@@ -64,8 +64,8 @@ public class BomPatcher {
     private final SpdxLicenseManager spdxLicenseManager;
     private final LicenseMapper licenseMapper;
 
-    private final Optional<Set<String>> skipGroupNames;
-    private final boolean resolveExpressions;
+    private Optional<Set<String>> skipGroupNames;
+    private boolean resolveExpressions;
 
     public BomPatcher(
             @NotNull Configuration configuration,
@@ -78,8 +78,16 @@ public class BomPatcher {
         configuration.getSpdxLicensesUrl().ifPresent(url -> spdxLicenseManager.load(URI.create(url.toString())));
 
         licenseMapper = LicenseMapper.create();
-        configuration.getLicenseMappingRulesUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
+        configuration.getLicensePatchingRulesUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
         licenseMapper.validateRules(spdxLicenseManager);
+    }
+
+    public void setSkipGroupNames(@Nullable Set<String> skipGroupNames) {
+        this.skipGroupNames = Optional.ofNullable(skipGroupNames);
+    }
+
+    public void setResolveExpressions(boolean resolveExpressions) {
+        this.resolveExpressions = resolveExpressions;
     }
 
     /**

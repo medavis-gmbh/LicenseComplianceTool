@@ -39,8 +39,8 @@ class ConfigurationOptions implements Configuration {
     @Option(names = {"--licenseMapping", "-lm"})
     private String licenseMappingsUrl;
 
-    @Option(names = {"--licenseMappingRulesUrl", "-lmru"}, description = "URL where to download the license mapping rules")
-    private String licenseMappingRulesUrl;
+    @Option(names = {"--licensePatchingRulesUrl", "-lpru"}, description = "URL where to download the license patching rules")
+    private String licensePatchingRulesUrl;
     @Option(names = {"--spdxLicenseListUrl", "-sllu"}, description = "URL where to download official supported SPDX licenses. If not set, then local copy will be used")
     private String spdxLicenseListUri;
 
@@ -60,8 +60,8 @@ class ConfigurationOptions implements Configuration {
     }
 
     @Override
-    public Optional<URL> getLicenseMappingRulesUrl() {
-        return convert(licenseMappingRulesUrl);
+    public Optional<URL> getLicensePatchingRulesUrl() {
+        return convert(licensePatchingRulesUrl);
     }
 
     @Override

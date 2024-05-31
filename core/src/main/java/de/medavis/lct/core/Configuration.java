@@ -32,7 +32,7 @@ public interface Configuration {
 
     Optional<URL> getLicenseMappingsUrl();
 
-    Optional<URL> getLicenseMappingRulesUrl();
+    Optional<URL> getLicensePatchingRulesUrl();
 
     Optional<URL> getSpdxLicensesUrl();
 
