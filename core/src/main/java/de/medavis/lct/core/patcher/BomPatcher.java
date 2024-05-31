@@ -69,16 +69,16 @@ public class BomPatcher {
 
     public BomPatcher(
             @NotNull Configuration configuration,
-            @Nullable URI spdxLicenseListUri,
             @Nullable Set<String> skipGroupNames,
             boolean resolveExpressions) {
         this.skipGroupNames = Optional.ofNullable(skipGroupNames);
         this.resolveExpressions = resolveExpressions;
 
-        spdxLicenseManager = SpdxLicenseManager.create(spdxLicenseListUri);
+        spdxLicenseManager = SpdxLicenseManager.create();
+        configuration.getSpdxLicensesUrl().ifPresent(url -> spdxLicenseManager.load(URI.create(url.toString())));
 
         licenseMapper = LicenseMapper.create();
-        configuration.getLicenseMappingsUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
+        configuration.getLicenseMappingRulesUrl().ifPresent(uri -> licenseMapper.load(URI.create(uri.toString())));
         licenseMapper.validateRules(spdxLicenseManager);
     }
 

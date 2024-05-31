@@ -64,7 +64,7 @@ class LicenseMapperTest {
         assertEquals("MIT", mapper.patchId("Lesser General Public License (LGPL)").get());
         assertEquals("Apache License 2.0", mapper.patchName("Apache License, 2.0").get());
 
-        mapper.validateRules(SpdxLicenseManager.create(null));
+        mapper.validateRules(SpdxLicenseManager.create());
 
     }
 

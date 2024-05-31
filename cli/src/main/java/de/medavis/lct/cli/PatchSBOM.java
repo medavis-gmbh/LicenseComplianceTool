@@ -25,7 +25,6 @@ import picocli.CommandLine.Option;
 
 import de.medavis.lct.core.patcher.BomPatcher;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -39,8 +38,6 @@ public class PatchSBOM implements Callable<Void> {
     private Path outputFile;
     @Option(names = {"--skipGroupNames", "-sgn"}, description = "Comma separated list of group names which will skipped during BOM patching")
     private Set<String> skipGroupNames;
-    @Option(names = {"--spdxLicenseListUri", "-sllu"}, description = "URI where to download official supported SPDX licenses. If not set, then local copy will be used")
-    private URI spdxLicenseListUri;
     @Option(names = {"--resolveExpressions", "-re"}, description = "When set, then license expression will be resolved and mapped into licenses")
     private boolean resolveExpressions;
     @Mixin
@@ -50,7 +47,6 @@ public class PatchSBOM implements Callable<Void> {
     public Void call() throws Exception {
         BomPatcher patcher = new BomPatcher(
                 configurationOptions,
-                spdxLicenseListUri,
                 skipGroupNames,
                 resolveExpressions
         );

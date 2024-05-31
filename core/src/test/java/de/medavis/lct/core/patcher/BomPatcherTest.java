@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BomPatcherTest {
 
-    private Configuration c = new Configuration() {
+    private final Configuration c = new Configuration() {
         @Override
         public Optional<URL> getComponentMetadataUrl() {
             return Optional.empty();
@@ -46,11 +46,21 @@ class BomPatcherTest {
         public Optional<URL> getLicenseMappingsUrl() {
             return Optional.empty();
         }
+
+        @Override
+        public Optional<URL> getLicenseMappingRulesUrl() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<URL> getSpdxLicensesUrl() {
+            return Optional.empty();
+        }
     };
 
     @Test
     void testCycloneDXSchema() {
-        BomPatcher patcher = new BomPatcher(c, null, null, true);
+        BomPatcher patcher = new BomPatcher(c, null, true);
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-version.json"), NullOutputStream.nullOutputStream()));
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-format.json"), NullOutputStream.nullOutputStream()));
     }
