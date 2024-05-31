@@ -18,5 +18,5 @@
  * #L%
  */
 node {
-    patchBOM inputFile: 'input.json', outputFile: 'output/bom-output.json'
+    patchBOM inputFile: 'input.bom', outputFile: 'output.bom'
 }

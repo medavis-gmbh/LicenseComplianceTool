@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                patchBOM inputFile: 'input.json', outputFile: 'output/bom-output.json', licensePatchingRules='http://localhost'
+                patchBOM inputFile: 'input.bom', outputFile: 'output.bom'
             }
         }
     }
