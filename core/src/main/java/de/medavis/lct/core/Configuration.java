@@ -21,7 +21,6 @@ package de.medavis.lct.core;
 
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
 
 public interface Configuration {
 
@@ -52,15 +51,6 @@ public interface Configuration {
      * @return Optional URL
      */
     default Optional<URL> getSpdxLicensesUrl() {
-        return Optional.empty();
-    }
-
-    /**
-     * Used by license patcher feature.
-     *
-     * @return Optional set of to be skipped group names;
-     */
-    default Optional<Set<String>> getSkipGroupNameSet() {
         return Optional.empty();
     }
 

@@ -142,11 +142,7 @@ public class BomPatcher {
 
             List<Component> components = bom.getComponents();
             if (components != null) {
-                components
-                        .stream()
-                        // TODO Check if it will always be true
-                        .filter(component -> configuration.getSkipGroupNameSet().map(gn -> gn.contains(component.getGroup())).orElse(true))
-                        .forEach(component -> {
+                components.forEach(component -> {
                     String purl = Objects.toString(component.getPurl(), "");
 
                     if (component.getLicenses() != null) {

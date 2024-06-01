@@ -34,36 +34,6 @@ class BomPatcherTest {
 
     private final Configuration c = new Configuration() {
         @Override
-        public Optional<URL> getComponentMetadataUrl() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<URL> getLicensesUrl() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<URL> getLicenseMappingsUrl() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<URL> getLicensePatchingRulesUrl() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<URL> getSpdxLicensesUrl() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<Set<String>> getSkipGroupNameSet() {
-            return Optional.empty();
-        }
-
-        @Override
         public boolean isResolveExpressions() {
             return true;
         }

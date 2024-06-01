@@ -26,13 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTest {
 
     @Test
-    void testPatchSBOM() {
+    void testPatchBOM() {
 
         int exitCode = new Main().run(new String[] {
                 "patch-sbom",
                 "--in=src/test/resources/test-bom.json",
                 "--out=target//test-patched.json",
-                "-sgn=de.medavis",
                 "--resolveExpressions"
         });
 

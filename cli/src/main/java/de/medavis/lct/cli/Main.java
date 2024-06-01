@@ -33,7 +33,7 @@ class Main {
         commandLine.addSubcommand(new HelpCommand());
         commandLine.addSubcommand(new CreateManifest());
         commandLine.addSubcommand(new DownloadLicenses());
-        commandLine.addSubcommand(new PatchSBOM());
+        commandLine.addSubcommand(new PatchBOM());
 
         return commandLine.execute(args);
     }

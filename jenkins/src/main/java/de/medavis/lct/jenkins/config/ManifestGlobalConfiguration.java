@@ -26,7 +26,6 @@ import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
 
 import jenkins.model.GlobalConfiguration;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -47,7 +46,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
 
     private String licensePatchingRules;
     private String spdxLicenses;
-    private String skipGroupNames;
     private boolean resolveExpressions;
 
     public static ManifestGlobalConfiguration getInstance() {
@@ -135,21 +133,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     @DataBoundSetter
     public void setSpdxLicenses(String spdxLicenses) {
         this.spdxLicenses = spdxLicenses;
-        save();
-    }
-
-    public String getSkipGroupNames() {
-        return skipGroupNames;
-    }
-
-    @Override
-    public Optional<Set<String>> getSkipGroupNameSet() {
-        return Optional.ofNullable(skipGroupNames == null ? null : Set.of(skipGroupNames.split(",")));
-    }
-
-    @DataBoundSetter
-    public void setSkipGroupNames(String skipGroupNames) {
-        this.skipGroupNames = skipGroupNames;
         save();
     }
 

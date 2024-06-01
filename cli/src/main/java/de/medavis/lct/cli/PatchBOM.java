@@ -28,8 +28,8 @@ import de.medavis.lct.core.patcher.BomPatcher;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-@Command(name = "patch-sbom", description = "Patch SBOM with licenses mapping rules")
-public class PatchSBOM implements Callable<Void> {
+@Command(name = "patch-sbom", description = "Patch BOM with licenses mapping rules")
+public class PatchBOM implements Callable<Void> {
 
     @Option(names = {"--in", "-i"}, required = true)
     private Path inputFile;
