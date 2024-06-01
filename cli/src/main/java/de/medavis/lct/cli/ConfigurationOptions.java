@@ -81,7 +81,7 @@ class ConfigurationOptions implements Configuration {
 
     @Override
     public boolean isResolveExpressions() {
-        return true;
+        return resolveExpressions;
     }
 
 }
