@@ -77,4 +77,31 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Download latest version of SPDX for offline use -->
+                        <id>download-latest-spdx</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <failOnError>false</failOnError>
+                            <overwrite>true</overwrite>
+                            <url>https://github.com/spdx/license-list-data/raw/main/json/licenses.json</url>
+                            <unpack>false</unpack>
+                            <outputDirectory>${project.basedir}/target/classes/de/medavis/lct/core/patcher</outputDirectory>
+                            <outputFileName>SpdxLicenseList.json5</outputFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
