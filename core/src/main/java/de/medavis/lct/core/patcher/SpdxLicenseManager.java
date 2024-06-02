@@ -19,6 +19,8 @@
  */
 package de.medavis.lct.core.patcher;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.medavis.lct.core.patcher.model.SpdxLicense;
 import de.medavis.lct.core.patcher.model.SpdxLicenses;
 
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 public class SpdxLicenseManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpdxLicenseManager.class);
+    private final ObjectMapper objectMapper = Json5MapperFactory.create();
     private final Set<String> idSet = new HashSet<>();
     private final Set<String> nameSet = new HashSet<>();
 
@@ -69,14 +72,24 @@ public class SpdxLicenseManager {
 
     public SpdxLicenseManager load(@NotNull URI uri) {
         LOGGER.info("Loading SPDX licenses from {}", uri);
-        SpdxRestClient client = new SpdxRestClient(uri);
-        SpdxLicenses licenses = client.fetchLicenses();
+        idSet.clear();
+        nameSet.clear();
 
+        SpdxLicenses licenses;
+
+        if ("file".equals(uri.getScheme())) {
+            try {
+                licenses = objectMapper.readValue(uri.toURL(), SpdxLicenses.class);
+            } catch (IOException ex) {
+                throw new LicensePatcherException(ex.getMessage(), ex);
+            }
+        } else {
+            SpdxRestClient client = new SpdxRestClient(uri);
+            licenses = client.fetchLicenses();
+        }
         LOGGER.info("Using SPDX license version {}", licenses.getLicenseListVersion());
 
-        idSet.clear();
         idSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getLicenseId).collect(Collectors.toList()));
-        nameSet.clear();
         nameSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getName).collect(Collectors.toList()));
 
         return this;
