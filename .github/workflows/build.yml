@@ -50,5 +50,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          gh release upload v${VERSION} "/cli/target/license-compliance-tool-cli.jar" --clobber
-          gh release upload v${VERSION} "/jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
+          gh release upload v${VERSION} "cli/target/license-compliance-tool-cli.jar" --clobber
+          gh release upload v${VERSION} "jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
