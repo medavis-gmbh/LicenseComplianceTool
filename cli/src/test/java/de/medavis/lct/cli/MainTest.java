@@ -21,26 +21,33 @@ package de.medavis.lct.cli;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MainTest {
 
     @Test
-    void testPatchBOM() {
+    void testPatchBOM() throws IOException {
 
         URI uri = Path.of("src/test/resources/test-rules.json5").toUri();
+
+        Path testFile = Path.of("target//test-results/test-patched.json");
+        Files.deleteIfExists(testFile);
 
         int exitCode = new Main().run(new String[] {
                 "patch-sbom",
                 "--in=src/test/resources/test-bom.json",
-                "--out=target//test-patched.json",
+                "--out=" + testFile,
                 "--licensePatchingRulesUrl=" + uri.toString(),
                 "--resolveExpressions"
         });
 
         assertEquals(0, exitCode);
+        assertTrue(Files.exists(testFile));
     }
 }
