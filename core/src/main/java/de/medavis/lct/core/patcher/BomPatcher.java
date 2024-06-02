@@ -97,8 +97,6 @@ public class BomPatcher {
      * @return Returns true if patching was successful. False, when BOM leaved untouched.
      */
     public boolean patch(@NotNull Path sourceFile, @NotNull Path targetFile) {
-        init();
-
         try (InputStream in = Files.newInputStream(sourceFile)) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
