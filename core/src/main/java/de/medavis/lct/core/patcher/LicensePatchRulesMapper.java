@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -74,7 +75,7 @@ public class LicensePatchRulesMapper {
 
     public void loadDefaultRules() {
         try {
-            LOGGER.info("Loading embedded mappings");
+            LOGGER.info("Loading embedded rules");
 
             Rules rules = objectMapper.readValue(Resources.getResource(DEFAULT_MAPPING_RESOURCE), Rules.class);
             setMapping(rules);
@@ -84,23 +85,26 @@ public class LicensePatchRulesMapper {
     }
 
     public void load(@NotNull URI uri) {
-        LicensePatchRulesRestClient client = new LicensePatchRulesRestClient();
-        Rules rules = client.fetchRules(uri);
-        setMapping(rules);
+        LOGGER.info("Loading custom rules from '{}'.", uri);
+        if ("file".equals(uri.getScheme())) {
+            try {
+                Rules rules = objectMapper.readValue(uri.toURL(), Rules.class);
+                setMapping(rules);
+            } catch (IOException ex) {
+                throw new LicensePatcherException(ex.getMessage(), ex);
+            }
+        } else {
+            LicensePatchRulesRestClient client = new LicensePatchRulesRestClient();
+            Rules rules = client.fetchRules(uri);
+            setMapping(rules);
+        }
     }
 
     public void load(@NotNull Path file) {
-        try {
-            if (Files.exists(file)) {
-                LOGGER.info("Loading custom mappings from '{}'.", file);
-
-                Rules rules = objectMapper.readValue(file.toFile(), Rules.class);
-                setMapping(rules);
-            } else {
-                LOGGER.info("No custom mapping file '{}' found.", file);
-            }
-        } catch (IOException ex) {
-            throw new LicensePatcherException(ex.getMessage(), ex);
+        if (Files.exists(file)) {
+            load(file.toUri());
+        } else {
+            LOGGER.info("No custom rules file '{}' found.", file);
         }
     }
 

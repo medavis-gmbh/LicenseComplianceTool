@@ -21,6 +21,9 @@ package de.medavis.lct.cli;
 
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MainTest {
@@ -28,10 +31,13 @@ class MainTest {
     @Test
     void testPatchBOM() {
 
+        URI uri = Path.of("src/test/resources/test-rules.json5").toUri();
+
         int exitCode = new Main().run(new String[] {
                 "patch-sbom",
                 "--in=src/test/resources/test-bom.json",
                 "--out=target//test-patched.json",
+                "--licensePatchingRulesUrl=" + uri.toString(),
                 "--resolveExpressions"
         });
 
