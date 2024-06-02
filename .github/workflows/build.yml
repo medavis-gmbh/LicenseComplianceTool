@@ -21,9 +21,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh
-
       - name: Get branch names.
         id: branch-names
         uses: tj-actions/branch-names@v8
@@ -49,21 +46,21 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Create GitHub SNAPSHOT release
-        id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v$VERSION
-          release_name: SNAPSHOT v$VERSION
-          draft: true
-          prerelease: false
-
-      - name: Upload SNAPSHOT assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract version from POM
+        id: extract_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          gh release upload "v$VERSION" "cli/target/license-compliance-tool-cli.jar" --clobber
-          gh release upload "v$VERSION" "jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub release and upload asset
+        if: steps.branch-names.outputs.current_branch == 'main'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          prerelease: false
+          files: |
+            cli/target/license-compliance-tool-cli.jar
+            jenkins/target/license-compliance-tool-jenkins.hpi          
