@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
       - name: Checkout project
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
 
@@ -38,5 +41,14 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+
+      - name: Upload snapshot assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          gh release upload v${VERSION} "/cli/target/license-compliance-tool-cli.jar" --clobber
+          gh release upload v${VERSION} "/jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
