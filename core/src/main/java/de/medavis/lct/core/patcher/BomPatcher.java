@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,6 @@ public class BomPatcher {
     private final LicensePatchRulesMapper licensePatchRulesMapper;
 
     private final Configuration configuration;
-
 
     public BomPatcher(@NotNull Configuration configuration) {
         this.configuration = configuration;
@@ -117,7 +117,7 @@ public class BomPatcher {
     /**
      * Patches a BOM stream.
      *
-     * @param in Source BOM as input stream
+     * @param in  Source BOM as input stream
      * @param out Target BOM as output stream
      * @return Returns true if patching was successful. False, when BOM leaved untouched.
      */
@@ -140,23 +140,22 @@ public class BomPatcher {
 
             String originalBom = BomGeneratorFactory.createJson(version, bom).toJsonString();
 
-            List<Component> components = bom.getComponents();
-            if (components != null) {
-                components.forEach(component -> {
-                    String purl = Objects.toString(component.getPurl(), "");
+            Optional.ofNullable(bom.getComponents())
+                    .orElse(List.of())
+                    .forEach(component -> {
+                        String purl = Objects.toString(component.getPurl(), "");
 
-                    if (component.getLicenses() != null) {
-                        patchLicenses(purl, component.getLicenses());
-                    } else {
-                        licensePatchRulesMapper
-                                .mapIdByPURL(purl)
-                                .ifPresentOrElse(
-                                        licenseId -> createLicenses(licenseId, component),
-                                        () -> LOGGER.warn("Component '{}' has no license information.", purl)
-                                );
-                    }
-                });
-            }
+                        if (component.getLicenses() == null) {
+                            licensePatchRulesMapper
+                                    .mapIdByPURL(purl)
+                                    .ifPresentOrElse(
+                                            licenseId -> createLicenses(licenseId, component),
+                                            () -> LOGGER.warn("Component '{}' has no license information.", purl)
+                                    );
+                        } else {
+                            patchLicenses(purl, component.getLicenses());
+                        }
+                    });
 
             String patchedBom = BomGeneratorFactory.createJson(version, bom).toJsonString();
             out.write(patchedBom.getBytes(StandardCharsets.UTF_8));
