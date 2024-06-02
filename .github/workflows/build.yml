@@ -24,6 +24,10 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh
 
+      - name: Get branch names.
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
       - name: Checkout project
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
 
@@ -33,7 +37,7 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            $${{ runner.os }}-maven-
+            ${{ runner.os }}-maven-
 
       - name: Set up JDK 11
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
@@ -51,8 +55,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${VERSION}
-          release_name: SNAPSHOT v${VERSION}
+          # tag_name: v$VERSION
+          release_name: SNAPSHOT v$VERSION
           draft: true
           prerelease: false
 
@@ -61,5 +65,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          gh release upload v${VERSION} "cli/target/license-compliance-tool-cli.jar" --clobber
-          gh release upload v${VERSION} "jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
+          gh release upload "v$VERSION" "cli/target/license-compliance-tool-cli.jar" --clobber
+          gh release upload "v$VERSION" "jenkins/target/license-compliance-tool-jenkins.hpi" --clobber
