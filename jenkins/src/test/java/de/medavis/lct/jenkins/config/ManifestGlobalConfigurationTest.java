@@ -21,6 +21,7 @@ package de.medavis.lct.jenkins.config;
 
 import java.net.URL;
 
+import org.htmlunit.html.HtmlCheckBoxInput;
 import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlTextInput;
 import org.junit.Rule;
@@ -37,6 +38,11 @@ public class ManifestGlobalConfigurationTest {
     private static final String LICENSES_URL = "https://licenses.url";
     private static final String LICENSES_MAPPING_URL = "https://licenses.mapping.url";
 
+    private static final String LICENSE_PATCHING_RULES_URL = "https://licenses.patching.rules.url";
+    private static final String SPDX_LICENSES_URL = "https://spdx.licenses.url";
+    private static final String SKIP_GROUP_NAMES = "de.medavis,com.anywhere";
+    private static final boolean RESOLVE_EXPRESSION = true;
+
     @Rule
     public JenkinsSessionRule jenkinsSession = new JenkinsSessionRule();
 
@@ -47,6 +53,9 @@ public class ManifestGlobalConfigurationTest {
             setInputValue(config, "_.componentMetadata", COMPONENT_METADATA_URL);
             setInputValue(config, "_.licenses", LICENSES_URL);
             setInputValue(config, "_.licenseMappings", LICENSES_MAPPING_URL);
+            setInputValue(config, "_.licensePatchingRules", LICENSE_PATCHING_RULES_URL);
+            setInputValue(config, "_.spdxLicenses", SPDX_LICENSES_URL);
+            setInputValue(config, "_.resolveExpressions", RESOLVE_EXPRESSION);
             jenkins.submit(config);
             verifyStoredConfig("After submit");
         });
@@ -58,6 +67,11 @@ public class ManifestGlobalConfigurationTest {
         textbox.setText(value);
     }
 
+    private void setInputValue(HtmlForm config, String name, boolean value) {
+        HtmlCheckBoxInput textbox = config.getInputByName(name);
+        textbox.setChecked(value);
+    }
+
     private void verifyStoredConfig(String stage) {
         assertThat(ManifestGlobalConfiguration.getInstance()).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
             softly.assertThat(storedConfig.getComponentMetadata()).isEqualTo(COMPONENT_METADATA_URL);
@@ -66,6 +80,11 @@ public class ManifestGlobalConfigurationTest {
             softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
             softly.assertThat(storedConfig.getLicenseMappings()).isEqualTo(LICENSES_MAPPING_URL);
             softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
+            softly.assertThat(storedConfig.getLicensePatchingRules()).isEqualTo(LICENSE_PATCHING_RULES_URL);
+            softly.assertThat(storedConfig.getLicensePatchingRulesUrl()).map(URL::toString).hasValue(LICENSE_PATCHING_RULES_URL);
+            softly.assertThat(storedConfig.getSpdxLicenses()).isEqualTo(SPDX_LICENSES_URL);
+            softly.assertThat(storedConfig.getSpdxLicensesUrl()).map(URL::toString).hasValue(SPDX_LICENSES_URL);
+            softly.assertThat(storedConfig.isResolveExpressions()).isTrue();
         }));
     }
 
@@ -82,6 +101,11 @@ public class ManifestGlobalConfigurationTest {
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappings()).isNullOrEmpty();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getLicensePatchingRules()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getLicensePatchingRulesUrl()).isNotPresent();
+                softly.assertThat(storedConfig.getSpdxLicenses()).isNullOrEmpty();
+                softly.assertThat(storedConfig.getSpdxLicensesUrl()).isNotPresent();
+                softly.assertThat(storedConfig.isResolveExpressions()).isFalse();
             }));
         });
     }

@@ -25,10 +25,8 @@ import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
+
 import jenkins.model.GlobalConfiguration;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -45,6 +43,10 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String componentMetadata;
     private String licenses;
     private String licenseMappings;
+
+    private String licensePatchingRules;
+    private String spdxLicenses;
+    private boolean resolveExpressions;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -101,6 +103,47 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     @DataBoundSetter
     public void setLicenseMappings(String licenseMappings) {
         this.licenseMappings = licenseMappings;
+        save();
+    }
+
+    public String getLicensePatchingRules() {
+        return licensePatchingRules;
+    }
+
+    @Override
+    public Optional<URL> getLicensePatchingRulesUrl() {
+        return toURL(licensePatchingRules);
+    }
+
+    @DataBoundSetter
+    public void setLicensePatchingRules(String licensePatchingRules) {
+        this.licensePatchingRules = licensePatchingRules;
+        save();
+    }
+
+    public String getSpdxLicenses() {
+        return spdxLicenses;
+    }
+
+    @Override
+    public Optional<URL> getSpdxLicensesUrl() {
+        return toURL(spdxLicenses);
+    }
+
+    @DataBoundSetter
+    public void setSpdxLicenses(String spdxLicenses) {
+        this.spdxLicenses = spdxLicenses;
+        save();
+    }
+
+    @Override
+    public boolean isResolveExpressions() {
+        return resolveExpressions;
+    }
+
+    @DataBoundSetter
+    public void setResolveExpressions(boolean resolveExpressions) {
+        this.resolveExpressions = resolveExpressions;
         save();
     }
 

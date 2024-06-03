@@ -181,6 +181,19 @@ Different components often use different names for the same license. You can use
 |The name of the license in the license information
 |===
 
+==== License patching rules URL
+The URL where to download the rules for patching BOM licenses. This is a required field when you want to use license
+patching.
+
+tbd
+
+==== SPDX licenses URL
+The URL where to download the list of supported SPDX licenses. If not set, then a local copy of the
+https://github.com/spdx/license-list-data/tree/main/json[SPDX GitHub project] will be used.
+
+==== Resolve license expressions
+tbd
+
 === Create manifest
 This build step creates a component manifest file based on an input SBOM and the global configuration.
 
@@ -241,6 +254,28 @@ pipeline {
 }
 ----
 
+=== Patch BOM
+In some cases, a BOM may contain incomplete or incorrect license information.
+This step can correct such errors in a BOM using patching rules by adjusting or completing license details.
+The rules are configured in the global settings of the plugin.
+
+tbd
+
+[source,groovy,title=Declarative pipeline example]
+----
+pipeline {
+    agent any
+
+    stages {
+        stage('Patch BOM') {
+            steps {
+                patchBOM inputFile: 'input.bom', outputFile: 'output.bom'
+            }
+        }
+    }
+}
+----
+
 == CLI tool
 You can also run the tool as a standalone CLI tool.
 This is especially useful when you want to test out changes to component or license metadata since you do not have to switch back and forth between Jenkins
@@ -274,6 +309,11 @@ Examples:
 [source]
 ----
   java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html
+----
+* Patch licenses
+[source]
+----
+java -jar license-compliance-tool-cli.jar download-bom --in=path/in.bom --out=path/out.bom --licensePatchingRulesUrl=file:///rules.json
 ----
 * Get usage help
 [source]

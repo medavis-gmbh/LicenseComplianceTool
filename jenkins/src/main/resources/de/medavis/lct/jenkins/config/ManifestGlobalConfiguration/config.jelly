@@ -11,5 +11,15 @@
         <f:entry field="licenseMappings" title="${%licenseMappings}">
             <f:textbox />
         </f:entry>
+        <f:entry field="licensePatchingRules" title="${%licensePatchingRules}" description="${%licensePatchingRules.description}">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="spdxLicenses" title="${%spdxLicenses}" description="${%spdxLicenses.description}">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="resolveExpressions" title="${%resolveExpressions}" description="${%resolveExpressions.description}">
+            <f:checkbox />
+        </f:entry>
+
     </f:section>
 </j:jelly>
