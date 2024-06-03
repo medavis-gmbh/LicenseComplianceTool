@@ -51,9 +51,9 @@
     </properties>
 
     <modules>
-        <module>core</module>
-        <module>jenkins</module>
-        <module>cli</module>
+        <module>mod-core</module>
+        <module>mod-jenkins</module>
+        <module>mod-cli</module>
     </modules>
 
     <dependencyManagement>

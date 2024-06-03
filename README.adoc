@@ -213,7 +213,7 @@ pipeline {
 ----
 
 With the parameter `templateUrl`, you can specify a URL pointing to a custom FreeMarker template which is used to create the output. The parameter is optional.
-If it is not set, the template from link:core/src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
+If it is not set, the template from link:mod-core/src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
 
 
 === Download licenses
