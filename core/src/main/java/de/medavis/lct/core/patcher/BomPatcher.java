@@ -185,6 +185,7 @@ public class BomPatcher {
 
         List<License> licenses = new ArrayList<>(List.of(license));
 
+        component.setLicenses(new LicenseChoice());
         component.getLicenses().setLicenses(licenses);
     }
 

@@ -19,8 +19,14 @@
  */
 package de.medavis.lct.cli;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.medavis.lct.core.patcher.Json5MapperFactory;
+
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -36,18 +42,26 @@ class MainTest {
 
         URI uri = Path.of("src/test/resources/test-rules.json5").toUri();
 
-        Path testFile = Path.of("target//test-results/test-patched.json");
+        Path testFile = Path.of("target//test-results/test-patched-01.json");
         Files.deleteIfExists(testFile);
 
         int exitCode = new Main().run(new String[] {
                 "patch-sbom",
-                "--in=src/test/resources/test-bom.json",
+                "--in=src/test/resources/test-bom-01.json",
                 "--out=" + testFile,
-                "--licensePatchingRulesUrl=" + uri.toString(),
+                "--licensePatchingRulesUrl=" + uri,
                 "--resolveExpressions"
         });
 
         assertEquals(0, exitCode);
         assertTrue(Files.exists(testFile));
+
+        ObjectMapper mapper = Json5MapperFactory.create();
+        JsonNode rootNode = mapper.readTree(new File("target//test-results/test-patched-01.json"));
+
+        assertEquals("Apache-2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
+        assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
+        assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
+        assertTrue(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
     }
 }
