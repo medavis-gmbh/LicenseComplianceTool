@@ -13,6 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+
+    - name: Cache Maven repository
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-      
     
     - name: Set up JDK 11
       uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
@@ -20,15 +28,57 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    
-    - name: Build with Maven
-      run: mvn -B package
-      
-    - name: Create release package
-      uses: qcastel/github-actions-maven-release@681756a2798ce7fc477d2db2fefcdec6670f6fed
+
+    - name: Extract releasing version from POM
+      id: extract_version
+      run: |
+        VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        # Remove -SNAPSHOT from version
+        VERSION=${VERSION%-SNAPSHOT}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV        
+
+    - name: Set up Git user
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'        
+        
+    - name: Set release version
       env:
-        JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mvn -B versions:set -DnewVersion=${{ env.VERSION }}
+        git commit -am "Release version set"
+        git push origin main             
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Create and push tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git tag v${{ env.VERSION }}
+        git push origin v${{ env.VERSION }}
+
+    - name: Increase version
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mvn -B release:update-versions
+        git commit -am "Next development version set"
+        git push origin main                
+
+    - name: Upload assets
+      uses: softprops/action-gh-release@v2
       with:
-        maven-args: "-Dmaven.deploy.skip=true"
+        name: v${{ env.VERSION }}
+        tag_name: v${{ env.VERSION }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
+        prerelease: false
+        files: |
+          cli/target/license-compliance-tool-cli.jar
+          jenkins/target/license-compliance-tool-jenkins.hpi          
+
       
       
