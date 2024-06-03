@@ -52,7 +52,7 @@ jobs:
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Create GitHub release and upload asset
+      - name: Upload assets from main branch
         if: steps.branch-names.outputs.current_branch == 'main'
         uses: softprops/action-gh-release@v2
         with:
