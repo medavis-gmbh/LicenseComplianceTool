@@ -29,7 +29,7 @@ toc::[]
 image::Overview.png[]
 
 1. Create a *Software Bill of Materials* (SBOM) for your source code.
-2. Call the *Jenkins Plugin* in your build job to create a component manifest and download the license files.
+2. Call the *Jenkins Plugin* in your build job to create a component manifest, to patch the SBOM and download the license files.
 You can *configure* several JSON data sources to improve data quality.
 3. Add the component manifest and the license files to your delivery package (e.g. ZIP, WAR, MSI).
 
@@ -166,7 +166,9 @@ Use this setting to define licenses and URLs with the license texts. The URL nee
 |===
 
 ==== License mapping
-Different components often use different names for the same license. You can use this setting to define aliases for licenses. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+Different components often use different names for the same license. You can use this setting to define aliases for
+licenses. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+
 |===
 |Name | Type | Required?|  Meaning
 
