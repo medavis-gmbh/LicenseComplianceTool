@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package de.medavis.lct.core.patcher;
+package de.medavis.lct.core;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;

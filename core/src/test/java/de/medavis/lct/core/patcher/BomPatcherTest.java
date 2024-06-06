@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.core.Json5MapperFactory;
 import de.medavis.lct.core.JsonPath;
 
 import org.apache.commons.io.output.NullOutputStream;
@@ -42,14 +43,9 @@ class BomPatcherTest {
 
     private final Configuration c = new Configuration() {
         @Override
-        public boolean isResolveExpressions() {
-            return true;
-        }
-
-        @Override
-        public Optional<URL> getLicensePatchingRulesUrl() {
+        public Optional<URL> getComponentMetadataUrl() {
             try {
-                return Optional.of(Path.of("src/test/resources/de/medavis/lct/core/patcher/test-rules.json5").toUri().toURL());
+                return Optional.of(Path.of("src/test/resources/de/medavis/lct/core/patcher/test-component-metadata.json").toUri().toURL());
             } catch(MalformedURLException ex) {
                 throw new LicensePatcherException(ex.getMessage(), ex);
             }
@@ -71,8 +67,10 @@ class BomPatcherTest {
         Path testFile = Path.of("target//test-results/test-patched-01.json");
         Files.deleteIfExists(testFile);
 
+        Path sourceFile = Path.of("src/test/resources/de/medavis/lct/core/patcher/test-bom-01.json");
+
         boolean result = patcher.patch(
-                Path.of("src/test/resources/de/medavis/lct/core/patcher/test-bom-01.json"),
+                sourceFile,
                 testFile
         );
 
@@ -80,9 +78,9 @@ class BomPatcherTest {
         assertTrue(Files.exists(testFile));
 
         ObjectMapper mapper = Json5MapperFactory.create();
+        JsonNode rootNode = mapper.readTree(sourceFile.toFile());
 
-        // Validate unpatched file
-        JsonNode rootNode = mapper.readTree(new File("src/test/resources/de/medavis/lct/core/patcher/test-bom-01.json"));
+        // Validate unpatched file, so that we can be sure that we have patched the BOM
         assertEquals("Apache 2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
         assertFalse(JsonPath.path(rootNode, "components[2].licenses[0].license").has("id"));
         assertTrue(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
@@ -92,9 +90,9 @@ class BomPatcherTest {
 
         // Now, validate patched file
         assertEquals("Apache-2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
+        // Test, creating of missing licenses node
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
         assertTrue(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
-        assertEquals("MIT", JsonPath.path(rootNode, "components[3].licenses[8].license.id").asText());
     }
 
 }

@@ -47,7 +47,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String licenses;
     private String licenseMappings;
 
-    private String licensePatchingRules;
     private String spdxLicenses;
     private boolean resolveExpressions;
 
@@ -109,25 +108,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
         save();
     }
 
-    public FormValidation doCheckLicensePatchingRules(@QueryParameter String value) {
-        return UrlValidator.validate(value);
-    }
-
-    public String getLicensePatchingRules() {
-        return licensePatchingRules;
-    }
-
-    @Override
-    public Optional<URL> getLicensePatchingRulesUrl() {
-        return toURL(licensePatchingRules);
-    }
-
-    @DataBoundSetter
-    public void setLicensePatchingRules(String licensePatchingRules) {
-        this.licensePatchingRules = licensePatchingRules;
-        save();
-    }
-
     public FormValidation doCheckSpdxLicenses(@QueryParameter String value) {
         return UrlValidator.validate(value);
     }
@@ -137,6 +117,7 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     }
 
     @Override
+    @NotNull
     public Optional<URL> getSpdxLicensesUrl() {
         return toURL(spdxLicenses);
     }

@@ -64,6 +64,9 @@ class SpdxLicenseManagerTest {
 
         assertTrue(manager.containsId("Apache-2.0"));
         assertFalse(manager.containsId("Commercial-42"));
+        assertTrue(manager.match("Apache-2.0", null).isPresent());
+        assertFalse(manager.match("Commercial-42", null).isPresent());
+        assertTrue(manager.match(null, "Apache License 1.1").isPresent());
     }
 
     @Test

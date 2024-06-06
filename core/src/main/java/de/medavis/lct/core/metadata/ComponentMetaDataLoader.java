@@ -20,24 +20,31 @@
 package de.medavis.lct.core.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.medavis.lct.core.Json5MapperFactory;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ComponentMetaDataLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComponentMetaDataLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentMetaDataLoader.class);
 
-    public Collection<ComponentMetadata> load(URL metadataUrl) {
+    public Collection<ComponentMetadata> load(@NotNull URL metadataUrl) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            List<ComponentMetadata> result = objectMapper.readValue(metadataUrl,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, ComponentMetadata.class));
-            logger.info("Imported {} component metadata entries from {}.", result.size(), metadataUrl);
+            List<ComponentMetadata> result = Json5MapperFactory
+                    .create()
+                    .readValue(metadataUrl, objectMapper.getTypeFactory().constructCollectionType(List.class, ComponentMetadata.class));
+
+            LOGGER.info("Imported {} component metadata entries from {}.", result.size(), metadataUrl);
             return result;
         } catch (IOException e) {
             throw new IllegalStateException("Failure while processing metadata from " + metadataUrl, e);

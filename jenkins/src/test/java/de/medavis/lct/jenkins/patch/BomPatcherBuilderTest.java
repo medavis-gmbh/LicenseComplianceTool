@@ -39,13 +39,15 @@ class BomPatcherBuilderTest {
     private static final String INPUT_FILE = "input.bom";
     private static final String OUTPUT_FILE = "output.bom";
 
+    private static final String PATH = "/test-component-metadata.json";
+
     private String baseUrl;
     private HttpServer httpServer;
 
     @BeforeEach
     void configureWebserver() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
-        httpServer.createContext("/DefaultLicenseRules.json", exchange -> {
+        httpServer.createContext(PATH, exchange -> {
             URL url = getClass().getResource("/de/medavis/lct/jenkins/patch/DefaultLicenseRules.json5");
             String body = Resources.toString(url, StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
@@ -63,9 +65,9 @@ class BomPatcherBuilderTest {
         BomPatcherBuilderFactory.setLicensesDownloaderFactory(configuration -> new BomPatcher(new Configuration() {
 
             @Override
-            public Optional<URL> getLicensePatchingRulesUrl() {
+            public Optional<URL> getLicenseMappingsUrl() {
                 try {
-                    URL url = new URL(baseUrl + "/DefaultLicenseRules.json");
+                    URL url = new URL(baseUrl + PATH);
                     return Optional.of(url);
                 } catch (MalformedURLException ex) {
 

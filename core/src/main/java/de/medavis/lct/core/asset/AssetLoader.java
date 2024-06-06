@@ -70,11 +70,12 @@ public class AssetLoader {
         String name = component.getName();
         String version = component.getVersion();
         String url = getWebsite(component.getExternalReferences());
+        String purl = component.getPurl();
         Set<License> licenses = getLicenseStream(component)
                 .map(this::extractLicense)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        return new Component(group, name, version, url, licenses);
+        return new Component(group, name, version, url, purl, licenses);
     }
 
     private License extractLicense(org.cyclonedx.model.License license) {
@@ -106,8 +107,8 @@ public class AssetLoader {
     }
 
     private Stream<org.cyclonedx.model.License> getLicenseStream(org.cyclonedx.model.Component component) {
-        return component.getLicenseChoice() != null && component.getLicenseChoice().getLicenses() != null
-                ? component.getLicenseChoice().getLicenses().stream()
+        return component.getLicenses() != null && component.getLicenses().getLicenses() != null
+                ? component.getLicenses().getLicenses().stream()
                 : Stream.empty();
     }
 

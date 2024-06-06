@@ -22,7 +22,7 @@ package de.medavis.lct.cli;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.medavis.lct.core.patcher.Json5MapperFactory;
+import de.medavis.lct.core.Json5MapperFactory;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MainTest {
@@ -40,16 +41,16 @@ class MainTest {
     @Test
     void testPatchBOM() throws IOException {
 
-        URI uri = Path.of("src/test/resources/test-rules.json5").toUri();
+        URI uri = Path.of("src/test/resources/test-component-metadata.json5").toUri();
 
-        Path testFile = Path.of("target//test-results/test-patched-01.json");
+        Path testFile = Path.of("target/test-results/test-patched-01.json");
         Files.deleteIfExists(testFile);
 
         int exitCode = new Main().run(new String[] {
                 "patch-sbom",
                 "--in=src/test/resources/test-bom-01.json",
                 "--out=" + testFile,
-                "--licensePatchingRulesUrl=" + uri,
+                "--componentMetadata=" + uri,
                 "--resolveExpressions"
         });
 
@@ -57,11 +58,11 @@ class MainTest {
         assertTrue(Files.exists(testFile));
 
         ObjectMapper mapper = Json5MapperFactory.create();
-        JsonNode rootNode = mapper.readTree(new File("target//test-results/test-patched-01.json"));
+        JsonNode rootNode = mapper.readTree(new File("target/test-results/test-patched-01.json"));
 
         assertEquals("Apache-2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
-        assertTrue(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
+        assertFalse(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
     }
 }

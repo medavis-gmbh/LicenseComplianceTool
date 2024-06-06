@@ -122,11 +122,6 @@
                 },
                 {
                     "license": {
-                        "url": "https://www.bouncycastle.org/licence.html"
-                    }
-                },
-                {
-                    "license": {
                         "name": "W3C license",
                         "url": "https://www.w3.org/Consortium/Legal/copyright-documents-19990405"
                     }

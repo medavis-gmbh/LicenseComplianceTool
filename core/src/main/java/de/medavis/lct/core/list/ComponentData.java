@@ -30,6 +30,7 @@ public final class ComponentData {
     private final String name;
     private final String version;
     private final String url;
+    private final String purl;
     private final Set<License> licenses;
     private final Set<String> attributionNotices;
 
@@ -37,11 +38,13 @@ public final class ComponentData {
             String name,
             String version,
             String url,
+            String purl,
             Set<License> licenses,
             Set<String> attributionNotices) {
         this.name = name;
         this.version = version;
         this.url = url;
+        this.purl = purl;
         this.licenses = licenses;
         this.attributionNotices = attributionNotices;
     }
@@ -56,6 +59,10 @@ public final class ComponentData {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getPurl() {
+        return purl;
     }
 
     public Set<License> getLicenses() {
@@ -78,13 +85,14 @@ public final class ComponentData {
         return Objects.equals(name, that.name)
                && Objects.equals(version, that.version)
                && Objects.equals(url, that.url)
+               && Objects.equals(purl, that.purl)
                && Objects.equals(licenses, that.licenses)
                && Objects.equals(attributionNotices, that.attributionNotices);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, url, licenses, attributionNotices);
+        return Objects.hash(name, version, url, purl, licenses, attributionNotices);
     }
 
     @Override
@@ -93,6 +101,7 @@ public final class ComponentData {
                 .add("name='" + name + "'")
                 .add("version='" + version + "'")
                 .add("url='" + url + "'")
+                .add("purl='" + purl + "'")
                 .add("licenses=" + licenses)
                 .add("attributionNotices=" + attributionNotices)
                 .toString();

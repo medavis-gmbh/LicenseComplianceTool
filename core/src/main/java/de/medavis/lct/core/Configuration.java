@@ -19,6 +19,8 @@
  */
 package de.medavis.lct.core;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.net.URL;
 import java.util.Optional;
 
@@ -41,15 +43,7 @@ public interface Configuration {
      *
      * @return Optional URL
      */
-    default Optional<URL> getLicensePatchingRulesUrl() {
-        return Optional.empty();
-    }
-
-    /**
-     * Used by license patcher feature.
-     *
-     * @return Optional URL
-     */
+    @NotNull
     default Optional<URL> getSpdxLicensesUrl() {
         return Optional.empty();
     }

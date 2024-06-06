@@ -27,6 +27,8 @@ import picocli.CommandLine.Option;
 
 import de.medavis.lct.core.Configuration;
 
+import org.jetbrains.annotations.NotNull;
+
 import static de.medavis.lct.cli.StringToUrlConverter.convert;
 
 @Command
@@ -39,8 +41,6 @@ class ConfigurationOptions implements Configuration {
     @Option(names = {"--licenseMapping", "-lm"})
     private String licenseMappingsUrl;
 
-    @Option(names = {"--licensePatchingRulesUrl", "-lpru"}, description = "URL where to download the license patching rules")
-    private String licensePatchingRulesUrl;
     @Option(names = {"--spdxLicenseListUrl", "-sllu"}, description = "URL where to download official supported SPDX licenses. If not set, then local copy will be used")
     private String spdxLicenseListUri;
     @Option(names = {"--resolveExpressions", "-re"}, description = "When set, then license expression will be resolved and mapped into licenses")
@@ -62,11 +62,7 @@ class ConfigurationOptions implements Configuration {
     }
 
     @Override
-    public Optional<URL> getLicensePatchingRulesUrl() {
-        return convert(licensePatchingRulesUrl);
-    }
-
-    @Override
+    @NotNull
     public Optional<URL> getSpdxLicensesUrl() {
         return convert(spdxLicenseListUri);
     }

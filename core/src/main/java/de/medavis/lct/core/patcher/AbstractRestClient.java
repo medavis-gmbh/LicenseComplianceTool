@@ -21,6 +21,8 @@ package de.medavis.lct.core.patcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.medavis.lct.core.Json5MapperFactory;
+
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -30,13 +30,15 @@ public final class Component {
     private final String name;
     private final String version;
     private final String url;
+    private final String purl;
     private final Set<License> licenses;
 
-    public Component(String group, String name, String version, String url, Set<License> licenses) {
+    public Component(String group, String name, String version, String url, String purl, Set<License> licenses) {
         this.group = group;
         this.name = name;
         this.version = version;
         this.url = url;
+        this.purl = purl;
         this.licenses = licenses;
     }
 
@@ -56,6 +58,10 @@ public final class Component {
         return url;
     }
 
+    public String purl() {
+        return purl;
+    }
+
     public Set<License> licenses() {
         return licenses;
     }
@@ -71,12 +77,13 @@ public final class Component {
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.version, that.version) &&
                Objects.equals(this.url, that.url) &&
+               Objects.equals(this.purl, that.purl) &&
                Objects.equals(this.licenses, that.licenses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(group, name, version, url, licenses);
+        return Objects.hash(group, name, version, url, purl, licenses);
     }
 
     @Override
@@ -86,6 +93,7 @@ public final class Component {
                "name=" + name + ", " +
                "version=" + version + ", " +
                "url=" + url + ", " +
+               "purl=" + purl + ", " +
                "licenses=" + licenses + ']';
     }
 

@@ -76,6 +76,11 @@ Entries have the following attributes:
 | If groupMatch is not set
 | Regular expression for the component's name
 
+|purlMatch
+| Package URL
+| Optional, if groupMatch and nameMatch is not set and patching is in use
+| Regular expression for the component's purl
+
 | mappedName
 | String
 | Optional
@@ -140,6 +145,18 @@ Here are some examples to illustrate what you can do with it:
   "licenses": [
     "Apache-2.0",
     "LGPL-2.1"
+  ]
+}
+----
+
+- Patching SBOM licenses > override licenses
+
+[source,json]
+----
+{
+  "purl": "pkg:maven\/com\.github\.kenglxn\.qrgen\/.*@2\.6\.0\?type=jar",
+  "licenses": [
+    "Apache-2.0"
   ]
 }
 ----
@@ -256,12 +273,9 @@ pipeline {
 }
 ----
 
-=== Patch BOM
-In some cases, a BOM may contain incomplete or incorrect license information.
-This step can correct such errors in a BOM using patching rules by adjusting or completing license details.
-The rules are configured in the global settings of the plugin.
-
-tbd
+=== Patch SBOM
+This build step patch a SBOM, based on your component manifest configuration and the global configuration.
+Goal is, to fix incomplete or incorrect license informations in your SBOM.
 
 [source,groovy,title=Declarative pipeline example]
 ----
@@ -315,7 +329,11 @@ Examples:
 * Patch licenses
 [source]
 ----
-java -jar license-compliance-tool-cli.jar download-bom --in=path/in.bom --out=path/out.bom --licensePatchingRulesUrl=file:///rules.json
+  java -jar license-compliance-tool-cli.jar
+    patch-sbom
+    --in=file-path/in.bom
+    --out=file-path/out.bom
+    --componentMetadata=https://your.server.url/componentMetadata.json
 ----
 * Get usage help
 [source]

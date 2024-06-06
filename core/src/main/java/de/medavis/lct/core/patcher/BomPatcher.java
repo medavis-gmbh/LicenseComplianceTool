@@ -45,13 +45,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class BomPatcher {
 
@@ -60,7 +61,7 @@ public class BomPatcher {
     private static final Pattern EXPRESSION_OR_PATTERN = Pattern.compile("^\\((?<id1>.*) OR (?<id2>.*)\\)$");
 
     private final SpdxLicenseManager spdxLicenseManager;
-    private final LicensePatchRulesMapper licensePatchRulesMapper;
+    private final ComponentMetaDataManager componentMetaDataManager;
 
     private final Configuration configuration;
 
@@ -68,7 +69,7 @@ public class BomPatcher {
         this.configuration = configuration;
 
         spdxLicenseManager = SpdxLicenseManager.create();
-        licensePatchRulesMapper = LicensePatchRulesMapper.create();
+        componentMetaDataManager = new ComponentMetaDataManager();
     }
 
     private void init() {
@@ -80,13 +81,11 @@ public class BomPatcher {
                 );
 
         configuration
-                .getLicensePatchingRulesUrl()
-                .ifPresentOrElse(
-                        uri -> licensePatchRulesMapper.load(URI.create(uri.toString())),
-                        licensePatchRulesMapper::loadDefaultRules
-                );
+                .getComponentMetadataUrl()
+                .map(url -> URI.create(url.toString()))
+                .ifPresent(componentMetaDataManager::load);
 
-        licensePatchRulesMapper.validateRules(spdxLicenseManager);
+        componentMetaDataManager.validateLicenseMappedNames(spdxLicenseManager.getSupportedLicenseNames());
     }
 
     /**
@@ -144,14 +143,14 @@ public class BomPatcher {
                         String purl = Objects.toString(component.getPurl(), "");
 
                         if (component.getLicenses() == null) {
-                            licensePatchRulesMapper
-                                    .mapIdByPURL(purl)
-                                    .ifPresentOrElse(
-                                            licenseId -> createLicenses(licenseId, component),
-                                            () -> LOGGER.warn("Component '{}' has no license information.", purl)
-                                    );
+                            // When no license node in component found then...Yes, this can be happened
+                            componentMetaDataManager
+                                    .findMatch(component.getGroup(), component.getName(), purl)
+                                    .ifPresentOrElse(cm -> {
+                                        component.setLicenses(createLicenses(cm.licenses()));
+                                    }, () -> LOGGER.warn("Component '{}' has no license information because unable to resolve", purl));
                         } else {
-                            patchLicenses(purl, component.getLicenses());
+                            patchLicenses(purl, component);
                         }
                     });
 
@@ -170,34 +169,33 @@ public class BomPatcher {
     }
 
     @NotNull
-    private Bom parseBom(@NotNull InputStream bomStream) {
-        try {
-            final byte[] bom = ByteStreams.toByteArray(bomStream);
-            return BomParserFactory.createParser(bom).parse(bom);
-        } catch (ParseException | IOException e) {
-            throw new IllegalStateException("Cannot parse BOM file " + bomStream, e);
-        }
+    private LicenseChoice createLicenses(@NotNull Set<String> licenseNames) {
+        LicenseChoice licenseChoice = new LicenseChoice();
+        licenseChoice.setLicenses(
+                licenseNames
+                        .stream()
+                        .map(n -> {
+                            License license = new License();
+                            license.setId(n);
+                            return license;
+                        })
+                        .collect(Collectors.toList()));
+
+        return licenseChoice;
     }
 
-    private void createLicenses(@NotNull String licenseId, @NotNull Component component) {
-        License license = new License();
-        license.setId(licenseId);
-
-        List<License> licenses = new ArrayList<>(List.of(license));
-
-        component.setLicenses(new LicenseChoice());
-        component.getLicenses().setLicenses(licenses);
-    }
-
-    private void patchLicenses(@NotNull String purl, @NotNull LicenseChoice licensesChoice) {
+    private void patchLicenses(@NotNull String purl, @NotNull Component component) {
+        LicenseChoice licensesChoice = component.getLicenses();
         if (licensesChoice.getLicenses() != null && !licensesChoice.getLicenses().isEmpty()) {
-            licensesChoice.getLicenses().forEach(license -> patchLicense(purl, license));
-        } else if (licensesChoice.getLicenses() != null && StringUtils.isNotBlank(licensesChoice.getExpression().getValue())) {
+            // OK. License node includes one or more licenses
+            licensesChoice.getLicenses().forEach(license -> patchLicense(component, license));
+        } else if (licensesChoice.getExpression() != null && StringUtils.isNotBlank(licensesChoice.getExpression().getValue())) {
+            // Fine. License node includes expression of two or more licenses
             if (configuration.isResolveExpressions()) {
                 patchLicenseByExpression(licensesChoice);
             }
         } else {
-            LOGGER.error("Licenses node of component '{}' must not be empty!", purl);
+            LOGGER.error("Invalid SBOM model. Licenses node of component '{}' must not be empty!", purl);
         }
     }
 
@@ -222,54 +220,37 @@ public class BomPatcher {
         }
     }
 
-    private void patchLicense(@NotNull String purl, final @NotNull License license) {
+    private void patchLicense(
+            @NotNull Component component,
+            final @NotNull License license) {
+        String purl = component.getPurl();
         LOGGER.trace("Try to patch license: {} of component {}", license, purl);
         String licenseId = Objects.toString(license.getId());
         String licenseName = Objects.toString(license.getName(), "");
-        String licenseUrl = Objects.toString(license.getUrl(), "");
 
-        // When id oder name is supported, then everything is fine. No need to map in anyway
-        if (spdxLicenseManager.containsId(licenseId) || spdxLicenseManager.containsName(licenseName)) {
-            return;
+        if (spdxLicenseManager.match(licenseId, licenseName).isEmpty()) {
+            LOGGER.info("Package URL '{}' has an unsupported license id '{}' and/or license name '{}'.", purl, licenseId, licenseName);
         }
 
-        licensePatchRulesMapper.mapIdByPURL(purl).ifPresentOrElse(id -> {
-                    LOGGER.debug("Patching by purl '{}' with id '{}'", purl, id);
-                    license.setId("id");
-                    license.setName(null);
-                }, () -> {
-                    if (StringUtils.isNotBlank(licenseId) && !spdxLicenseManager.containsId(licenseId)) {
-                        licensePatchRulesMapper.patchId(licenseId).ifPresentOrElse(
-                                id -> {
-                                    LOGGER.debug("Patching {} by id '{}' with id '{}'", purl, licenseId, id);
-                                    license.setId(id);
-                                }, () -> licensePatchRulesMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
-                                    LOGGER.debug("Patching {} by url '{}' with name '{}'", purl, licenseUrl, id);
-                                    license.setId(id);
-                                }, () -> LOGGER.warn("No rule for unsupported SPIDX ID '{}' of purl '{}' found", licenseId, purl))
-                        );
-                    } else if (StringUtils.isNotBlank(licenseName) && !spdxLicenseManager.containsName(licenseName)) {
-                        licensePatchRulesMapper.patchName(licenseName).ifPresentOrElse(
-                                name -> {
-                                    LOGGER.debug("Patching {} by name '{}' with name '{}'", purl, licenseName, name);
-                                    license.setName(name);
-                                }, () -> licensePatchRulesMapper.mapIdByUrl(licenseUrl).ifPresentOrElse(id -> {
-                                    LOGGER.debug("Patching {} by url '{}' with name '{}'", purl, licenseUrl, id);
-                                    license.setId(id);
-                                    license.setName(null);
-                                }, () -> LOGGER.warn("No rule for unsupported license name '{}' of purl '{}' found", licenseName, purl))
-                        );
-                    }
-                }
-        );
-
-        String licenseId3 = Objects.toString("id", "");
-        String licenseName3 = Objects.toString("name", "");
-        String licenseUrl3 = Objects.toString("url", "");
-
-        if (!spdxLicenseManager.containsId(licenseId3) && spdxLicenseManager.containsName(licenseName3) && StringUtils.isBlank(licenseUrl3)) {
-            LOGGER.warn("No rule for purl {} found", purl);
-        }
+        componentMetaDataManager.findMatch(
+                component.getGroup(),
+                component.getName(),
+                component.getPurl()
+        ).ifPresentOrElse(cm -> {
+            if (cm.licenses() == null || cm.licenses().isEmpty()) {
+                LOGGER.warn("No license to set for purl '{}'.", purl);
+            } else if (cm.licenses().size() == 1) {
+                // Enrich license
+                license.setId(cm.licenses().stream().findFirst().orElse(""));
+                license.setName(null);
+                Optional.ofNullable(cm.url()).ifPresent(license::setUrl);
+            } else {
+                // Recreate licenses node with all licenses
+                component.setLicenses(createLicenses(cm.licenses()));
+            }
+        }, () -> {
+            LOGGER.warn("No match for purl '{}' found", purl);
+        });
     }
 
 }

@@ -21,30 +21,54 @@ package de.medavis.lct.core.patcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.medavis.lct.core.Json5MapperFactory;
 import de.medavis.lct.core.patcher.model.SpdxLicense;
 import de.medavis.lct.core.patcher.model.SpdxLicenses;
 
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SpdxLicenseManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpdxLicenseManager.class);
     private final ObjectMapper objectMapper = Json5MapperFactory.create();
-    private final Set<String> idSet = new HashSet<>();
-    private final Set<String> nameSet = new HashSet<>();
+    private final Map<String, SpdxLicense> idMap = new HashMap<>();
+    private final Map<String, SpdxLicense> nameMap = new HashMap<>();
 
     public static SpdxLicenseManager create() {
         return new SpdxLicenseManager();
+    }
+
+
+    private void clear() {
+        idMap.clear();
+        nameMap.clear();
+    }
+
+    private void load(@NotNull SpdxLicenses licenses) {
+        LOGGER.info("Using SPDX license version {}", licenses.getLicenseListVersion());
+
+        idMap.putAll(licenses
+                .getLicenses()
+                .stream()
+                .collect(Collectors.toMap(SpdxLicense::getLicenseId, l -> l)));
+        nameMap.putAll(licenses
+                .getLicenses()
+                .stream()
+                .collect(Collectors.toMap(SpdxLicense::getName, Function.identity(), (existing, replacement) -> existing)));
     }
 
     public SpdxLicenseManager loadDefaults() {
@@ -59,10 +83,7 @@ public class SpdxLicenseManager {
                     .create()
                     .readValue(resource, SpdxLicenses.class);
 
-            LOGGER.info("Using SPDX license version {}", licenses.getLicenseListVersion());
-
-            idSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getLicenseId).collect(Collectors.toList()));
-            nameSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getName).collect(Collectors.toList()));
+            load(licenses);
         } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
@@ -72,8 +93,7 @@ public class SpdxLicenseManager {
 
     public SpdxLicenseManager load(@NotNull URI uri) {
         LOGGER.info("Loading SPDX licenses from {}", uri);
-        idSet.clear();
-        nameSet.clear();
+        clear();
 
         SpdxLicenses licenses;
 
@@ -87,20 +107,27 @@ public class SpdxLicenseManager {
             SpdxRestClient client = new SpdxRestClient(uri);
             licenses = client.fetchLicenses();
         }
-        LOGGER.info("Using SPDX license version {}", licenses.getLicenseListVersion());
 
-        idSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getLicenseId).collect(Collectors.toList()));
-        nameSet.addAll(licenses.getLicenses().stream().map(SpdxLicense::getName).collect(Collectors.toList()));
+        load(licenses);
 
         return this;
     }
 
+    public Optional<SpdxLicense> match(@Nullable String licenseId, @Nullable String licenseName) {
+        return Optional.ofNullable(idMap.get(licenseId))
+                .or(() -> Optional.ofNullable(nameMap.get(licenseName)));
+    }
+
     public boolean containsId(String id) {
-        return idSet.contains(id);
+        return idMap.containsKey(id);
     }
 
     public boolean containsName(String name) {
-        return nameSet.contains(name);
+        return nameMap.containsKey(name);
+    }
+
+    public Set<String> getSupportedLicenseNames() {
+        return nameMap.keySet();
     }
 
 }
