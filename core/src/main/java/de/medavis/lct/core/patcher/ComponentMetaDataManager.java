@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class ComponentMetaDataManager {
 
@@ -48,6 +48,7 @@ public class ComponentMetaDataManager {
     }
 
     private void clear() {
+        // NOOP
     }
 
     private void setComponentMetaDataList(@NotNull Collection<ComponentMetadata> list) {
@@ -60,12 +61,7 @@ public class ComponentMetaDataManager {
 
         try {
             ComponentMetaDataLoader loader = new ComponentMetaDataLoader();
-            if ("file".equals(uri.getScheme())) {
-                setComponentMetaDataList(loader.load(uri.toURL()));
-            } else {
-
-                setComponentMetaDataList(loader.load(uri.toURL()));
-            }
+            setComponentMetaDataList(loader.load(uri.toURL()));
         } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
@@ -82,23 +78,22 @@ public class ComponentMetaDataManager {
     /**
      * Validate to be mapped license names against an (official SPDX) set of license names.
      * <p>
-     * If an unsupported SPDX license was found, a log warning will be written.
+     * If an unsupported SPDX license was found, a log warning will be written into the log.
      *
      * @param supportedLicenseNames Set od (SPDX) supported license names
-     * @return Returns true, when unsupported warnings was found
      */
     public boolean validateLicenseMappedNames(@NotNull Set<String> supportedLicenseNames) {
-        AtomicBoolean result = new AtomicBoolean(false);
-
-        componentMetaDataList
+        List<String> findings = componentMetaDataList
                 .stream()
                 .filter(cm -> StringUtils.isNotBlank(cm.mappedName()) && !supportedLicenseNames.contains(cm.mappedName()))
-                .forEach(cm -> {
-                    result.set(true);
-                    LOGGER.warn("Your component meta data configuration contains an unsupported to be mapped SPDX name '{}'.", cm.mappedName());
-                });
+                .map(ComponentMetadata::mappedName)
+                .collect(Collectors.toList());
 
-        return result.get();
+        if (!findings.isEmpty()) {
+            LOGGER.warn("Your component meta data configuration contains an unsupported to be mapped SPDX name '{}'.", findings);
+        }
+
+        return !findings.isEmpty();
     }
 
     /**

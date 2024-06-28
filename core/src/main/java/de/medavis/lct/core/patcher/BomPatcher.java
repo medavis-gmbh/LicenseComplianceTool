@@ -36,7 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -92,20 +91,20 @@ public class BomPatcher {
      * Patches a BOM file.
      *
      * @param sourceFile Source BOM file
-     * @param targetFile Target BOM file
+     * @param targetFile Target BOM file. The directory will be created if not exist
      * @return Returns true if patching was successful. False, when BOM leaved untouched.
      */
     public boolean patch(@NotNull Path sourceFile, @NotNull Path targetFile) {
-        try (InputStream in = Files.newInputStream(sourceFile)) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            boolean result = patch(in, out);
-
-            LOGGER.info("Writing patched file '{}'", targetFile);
+        try {
             Files.createDirectories(targetFile.getParent());
-            Files.writeString(targetFile, out.toString(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+        } catch (IOException ex) {
+            throw new LicensePatcherException(ex.getMessage(), ex);
+        }
 
-            return result;
+        try (InputStream in = Files.newInputStream(sourceFile);
+             OutputStream out = Files.newOutputStream(targetFile, StandardOpenOption.CREATE)) {
+            LOGGER.info("Writing patched file '{}'", targetFile);
+            return patch(in, out);
         } catch (IOException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
@@ -139,20 +138,7 @@ public class BomPatcher {
 
             Optional.ofNullable(bom.getComponents())
                     .orElse(List.of())
-                    .forEach(component -> {
-                        String purl = Objects.toString(component.getPurl(), "");
-
-                        if (component.getLicenses() == null) {
-                            // When no license node in component found then...Yes, this can be happened
-                            componentMetaDataManager
-                                    .findMatch(component.getGroup(), component.getName(), purl)
-                                    .ifPresentOrElse(cm -> {
-                                        component.setLicenses(createLicenses(cm.licenses()));
-                                    }, () -> LOGGER.warn("Component '{}' has no license information because unable to resolve", purl));
-                        } else {
-                            patchLicenses(purl, component);
-                        }
-                    });
+                    .forEach(this::patchLicenses);
 
             String patchedBom = BomGeneratorFactory.createJson(version, bom).toJsonString();
             out.write(patchedBom.getBytes(StandardCharsets.UTF_8));
@@ -168,6 +154,13 @@ public class BomPatcher {
         }
     }
 
+    /**
+     * Creates a {@link LicenseChoice} instance, add the given license names as
+     * {@link de.medavis.lct.core.license.License}s and return the {@link LicenseChoice} instance.
+     *
+     * @param licenseNames Name of licenses to add
+     * @return Returns the {@link LicenseChoice} instance but never null
+     */
     @NotNull
     private LicenseChoice createLicenses(@NotNull Set<String> licenseNames) {
         LicenseChoice licenseChoice = new LicenseChoice();
@@ -184,9 +177,22 @@ public class BomPatcher {
         return licenseChoice;
     }
 
-    private void patchLicenses(@NotNull String purl, @NotNull Component component) {
+    /**
+     * Patch the licenses of a {@link Component} if configured
+     *
+     * @param component {@link Component} of the BOM model.
+     */
+    private void patchLicenses(@NotNull Component component) {
+        String purl =  Objects.toString(component.getPurl(), "");
         LicenseChoice licensesChoice = component.getLicenses();
-        if (licensesChoice.getLicenses() != null && !licensesChoice.getLicenses().isEmpty()) {
+        if (licensesChoice == null) {
+            // When no license node in component found then...Yes, this can be happened
+            componentMetaDataManager
+                    // Find licenses bei group name or PURL
+                    .findMatch(component.getGroup(), component.getName(), purl)
+                    .ifPresentOrElse(cm -> component.setLicenses(createLicenses(cm.licenses())),
+                            () -> LOGGER.warn("Component '{}' has no license information because unable to resolve", purl));
+        } else if (licensesChoice.getLicenses() != null && !licensesChoice.getLicenses().isEmpty()) {
             // OK. License node includes one or more licenses
             licensesChoice.getLicenses().forEach(license -> patchLicense(component, license));
         } else if (licensesChoice.getExpression() != null && StringUtils.isNotBlank(licensesChoice.getExpression().getValue())) {
@@ -199,6 +205,13 @@ public class BomPatcher {
         }
     }
 
+    /**
+     * Resolve license expressions.
+     * <p/>
+     * <b>Note: Currently only one "or" expression supported</b>
+     *
+     * @param licenseChoice License choice element from the BOM model.
+     */
     private void patchLicenseByExpression(@NotNull LicenseChoice licenseChoice) {
         String expression = licenseChoice.getExpression().getValue();
 
@@ -220,6 +233,12 @@ public class BomPatcher {
         }
     }
 
+    /**
+     * Patch the license element ob using "purl", license "id" and license "name" and the {@link ComponentMetaDataManager}.
+     *
+     * @param component Component of the BOM model
+     * @param license License to patch. This one {@link License} of the component {@link LicenseChoice} model.
+     */
     private void patchLicense(
             @NotNull Component component,
             final @NotNull License license) {
@@ -248,9 +267,7 @@ public class BomPatcher {
                 // Recreate licenses node with all licenses
                 component.setLicenses(createLicenses(cm.licenses()));
             }
-        }, () -> {
-            LOGGER.warn("No match for purl '{}' found", purl);
-        });
+        }, () -> LOGGER.warn("No match for purl '{}' found", purl));
     }
 
 }

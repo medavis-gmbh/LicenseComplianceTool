@@ -64,7 +64,7 @@ public abstract class AbstractRestClient {
     }
 
     /**
-     * Execute a HTTP request and return the HTTP response body as string.
+     * Execute an HTTP request and return the HTTP response body as string.
      *
      * @param request The HTTP request
      * @return Returns the HTTP response body as string
@@ -73,13 +73,27 @@ public abstract class AbstractRestClient {
      */
     @NotNull
     protected String executeRequest(@NotNull HttpRequest request) throws IOException, InterruptedException {
+        HttpResponse<String> response = executeRequestWithResponse(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (!List.of(200, 302).contains(response.statusCode())) {
+            throw new LicensePatcherException("Unexpected HTTP status code " + response.statusCode() + ": Body=" + response.body());
+        }
+
+        return response.body();
+    }
+
+    /**
+     * Execute an HTTP request and return the {@link HttpResponse} of the request.
+     *
+     * @param request The HTTP request
+     * @return Returns the HTTP response body as string
+     * @throws IOException Thrown if an I/ O error occurs when sending or receiving
+     * @throws InterruptedException Thrown if the operation is interrupted
+     */
+    @NotNull
+    protected <T> HttpResponse<T> executeRequestWithResponse(@NotNull HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) throws IOException, InterruptedException {
         try {
             LOGGER.debug("Executing HTTP {} to {}", request.method(), request.uri());
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (!List.of(200, 302).contains(response.statusCode())) {
-                throw new LicensePatcherException("Unexpected HTTP status code " + response.statusCode() + ": Body=" + response.body());
-            }
-            return response.body();
+            return httpClient.send(request, responseBodyHandler);
         } catch (Exception ex) {
             LOGGER.error("Error on url request '{}' occurred.", request.uri());
             throw ex;
@@ -87,7 +101,7 @@ public abstract class AbstractRestClient {
     }
 
     /**
-     * Execute a HTTP request and return the JSON result as a Java object.
+     * Execute an HTTP request and return the JSON result as a Java object.
      *
      * @param request The HTTP request
      * @param classType Class type to return
