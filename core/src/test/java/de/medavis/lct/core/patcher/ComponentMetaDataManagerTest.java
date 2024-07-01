@@ -20,15 +20,27 @@
 package de.medavis.lct.core.patcher;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class ComponentMetaDataManagerTest {
 
+    @Mock()
+    private Logger mockedLogger;
+
     @Test
-    void testLoadAndMatching() throws URISyntaxException {
+    void testFindMatch() throws URISyntaxException {
 
         ComponentMetaDataManager mapper = ComponentMetaDataManager.create();
         mapper.load(getClass().getClassLoader().getResource("de/medavis/lct/core/patcher/test-component-metadata.json").toURI());
@@ -39,7 +51,24 @@ class ComponentMetaDataManagerTest {
         assertTrue(mapper.findMatch(null, "BliBlaBlub", "pkg:maven/javax.annotation/jakarta.annotation-api@1.3.2?type=jar").isPresent());
         assertTrue(mapper.findMatch("abc", "BliBlaBlub", "pkg:maven/javax.annotation/jakarta.annotation-api@1.3.2?type=jar").isPresent());
 
-        assertTrue(mapper.validateLicenseMappedNames(SpdxLicenseManager.create().loadDefaults().getSupportedLicenseNames()));
+    }
+
+    @Test
+    void testValidateLicenseMappedNames() throws URISyntaxException {
+
+        try (MockedStatic<LoggerFactory> context = Mockito.mockStatic(LoggerFactory.class)) {
+            context
+                    .when(() -> LoggerFactory.getLogger(Mockito.any(Class.class)))
+                    .thenReturn(mockedLogger);
+
+            ComponentMetaDataManager mapper = ComponentMetaDataManager.create();
+            mapper.load(getClass().getClassLoader().getResource("de/medavis/lct/core/patcher/test-component-metadata2.json").toURI());
+
+            mapper.logInvalidLicenseIds(SpdxLicenseManager.create().loadDefaults().getSupportedLicenseIds());
+
+            Mockito.verify(mockedLogger)
+                    .warn("Your component meta data configuration contains an unsupported to be mapped SPDX name '{}'.", List.of("Apache-1.0-JDOM"));
+        }
 
     }
 

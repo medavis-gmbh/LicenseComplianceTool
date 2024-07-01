@@ -52,7 +52,6 @@ public class SpdxLicenseManager {
         return new SpdxLicenseManager();
     }
 
-
     private void clear() {
         idMap.clear();
         nameMap.clear();
@@ -71,6 +70,7 @@ public class SpdxLicenseManager {
                 .collect(Collectors.toMap(SpdxLicense::getName, Function.identity(), (existing, replacement) -> existing)));
     }
 
+    @NotNull
     public SpdxLicenseManager loadDefaults() {
         try {
             LOGGER.info("Loading local copy of SPDX licenses");
@@ -91,6 +91,14 @@ public class SpdxLicenseManager {
         return this;
     }
 
+    /**
+     * Tries to load a list of licenses in specified SPDX format.
+     * See <a href="https://github.com/spdx/license-list-data">https://github.com/spdx/license-list-data</a> for more information.
+     *
+     * @param uri URI of the SPDX list
+     * @return Returns this instance
+     */
+    @NotNull
     public SpdxLicenseManager load(@NotNull URI uri) {
         LOGGER.info("Loading SPDX licenses from {}", uri);
         clear();
@@ -113,21 +121,22 @@ public class SpdxLicenseManager {
         return this;
     }
 
+    /**
+     * Try to match a {@link SpdxLicense} ny license name or license ID.
+     *
+     * @param licenseId License ID
+     * @param licenseName License name
+     * @return Returns an {@link Optional} with the matched {@link SpdxLicense} or an empty Optional
+     */
+    @NotNull
     public Optional<SpdxLicense> match(@Nullable String licenseId, @Nullable String licenseName) {
         return Optional.ofNullable(idMap.get(licenseId))
                 .or(() -> Optional.ofNullable(nameMap.get(licenseName)));
     }
 
-    public boolean containsId(String id) {
-        return idMap.containsKey(id);
-    }
-
-    public boolean containsName(String name) {
-        return nameMap.containsKey(name);
-    }
-
-    public Set<String> getSupportedLicenseNames() {
-        return nameMap.keySet();
+    @NotNull
+    public Set<String> getSupportedLicenseIds() {
+        return Set.copyOf(idMap.keySet());
     }
 
 }

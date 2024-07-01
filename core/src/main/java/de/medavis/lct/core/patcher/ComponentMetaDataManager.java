@@ -40,19 +40,16 @@ import java.util.stream.Collectors;
 
 public class ComponentMetaDataManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentMetaDataManager.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(ComponentMetaDataManager.class);
     private Collection<ComponentMetadata> componentMetaDataList = List.of();
+
+    private ComponentMetaDataManager() { }
 
     public static ComponentMetaDataManager create() {
         return new ComponentMetaDataManager();
     }
 
-    private void clear() {
-        // NOOP
-    }
-
     private void setComponentMetaDataList(@NotNull Collection<ComponentMetadata> list) {
-        clear();
         this.componentMetaDataList = List.copyOf(list);
     }
 
@@ -80,20 +77,18 @@ public class ComponentMetaDataManager {
      * <p>
      * If an unsupported SPDX license was found, a log warning will be written into the log.
      *
-     * @param supportedLicenseNames Set od (SPDX) supported license names
+     * @param supportedLicenseIds Set od (SPDX) supported license IDs
      */
-    public boolean validateLicenseMappedNames(@NotNull Set<String> supportedLicenseNames) {
+    public void logInvalidLicenseIds(@NotNull Set<String> supportedLicenseIds) {
         List<String> findings = componentMetaDataList
                 .stream()
-                .filter(cm -> StringUtils.isNotBlank(cm.mappedName()) && !supportedLicenseNames.contains(cm.mappedName()))
-                .map(ComponentMetadata::mappedName)
+                .flatMap(cm -> cm.licenses().stream())
+                .filter(l -> StringUtils.isNotBlank(l) && !supportedLicenseIds.contains(l))
                 .collect(Collectors.toList());
 
         if (!findings.isEmpty()) {
             LOGGER.warn("Your component meta data configuration contains an unsupported to be mapped SPDX name '{}'.", findings);
         }
-
-        return !findings.isEmpty();
     }
 
     /**

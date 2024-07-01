@@ -68,7 +68,7 @@ public class BomPatcher {
         this.configuration = configuration;
 
         spdxLicenseManager = SpdxLicenseManager.create();
-        componentMetaDataManager = new ComponentMetaDataManager();
+        componentMetaDataManager = ComponentMetaDataManager.create();
     }
 
     private void init() {
@@ -84,7 +84,7 @@ public class BomPatcher {
                 .map(url -> URI.create(url.toString()))
                 .ifPresent(componentMetaDataManager::load);
 
-        componentMetaDataManager.validateLicenseMappedNames(spdxLicenseManager.getSupportedLicenseNames());
+        componentMetaDataManager.logInvalidLicenseIds(spdxLicenseManager.getSupportedLicenseIds());
     }
 
     /**

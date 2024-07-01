@@ -62,24 +62,9 @@ class SpdxLicenseManagerTest {
                 .create()
                 .load(URI.create(baseUrl + SPDX_LICENSE_PATH));
 
-        assertTrue(manager.containsId("Apache-2.0"));
-        assertFalse(manager.containsId("Commercial-42"));
         assertTrue(manager.match("Apache-2.0", null).isPresent());
         assertFalse(manager.match("Commercial-42", null).isPresent());
         assertTrue(manager.match(null, "Apache License 1.1").isPresent());
-    }
-
-    @Test
-    void testCreateWithInternal() throws IOException {
-        String licenses = IOUtils.resourceToString("de/medavis/lct/core/patcher/SpdxLicenseList.json5", StandardCharsets.UTF_8, SpdxLicenseManagerTest.class.getClassLoader());
-        assertNotNull(licenses);
-        SpdxLicenseManager manager = SpdxLicenseManager.create().loadDefaults();
-
-        assertTrue(manager.containsId("Apache-2.0"));
-        assertFalse(manager.containsId("Commercial-42"));
-
-        assertTrue(manager.containsName("BSD 3-Clause No Nuclear License"));
-        assertFalse(manager.containsName("Very Commercial License 42"));
     }
 
 }
