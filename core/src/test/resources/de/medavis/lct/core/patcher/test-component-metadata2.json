@@ -1,0 +1,21 @@
+[
+    {
+        "groupMatch": "org\\.jdom",
+        "nameMatch": "jdom2",
+        "licenses": [
+            "Apache-1.0-JDOM"
+        ]
+    },
+    {
+        "purlMatch": "pkg:maven\\/us\\.springett\\/alpine-common@2\\.2\\.5\\?type=jar",
+        "licenses": [
+            "Apache-2.0"
+        ]
+    },
+    {
+        "purlMatch": "pkg:maven\\/com\\.pixelmed\\/any-lib@1\\.2\\.3\\.4\\?type=jar",
+        "licenses": [
+            "BSD-2-Clause"
+        ]
+    }
+]
