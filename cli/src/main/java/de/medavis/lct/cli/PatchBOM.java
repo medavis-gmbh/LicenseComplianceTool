@@ -23,6 +23,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
+import de.medavis.lct.core.asset.AssetLoader;
+import de.medavis.lct.core.license.LicenseLoader;
+import de.medavis.lct.core.license.LicenseMappingLoader;
+import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 import de.medavis.lct.core.patcher.BomPatcher;
 
 import java.nio.file.Path;
@@ -40,7 +44,13 @@ public class PatchBOM implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        BomPatcher patcher = new BomPatcher(configurationOptions);
+        BomPatcher patcher = new BomPatcher(
+                new AssetLoader(),
+                new ComponentMetaDataLoader(),
+                new LicenseLoader(),
+                new LicenseMappingLoader(),
+                configurationOptions);
+
         patcher.patch(inputFile, outputFile);
 
         return null;

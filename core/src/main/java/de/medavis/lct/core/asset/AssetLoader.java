@@ -43,7 +43,8 @@ public class AssetLoader {
     public Asset loadFromBom(InputStream bomStream) {
         Bom assetBom = parseBom(bomStream);
         String assetName = Joiner.on(".").join(
-                assetBom.getMetadata().getComponent().getGroup(),
+                // Group can be null
+                Optional.ofNullable(assetBom.getMetadata().getComponent().getGroup()).orElse(""),
                 assetBom.getMetadata().getComponent().getName());
         String assetVersion = assetBom.getMetadata().getComponent().getVersion();
         Set<Component> components = assetBom.getComponents() == null

@@ -25,6 +25,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.Json5MapperFactory;
 import de.medavis.lct.core.JsonPath;
+import de.medavis.lct.core.asset.AssetLoader;
+import de.medavis.lct.core.license.LicenseLoader;
+import de.medavis.lct.core.license.LicenseMappingLoader;
+import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.jupiter.api.Test;
@@ -41,28 +45,35 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BomPatcherTest {
 
-    private final Configuration c = new Configuration() {
-        @Override
-        public Optional<URL> getComponentMetadataUrl() {
-            try {
-                return Optional.of(Path.of("src/test/resources/de/medavis/lct/core/patcher/test-component-metadata.json").toUri().toURL());
-            } catch(MalformedURLException ex) {
-                throw new LicensePatcherException(ex.getMessage(), ex);
-            }
-        }
-    };
+    private BomPatcher createBomPatcher() {
+        return new BomPatcher(
+                new AssetLoader(),
+                new ComponentMetaDataLoader(),
+                new LicenseLoader(),
+                new LicenseMappingLoader(),
+                new Configuration() {
+                    @Override
+                    public Optional<URL> getComponentMetadataUrl() {
+                        try {
+                            return Optional.of(Path.of("src/test/resources/de/medavis/lct/core/patcher/test-component-metadata.json").toUri().toURL());
+                        } catch (MalformedURLException ex) {
+                            throw new LicensePatcherException(ex.getMessage(), ex);
+                        }
+                    }
+                }
+        );
+    }
 
     @Test
     void testCycloneDXSchema() {
-        BomPatcher patcher = new BomPatcher(c);
+        BomPatcher patcher = createBomPatcher();
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-version.json"), NullOutputStream.nullOutputStream()));
         assertThrows(LicensePatcherException.class, () -> patcher.patch(getClass().getResourceAsStream("/asset/test-bom-unsupported-format.json"), NullOutputStream.nullOutputStream()));
     }
 
     @Test
     void testPatchBOM() throws IOException {
-
-        BomPatcher patcher = new BomPatcher(c);
+        BomPatcher patcher = createBomPatcher();
 
         Path testFile = Path.of("target//test-results/test-patched-01.json");
         Files.deleteIfExists(testFile);

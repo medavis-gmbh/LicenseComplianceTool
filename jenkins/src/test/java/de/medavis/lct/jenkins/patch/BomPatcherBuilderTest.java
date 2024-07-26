@@ -6,6 +6,10 @@ import hudson.FilePath;
 import hudson.model.FreeStyleProject;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.core.asset.AssetLoader;
+import de.medavis.lct.core.license.LicenseLoader;
+import de.medavis.lct.core.license.LicenseMappingLoader;
+import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 import de.medavis.lct.core.patcher.BomPatcher;
 
 import org.apache.http.entity.ContentType;
@@ -62,7 +66,12 @@ class BomPatcherBuilderTest {
 
         baseUrl = String.format("http://%s:%d", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort());
 
-        BomPatcherBuilderFactory.setLicensesDownloaderFactory(configuration -> new BomPatcher(new Configuration() {
+        BomPatcherBuilderFactory.setLicensesDownloaderFactory(configuration -> new BomPatcher(
+                new AssetLoader(),
+                new ComponentMetaDataLoader(),
+                new LicenseLoader(),
+                new LicenseMappingLoader(),
+                new Configuration() {
 
             @Override
             public Optional<URL> getLicenseMappingsUrl() {

@@ -22,6 +22,12 @@ package de.medavis.lct.core.patcher;
 import com.google.common.io.ByteStreams;
 
 import de.medavis.lct.core.Configuration;
+import de.medavis.lct.core.asset.AssetLoader;
+import de.medavis.lct.core.license.LicenseLoader;
+import de.medavis.lct.core.license.LicenseMappingLoader;
+import de.medavis.lct.core.list.ComponentData;
+import de.medavis.lct.core.list.ComponentLister;
+import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cyclonedx.Version;
@@ -36,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +53,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -59,13 +67,27 @@ public class BomPatcher {
 
     private static final Pattern EXPRESSION_OR_PATTERN = Pattern.compile("^\\((?<id1>.*) OR (?<id2>.*)\\)$");
 
+    private final ComponentLister componentLister;
+    private final Configuration configuration;
+
     private final SpdxLicenseManager spdxLicenseManager;
     private final ComponentMetaDataManager componentMetaDataManager;
 
-    private final Configuration configuration;
-
-    public BomPatcher(@NotNull Configuration configuration) {
+    public BomPatcher(
+            @NotNull AssetLoader assetLoader,
+            @NotNull ComponentMetaDataLoader componentMetaDataLoader,
+            @NotNull LicenseLoader licenseLoader,
+            @NotNull LicenseMappingLoader licenseMappingLoader,
+            @NotNull Configuration configuration) {
         this.configuration = configuration;
+
+        componentLister = new ComponentLister(
+                assetLoader,
+                componentMetaDataLoader,
+                licenseLoader,
+                licenseMappingLoader,
+                configuration
+        );
 
         spdxLicenseManager = SpdxLicenseManager.create();
         componentMetaDataManager = ComponentMetaDataManager.create();
@@ -123,7 +145,6 @@ public class BomPatcher {
         try {
             final byte[] bomBytes = ByteStreams.toByteArray(in);
             Bom bom = BomParserFactory.createParser(bomBytes).parse(bomBytes);
-
             Version version = Arrays
                     .stream(Version.values())
                     .filter(v -> v.getVersionString().equals(bom.getSpecVersion()))
@@ -136,9 +157,14 @@ public class BomPatcher {
 
             String originalBom = BomGeneratorFactory.createJson(version, bom).toJsonString();
 
-            Optional.ofNullable(bom.getComponents())
-                    .orElse(List.of())
-                    .forEach(this::patchLicenses);
+            List<ComponentData> list = componentLister.listComponents(new ByteArrayInputStream(bomBytes));
+
+            // Map licenses back to original BOM
+            Map<String, ComponentData> purlMap = list.stream().collect(Collectors.toMap(ComponentData::getPurl, cd -> cd));
+            bom.getComponents()
+                    .stream()
+                    .filter(c -> purlMap.containsKey(c.getPurl()))
+                    .forEach(c -> patchLicense(c, purlMap.get(c.getPurl())));
 
             String patchedBom = BomGeneratorFactory.createJson(version, bom).toJsonString();
             out.write(patchedBom.getBytes(StandardCharsets.UTF_8));
@@ -231,6 +257,21 @@ public class BomPatcher {
         } else {
             LOGGER.warn("Expressions like '{}' currently not supported.", expression);
         }
+    }
+
+    private void patchLicense(@NotNull Component c, @NotNull ComponentData cd) {
+        c.setLicenses(new LicenseChoice());
+        cd.getLicenses()
+                .stream()
+                .map(this::mapLicense)
+                .forEach(l -> c.getLicenses().addLicense(l));
+    }
+
+    @NotNull
+    private License mapLicense(@NotNull de.medavis.lct.core.license.License l) {
+        License license = new License();
+        license.setName(l.getName());
+        return license;
     }
 
     /**

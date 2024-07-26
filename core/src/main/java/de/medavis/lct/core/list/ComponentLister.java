@@ -116,9 +116,9 @@ public class ComponentLister {
                 .findFirst()
                 .map(cmd -> {
                     String exportName = !Strings.isNullOrEmpty(cmd.mappedName()) ? cmd.mappedName() : combineGroupAndName(component);
-                    String url = !Strings.isNullOrEmpty(cmd.url()) ? cmd.url() : component.url();
+                    String url = Strings.isNullOrEmpty(cmd.url()) ? component.url() : cmd.url();
                     // TODO What to set in purl?
-                    return new ComponentData(exportName, component.version(), url, "", convertedLicenses, cmd.attributionNotices());
+                    return new ComponentData(exportName, component.version(), url, component.purl(), convertedLicenses, cmd.attributionNotices());
                 })
                 .orElse(new ComponentData(combineGroupAndName(component), component.version(), component.url(), component.purl(), convertedLicenses, Collections.emptySet()));
     }
