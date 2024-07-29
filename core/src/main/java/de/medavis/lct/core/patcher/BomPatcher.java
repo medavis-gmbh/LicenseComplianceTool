@@ -263,6 +263,8 @@ public class BomPatcher {
         c.setLicenses(new LicenseChoice());
         cd.getLicenses()
                 .stream()
+                // Map only valid licenses
+                .filter(l -> spdxLicenseManager.getSupportedLicenseIds().contains(l.getName()))
                 .map(this::mapLicense)
                 .forEach(l -> c.getLicenses().addLicense(l));
     }
@@ -270,7 +272,8 @@ public class BomPatcher {
     @NotNull
     private License mapLicense(@NotNull de.medavis.lct.core.license.License l) {
         License license = new License();
-        license.setName(l.getName());
+        // Do not wonder. License object from the asset loader may contain license id or license name.
+        license.setId(l.getName());
         license.setUrl(l.getUrl());
         return license;
     }
