@@ -78,7 +78,7 @@ class ComponentListerTest {
     void canMergeComponentsWithSameMappedName() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", "", ImmutableSet.of(
+                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", "pkg:maven/ch.qos.logback/logback-core@1.2.11?type=jar", ImmutableSet.of(
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         ), Collections.emptySet()),
@@ -92,7 +92,7 @@ class ComponentListerTest {
     void canMergeLicensesWhenMergingComponents() {
         assertThat(executeTest("metadata-mergeLogback", "license-empty", "licensemapping-empty", "test-bom-modifiedLicense"))
                 .containsExactly(
-                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", "", ImmutableSet.of(
+                        new ComponentData("Logback", "1.2.11", "https://github.com/ceki/logback", "pkg:maven/ch.qos.logback/logback-core@1.2.11?type=jar", ImmutableSet.of(
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("EPL-1.0-Modified", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
@@ -162,7 +162,7 @@ class ComponentListerTest {
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         ), Collections.emptySet()),
-                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://my.slf4j.com/", "", ImmutableSet.of(
+                        new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://my.slf4j.com/", "pkg:maven/org.slf4j/slf4j-api@1.7.32?type=jar", ImmutableSet.of(
                                 License.dynamic("MIT", "https://opensource.org/licenses/MIT")
                         ), Collections.emptySet())
                 );
@@ -176,7 +176,7 @@ class ComponentListerTest {
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         ), Collections.emptySet()),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", "", ImmutableSet.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", "pkg:maven/ch.qos.logback/logback-core@1.2.11?type=jar", ImmutableSet.of(
                                 License.dynamic("MYLICENSE", null)
                         ), Collections.emptySet()),
                         new ComponentData("org.slf4j.slf4j-api", "1.7.32", "https://github.com/qos-ch/slf4j", "pkg:maven/org.slf4j/slf4j-api@1.7.32?type=jar", ImmutableSet.of(
@@ -189,11 +189,11 @@ class ComponentListerTest {
     void canAddAttributionNotices() {
         assertThat(executeTest("metadata-logbackAttributionNotice", "license-empty", "licensemapping-empty", "test-bom"))
                 .containsExactly(
-                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", "", ImmutableSet.of(
+                        new ComponentData("ch.qos.logback.logback-classic", "1.2.11", "https://github.com/ceki/logback", "pkg:maven/ch.qos.logback/logback-classic@1.2.11?type=jar", ImmutableSet.of(
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         ), ImmutableSet.of("Copyright (c) 2015", "Guaranteed Log4Shell-free")),
-                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", "", ImmutableSet.of(
+                        new ComponentData("ch.qos.logback.logback-core", "1.2.11", "https://github.com/ceki/logback", "pkg:maven/ch.qos.logback/logback-core@1.2.11?type=jar", ImmutableSet.of(
                                 License.dynamic("EPL-1.0", null),
                                 License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
                         ), ImmutableSet.of("Copyright (c) 2015", "Guaranteed Log4Shell-free")),
