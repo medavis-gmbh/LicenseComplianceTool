@@ -271,6 +271,7 @@ public class BomPatcher {
     private License mapLicense(@NotNull de.medavis.lct.core.license.License l) {
         License license = new License();
         license.setName(l.getName());
+        license.setUrl(l.getUrl());
         return license;
     }
 

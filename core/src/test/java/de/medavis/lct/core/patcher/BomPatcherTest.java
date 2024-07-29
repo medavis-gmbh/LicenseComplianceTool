@@ -75,7 +75,7 @@ class BomPatcherTest {
     void testPatchBOM() throws IOException {
         BomPatcher patcher = createBomPatcher();
 
-        Path testFile = Path.of("target//test-results/test-patched-01.json");
+        Path testFile = Path.of("target/test-results/test-patched-01.json");
         Files.deleteIfExists(testFile);
 
         Path sourceFile = Path.of("src/test/resources/de/medavis/lct/core/patcher/test-bom-01.json");
