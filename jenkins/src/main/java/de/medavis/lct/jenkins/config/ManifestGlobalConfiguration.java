@@ -48,7 +48,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String licenseMappings;
 
     private String spdxLicenses;
-    private boolean resolveExpressions;
 
     public static ManifestGlobalConfiguration getInstance() {
         return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
@@ -125,17 +124,6 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     @DataBoundSetter
     public void setSpdxLicenses(String spdxLicenses) {
         this.spdxLicenses = spdxLicenses;
-        save();
-    }
-
-    @Override
-    public boolean isResolveExpressions() {
-        return resolveExpressions;
-    }
-
-    @DataBoundSetter
-    public void setResolveExpressions(boolean resolveExpressions) {
-        this.resolveExpressions = resolveExpressions;
         save();
     }
 

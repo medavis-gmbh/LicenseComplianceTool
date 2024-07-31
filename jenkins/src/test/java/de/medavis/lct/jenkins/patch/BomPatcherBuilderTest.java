@@ -82,10 +82,6 @@ class BomPatcherBuilderTest {
                         }
                     }
 
-                    @Override
-                    public boolean isResolveExpressions() {
-                        return true;
-                    }
                 })
         );
     }

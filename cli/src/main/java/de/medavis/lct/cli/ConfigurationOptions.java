@@ -43,8 +43,6 @@ class ConfigurationOptions implements Configuration {
 
     @Option(names = {"--spdxLicenseListUrl", "-sllu"}, description = "URL where to download official supported SPDX licenses. If not set, then local copy will be used")
     private String spdxLicenseListUri;
-    @Option(names = {"--resolveExpressions", "-re"}, description = "When set, then license expression will be resolved and mapped into licenses")
-    private boolean resolveExpressions;
 
     @Override
     public Optional<URL> getComponentMetadataUrl() {
@@ -65,11 +63,6 @@ class ConfigurationOptions implements Configuration {
     @NotNull
     public Optional<URL> getSpdxLicensesUrl() {
         return convert(spdxLicenseListUri);
-    }
-
-    @Override
-    public boolean isResolveExpressions() {
-        return resolveExpressions;
     }
 
 }

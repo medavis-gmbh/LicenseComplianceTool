@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MainTest {
@@ -51,7 +50,6 @@ class MainTest {
                 "--in=src/test/resources/test-bom-01.json",
                 "--out=" + testFile,
                 "--componentMetadata=" + uri,
-                "--resolveExpressions"
         });
 
         assertEquals(0, exitCode);
@@ -63,6 +61,5 @@ class MainTest {
         assertEquals("Apache-2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());
-        assertFalse(JsonPath.path(rootNode, "components[1].licenses[0]").has("expression"));
     }
 }

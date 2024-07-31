@@ -29,7 +29,6 @@ import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 
-import org.apache.commons.lang3.StringUtils;
 import org.cyclonedx.Version;
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.BomGeneratorFactory;
@@ -54,18 +53,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BomPatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BomPatcher.class);
-
-    private static final Pattern EXPRESSION_OR_PATTERN = Pattern.compile("^\\((?<id1>.*) OR (?<id2>.*)\\)$");
 
     private final ComponentLister componentLister;
     private final Configuration configuration;
@@ -180,85 +172,6 @@ public class BomPatcher {
         }
     }
 
-    /**
-     * Creates a {@link LicenseChoice} instance, add the given license names as
-     * {@link de.medavis.lct.core.license.License}s and return the {@link LicenseChoice} instance.
-     *
-     * @param licenseNames Name of licenses to add
-     * @return Returns the {@link LicenseChoice} instance but never null
-     */
-    @NotNull
-    private LicenseChoice createLicenses(@NotNull Set<String> licenseNames) {
-        LicenseChoice licenseChoice = new LicenseChoice();
-        licenseChoice.setLicenses(
-                licenseNames
-                        .stream()
-                        .map(n -> {
-                            License license = new License();
-                            license.setId(n);
-                            return license;
-                        })
-                        .collect(Collectors.toList()));
-
-        return licenseChoice;
-    }
-
-    /**
-     * Patch the licenses of a {@link Component} if configured
-     *
-     * @param component {@link Component} of the BOM model.
-     */
-    private void patchLicenses(@NotNull Component component) {
-        String purl =  Objects.toString(component.getPurl(), "");
-        LicenseChoice licensesChoice = component.getLicenses();
-        if (licensesChoice == null) {
-            // When no license node in component found then...Yes, this can be happened
-            componentMetaDataManager
-                    // Find licenses bei group name or PURL
-                    .findMatch(component.getGroup(), component.getName(), purl)
-                    .ifPresentOrElse(cm -> component.setLicenses(createLicenses(cm.licenses())),
-                            () -> LOGGER.warn("Component '{}' has no license information because unable to resolve", purl));
-        } else if (licensesChoice.getLicenses() != null && !licensesChoice.getLicenses().isEmpty()) {
-            // OK. License node includes one or more licenses
-            licensesChoice.getLicenses().forEach(license -> patchLicense(component, license));
-        } else if (licensesChoice.getExpression() != null && StringUtils.isNotBlank(licensesChoice.getExpression().getValue())) {
-            // Fine. License node includes expression of two or more licenses
-            if (configuration.isResolveExpressions()) {
-                patchLicenseByExpression(licensesChoice);
-            }
-        } else {
-            LOGGER.error("Invalid SBOM model. Licenses node of component '{}' must not be empty!", purl);
-        }
-    }
-
-    /**
-     * Resolve license expressions.
-     * <p/>
-     * <b>Note: Currently only one "or" expression supported</b>
-     *
-     * @param licenseChoice License choice element from the BOM model.
-     */
-    private void patchLicenseByExpression(@NotNull LicenseChoice licenseChoice) {
-        String expression = licenseChoice.getExpression().getValue();
-
-        Matcher matcher = EXPRESSION_OR_PATTERN.matcher(expression);
-        if (matcher.find()) {
-            // Create node 1
-            License licenseId1 = new License();
-            licenseId1.setId(matcher.group("id1"));
-
-            // Create node 2
-            License licenseId2 = new License();
-            licenseId2.setId(matcher.group("id2"));
-
-            // Remove all licenses and Add new licenses (Removing of expression will automatically be done by adding licenses)
-            licenseChoice.addLicense(licenseId1);
-            licenseChoice.addLicense(licenseId2);
-        } else {
-            LOGGER.warn("Expressions like '{}' currently not supported.", expression);
-        }
-    }
-
     private void patchLicense(@NotNull Component c, @NotNull ComponentData cd) {
         c.setLicenses(new LicenseChoice());
         cd.getLicenses()
@@ -276,43 +189,6 @@ public class BomPatcher {
         license.setId(l.getName());
         license.setUrl(l.getUrl());
         return license;
-    }
-
-    /**
-     * Patch the license element ob using "purl", license "id" and license "name" and the {@link ComponentMetaDataManager}.
-     *
-     * @param component Component of the BOM model
-     * @param license License to patch. This one {@link License} of the component {@link LicenseChoice} model.
-     */
-    private void patchLicense(
-            @NotNull Component component,
-            final @NotNull License license) {
-        String purl = component.getPurl();
-        LOGGER.trace("Try to patch license: {} of component {}", license, purl);
-        String licenseId = Objects.toString(license.getId());
-        String licenseName = Objects.toString(license.getName(), "");
-
-        if (spdxLicenseManager.match(licenseId, licenseName).isEmpty()) {
-            LOGGER.info("Package URL '{}' has an unsupported license id '{}' and/or license name '{}'.", purl, licenseId, licenseName);
-        }
-
-        componentMetaDataManager.findMatch(
-                component.getGroup(),
-                component.getName(),
-                component.getPurl()
-        ).ifPresentOrElse(cm -> {
-            if (cm.licenses() == null || cm.licenses().isEmpty()) {
-                LOGGER.warn("No license to set for purl '{}'.", purl);
-            } else if (cm.licenses().size() == 1) {
-                // Enrich license
-                license.setId(cm.licenses().stream().findFirst().orElse(""));
-                license.setName(null);
-                Optional.ofNullable(cm.url()).ifPresent(license::setUrl);
-            } else {
-                // Recreate licenses node with all licenses
-                component.setLicenses(createLicenses(cm.licenses()));
-            }
-        }, () -> LOGGER.warn("No match for purl '{}' found", purl));
     }
 
 }

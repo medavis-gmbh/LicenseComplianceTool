@@ -48,13 +48,4 @@ public interface Configuration {
         return Optional.empty();
     }
 
-    /**
-     * Used by license patcher feature.
-     *
-     * @return Boolean
-     */
-    default boolean isResolveExpressions() {
-        return false;
-    }
-
 }
