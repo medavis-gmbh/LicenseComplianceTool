@@ -52,12 +52,12 @@ class BomPatcherBuilderTest {
     void configureWebserver() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         httpServer.createContext(PATH, exchange -> {
-            URL url = getClass().getResource("/de/medavis/lct/jenkins/patch/DefaultLicenseRules.json5");
-            String body = Resources.toString(url, StandardCharsets.UTF_8);
+            URL url = getClass().getResource("/de/medavis/lct/jenkins/patch" + PATH);
+            byte[] data = Resources.toByteArray(url);
             exchange.getResponseHeaders().add("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
-            exchange.sendResponseHeaders(200, body.length());
+            exchange.sendResponseHeaders(200, data.length);
             try (var response = exchange.getResponseBody()) {
-                response.write(body.getBytes(StandardCharsets.UTF_8));
+                response.write(data);
                 response.flush();
             }
         });
@@ -73,23 +73,21 @@ class BomPatcherBuilderTest {
                 new LicenseMappingLoader(),
                 new Configuration() {
 
-            @Override
-            public Optional<URL> getLicenseMappingsUrl() {
-                try {
-                    URL url = new URL(baseUrl + PATH);
-                    return Optional.of(url);
-                } catch (MalformedURLException ex) {
+                    @Override
+                    public Optional<URL> getComponentMetadataUrl() {
+                        try {
+                            return Optional.of(new URL(baseUrl + PATH));
+                        } catch (MalformedURLException ex) {
+                            return Optional.empty();
+                        }
+                    }
 
-                    return Optional.empty();
-                }
-            }
-
-            @Override
-            public boolean isResolveExpressions() {
-                return true;
-            }
-
-        }));
+                    @Override
+                    public boolean isResolveExpressions() {
+                        return true;
+                    }
+                })
+        );
     }
 
     @AfterEach
@@ -120,7 +118,7 @@ class BomPatcherBuilderTest {
     private void executePipelineAndVerifyResult(JenkinsRule jenkins, SoftAssertions softly, String pipelineFile) throws Exception {
         WorkflowJob job = createJob(jenkins, pipelineFile);
         final FilePath workspace = jenkins.jenkins.getWorkspaceFor(job);
-        workspace.child("input.bom").write(getModifiedInputBom(), StandardCharsets.UTF_8.name());
+        workspace.child(INPUT_FILE).write(getModifiedInputBom(), StandardCharsets.UTF_8.name());
 
         jenkins.buildAndAssertSuccess(job);
 

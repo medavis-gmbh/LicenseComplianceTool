@@ -19,6 +19,7 @@
  */
 package de.medavis.lct.core.metadata;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.medavis.lct.core.Json5MapperFactory;
@@ -40,9 +41,7 @@ public class ComponentMetaDataLoader {
         ObjectMapper objectMapper = Json5MapperFactory.create();
 
         try {
-            List<ComponentMetadata> result = Json5MapperFactory
-                    .create()
-                    .readValue(metadataUrl, objectMapper.getTypeFactory().constructCollectionType(List.class, ComponentMetadata.class));
+            List<ComponentMetadata> result = List.of(objectMapper.readValue(metadataUrl, ComponentMetadata[].class));
 
             LOGGER.info("Imported {} component metadata entries from {}.", result.size(), metadataUrl);
             return result;
