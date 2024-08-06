@@ -44,12 +44,14 @@ class CreateManifest implements Callable<Void> {
     private File outputFile;
     @Option(names = {"--template", "-t"})
     private String template;
+    @Option(names = {"--ignoreUnavailableUrl", "-iuu"}, defaultValue = "true")
+    private boolean ignoreUnavailableUrl;
     @Mixin
     private ConfigurationOptions configurationOptions;
 
     @Override
     public Void call() throws Exception {
-        var componentLister = new ComponentLister(new AssetLoader(true), new ComponentMetaDataLoader(), new LicenseLoader(), new LicenseMappingLoader(),
+        var componentLister = new ComponentLister(new AssetLoader(ignoreUnavailableUrl), new ComponentMetaDataLoader(), new LicenseLoader(), new LicenseMappingLoader(),
                 configurationOptions);
         try (var bomInputStream = new FileInputStream(inputFile); var outputWriter = new FileWriter(outputFile)) {
             var components = componentLister.listComponents(bomInputStream);
