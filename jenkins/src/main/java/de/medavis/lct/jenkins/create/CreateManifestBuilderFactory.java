@@ -19,6 +19,7 @@
  */
 package de.medavis.lct.jenkins.create;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -33,8 +34,8 @@ import de.medavis.lct.core.outputter.FreemarkerOutputter;
 // TODO Try to use dependency injection (maybe using ExtensionFinder, GuiceFinder?)
 class CreateManifestBuilderFactory {
 
-    private static Function<Configuration, ComponentLister> componentListerFactory = configuration -> new ComponentLister(
-            new AssetLoader(),
+    private static BiFunction<Configuration, Boolean, ComponentLister> componentListerFactory = (configuration, ignoreUnavailableUrl) -> new ComponentLister(
+            new AssetLoader(ignoreUnavailableUrl),
             new ComponentMetaDataLoader(),
             new LicenseLoader(),
             new LicenseMappingLoader(),
@@ -44,8 +45,8 @@ class CreateManifestBuilderFactory {
     private CreateManifestBuilderFactory() {
     }
 
-    public static ComponentLister getComponentLister(Configuration configuration) {
-        return componentListerFactory.apply(configuration);
+    public static ComponentLister getComponentLister(Configuration configuration, final boolean ignoreUnavailableUrl) {
+        return componentListerFactory.apply(configuration, ignoreUnavailableUrl);
     }
 
     public static FreemarkerOutputter getOutputterFactory() {
@@ -55,7 +56,7 @@ class CreateManifestBuilderFactory {
     /**
      * Should only be used for tests
      */
-    static void setComponentListerFactory(Function<Configuration, ComponentLister> componentListerFactory) {
+    static void setComponentListerFactory(BiFunction<Configuration, Boolean, ComponentLister> componentListerFactory) {
         CreateManifestBuilderFactory.componentListerFactory = componentListerFactory;
     }
 

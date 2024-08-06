@@ -74,7 +74,7 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentListerFactory(configuration -> componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> componentListerMock);
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
         CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
