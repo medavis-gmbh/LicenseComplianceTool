@@ -192,7 +192,7 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                componentManifest inputPath: 'input.json', outputPath: 'output.pdf', templateUrl: 'file://template.ftl'
+                componentManifest inputPath: 'input.json', outputPath: 'output.pdf', templateUrl: 'file://template.ftl', ignoreUnavailableUrl: true
             }
         }
     }
@@ -201,6 +201,8 @@ pipeline {
 
 With the parameter `templateUrl`, you can specify a URL pointing to a custom FreeMarker template which is used to create the output. The parameter is optional.
 If it is not set, the template from link:core/src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
+
+If the parameter `ignoreUnavailableUrl` is set (default value: `false`), URLs from the SBOM are ignored when they are not available, i.e. no connection can be established or they return a different status code than 200. This is useful to prevent the generated component manifest from containing invalid links.
 
 
 === Download licenses
