@@ -33,6 +33,7 @@ class Main {
         commandLine.addSubcommand(new HelpCommand());
         commandLine.addSubcommand(new CreateManifest());
         commandLine.addSubcommand(new DownloadLicenses());
+        commandLine.addSubcommand(new AnalyzeComponents());
         System.exit(commandLine.execute(args));
     }
 
