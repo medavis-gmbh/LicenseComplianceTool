@@ -126,6 +126,7 @@ class LicensesDownloaderTest {
                 RandomStringUtils.randomAlphabetic(6),
                 RandomStringUtils.randomAlphabetic(6),
                 RandomStringUtils.randomAlphabetic(6),
+                RandomStringUtils.randomAlphabetic(6),
                 ImmutableSet.copyOf(licenses),
                 Collections.emptySet());
     }

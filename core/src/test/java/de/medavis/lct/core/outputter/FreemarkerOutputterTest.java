@@ -72,9 +72,9 @@ class FreemarkerOutputterTest {
 
         @Test
         void fullAttributes(@TempDir Path outputPath) throws IOException {
-            final ComponentData componentA = createComponent("ComponentA", "1.0.0", "https://component-a.com",
+            final ComponentData componentA = createComponent("ComponentA","1.0.0", "https://component-a.com", null,
                     createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
-            final ComponentData componentB = createComponent("ComponentB", "2.0.0", "https://component-b.com",
+            final ComponentData componentB = createComponent("ComponentB", "2.0.0", "https://component-b.com", null,
                     createLicenses("LIC-B", "https://license-b.com"), ImmutableSet.of("Copyright (c) 2015", "Resistance is futile"));
 
             createAndVerifyOutput(outputPath, componentA, componentB);
@@ -82,7 +82,7 @@ class FreemarkerOutputterTest {
 
         @Test
         void missingComponentUrl(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", "1.0.0", null,
+            final ComponentData component = createComponent("ComponentA", "1.0.0", null, null,
                     createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
@@ -90,7 +90,7 @@ class FreemarkerOutputterTest {
 
         @Test
         void missingVersionUrl(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", null, "https://component-a.com",
+            final ComponentData component = createComponent("ComponentA", null, "https://component-a.com", null,
                     createLicenses("LIC-A", "https://license-a.com"), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
@@ -98,7 +98,7 @@ class FreemarkerOutputterTest {
 
         @Test
         void missingLicenseUrl(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", "1.0.0", null,
+            final ComponentData component = createComponent("ComponentA", "1.0.0", null, null,
                     createLicenses("LIC-A", null), Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
@@ -106,7 +106,7 @@ class FreemarkerOutputterTest {
 
         @Test
         void noLicenses(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", Collections.emptySet(),
+            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", null, Collections.emptySet(),
                     Collections.singleton("Copyright (c) 2020"));
 
             createAndVerifyOutput(outputPath, component);
@@ -114,14 +114,14 @@ class FreemarkerOutputterTest {
 
         @Test
         void noAttributionNotices(@TempDir Path outputPath) throws IOException {
-            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", createLicenses("LIC-A", "https://license-a.com"),
+            final ComponentData component = createComponent("ComponentA", "1.0.0", "https://component-a.com", null, createLicenses("LIC-A", "https://license-a.com"),
                     Collections.emptySet());
 
             createAndVerifyOutput(outputPath, component);
         }
 
-        private ComponentData createComponent(String name, String version, String url, Set<License> licenses, Set<String> attributionNotices) {
-            return new ComponentData(name, version, url, licenses, attributionNotices);
+        private ComponentData createComponent(String name, String version, String url, String purl, Set<License> licenses, Set<String> attributionNotices) {
+            return new ComponentData(name, version, url, purl, licenses, attributionNotices);
         }
 
         private Set<License> createLicenses(String name, String url) {

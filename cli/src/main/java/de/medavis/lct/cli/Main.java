@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,19 +26,21 @@ import picocli.CommandLine.HelpCommand;
 @Command
 class Main {
 
-    public Main(String[] args) {
+    int run(String[] args) {
         System.setProperty("org.jboss.logging.provider", "slf4j");
 
         final CommandLine commandLine = new CommandLine(this);
         commandLine.addSubcommand(new HelpCommand());
         commandLine.addSubcommand(new CreateManifest());
         commandLine.addSubcommand(new DownloadLicenses());
-        System.exit(commandLine.execute(args));
+        commandLine.addSubcommand(new PatchBOM());
+
+        return commandLine.execute(args);
     }
 
     public static void main(String[] args) {
-        new Main(args);
-
+        Main main = new Main();
+        System.exit(main.run(args));
     }
 
 }

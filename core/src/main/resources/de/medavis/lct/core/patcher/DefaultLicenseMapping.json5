@@ -1,0 +1,204 @@
+{
+    "idPatchRules": [
+        {
+            "match": "CDDL or GPLv2 with exceptions",
+            "resolved": "CDDL-1.0"
+        },
+        {
+            "match": "GNU General Public License, Version 2 with the Classpath Exception",
+            "resolved": "GPL-2.0-with-classpath-exception"
+        },
+        {
+            "match": "Lesser General Public License (LGPL)",
+            "resolved": "MIT"
+        },
+    ],
+    "namePatchRules": [
+        {
+            "match": "Apache Software License 2.0",
+            "resolved": "Apache License 2.0"
+        },
+        {
+            "match": "Apache License, Version 2.0 and Common Development And Distribution License (CDDL) Version 1.0",
+            "resolved": "Apache License 2.0"
+        },
+        {
+            "match": "Apache License, 2.0",
+            "resolved": "Apache License 2.0"
+        },
+        {
+            "match": "CDDL or GPLv2 with exceptions",
+            "resolved": "Common Development and Distribution License 1.0"
+        },
+        {
+            "match": "GNU General Public License, Version 2 with the Classpath Exception",
+            "resolved": "GNU General Public License v2.0 w/Classpath exception"
+        },
+
+        {
+            "match": "Lesser General Public License (LGPL)",
+            "resolved": "GNU Lesser General Public License v2.1 only"
+        },
+        {
+            "match": "Mozilla Public License, Version 2.0",
+            "resolved": "Mozilla Public License 2.0"
+        }
+    ],
+    "urlMappingRules": [
+        {
+            "match": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "id": "CC0-1.0"
+        },
+        {
+            "match": "https://www.bouncycastle.org/licence.html",
+            "id": "MIT"
+        }
+    ],
+    "purlMappingRules": [
+        {
+            "match": "pkg:maven/org.apache/xmlsec@1.4.3?type=jar",
+            "id": "Apache-1.0"
+        },
+        {
+            "match": "pkg:maven/jakarta-regexp/jakarta-regexp@1.4?type=jar",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/xalan/xalan@2.7.0?type=jar",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/jakarta-regexp/jakarta-regexp@1.4?type=jar",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/org.apache.xbean/xbean-asm9-shaded@4.20?type=jar",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven\\/com\\.github\\.kenglxn\\.qrgen\\/.*@2\\.6\\.0\\?type=jar",
+            "regex": true,
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/com.apachelounge/httpd@2.4.58-win64?classifier=vs17&type=zip",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/com.vaadin.componentfactory/togglebutton@1.0.2?type=jar",
+            "id": "Apache-2.0"
+        },
+        {
+            "match": "pkg:maven/com.samskivert/jmustache@1.14?type=jar",
+            "id": "BSD-2-Clause"
+        },
+        {
+            "match": "pkg:maven\\/com\\.pixelmed\\/.*@.*\\?type=jar",
+            "regex": true,
+            "id": "BSD-2-Clause"
+        },
+        {
+            "match": "pkg:maven/org.jvnet.jaxb2_commons/jaxb2-basics-runtime@0.11.1?type=jar",
+            "id": "BSD-2-Clause"
+        },
+        {
+            "match": "pkg:maven\\/com\\.twelvemonkeys\\.imageio\\/imageio.*@3\\.1\\.0\\?type=jar",
+            "regex": true,
+            "id": "BSD-3-Clause"
+        },
+        {
+            "match": "pkg:maven\\/com\\.twelvemonkeys\\.common\\/common-.*@3\\.1\\.0\\?type=jar",
+            "regex": true,
+            "id": "BSD-3-Clause"
+        },
+        {
+            "match": "pkg:maven/com.github.jai-imageio/jai-imageio-core@1.4.0?type=jar",
+            "id": "BSD-3-Clause"
+        },
+        {
+            "match": "pkg:maven/io.github.x-stream/mxparser@1.2.2?type=jar",
+            "id": "BSD-4-Clause"
+        },
+        {
+            "match": "pkg:maven/pull-parser/pull-parser@2.1.10?type=jar",
+            "id": "BSD-4-Clause"
+        },
+        {
+            "match": "pkg:maven/javax.servlet/servlet-api@2.5?type=jar",
+            "id": "CDDL-1.0"
+        },
+        {
+            "match": "pkg:maven/javax.xml.bind/jsr173_api@1.0?type=jar",
+            // Assuming that this is a CDDL 1.0 license
+            "id": "CDDL-1.0"
+        },
+        {
+            "match": "^pkg:maven\\/org\\.glassfish\\.grizzly\\/.*@2\\.3\\.14\\?type=jar$",
+            "regex": true,
+            "id": "CDDL-1.1"
+        },
+        {
+            "match": "pkg:maven/wsdl4j/wsdl4j@1.6.3?type=jar",
+            "id": "CPL-1.0"
+        },
+        {
+            "match": "pkg:maven\\/com\\.amazon\\/corretto.*@.*\\?classifier=windows-x64-((jre)|(jdk))&type=zip",
+            "regex": true,
+            "id": "GPL-2.0-with-classpath-exception"
+        },
+        {
+            "match": "pkg:maven/org.jboss.spec.javax.interceptor/jboss-interceptors-api_1.1_spec@1.0.0.Beta1?type=jar",
+            "id": "LGPL-2.1"
+        },
+        {
+            "match": "pkg:maven/com.ibm.icu/icu4j@72.1?type=jar",
+            "id": "ICU"
+        },
+        {
+            "match": "pkg:maven/net.suberic/javamail-crypto@1.0?type=jar",
+            "id": "LGPL-2.0"
+        },
+        {
+            "match": "pkg:maven/snoozesoft/systray4j@2.4.1?type=jar",
+            "id": "LGPL-2.0"
+        },
+        {
+            "match": "pkg:maven/net.suberic/javamail-crypto-bouncycastle-smime@1.0?type=jar",
+            "id": "LGPL-2.0"
+        },
+        {
+            "match": "pkg:maven/xom/xom@1.2.5?type=jar",
+            "id": "LGPL-2.1"
+        },
+        {
+            "match": "pkg:maven\\/org\\.hibernate.*@.*\\?type=jar",
+            "regex": true,
+            "id": "LGPL-2.1",
+        },
+        {
+            "match": "pkg:maven/com.github.albfernandez/juniversalchardet@2.3.2?type=jar",
+            "id": "LGPL-3.0"
+        },
+        {
+            "match": "pkg:maven/com.tupilabs/human-name-parser@0.2?type=jar",
+            "id": "MIT"
+        },
+        {
+            "match": "pkg:maven/com.fg/xmleditor-.*\\?type=jar",
+            "regex": true,
+            "id": "CC0-1.0"
+        },
+        {
+            "match": "pkg:maven/xmlpull/xmlpull@1.1.3.1?type=jar",
+            "id": "CC0-1.0"
+        },
+        {
+            "match": "pkg:maven/aopalliance/aopalliance@1.0?type=jar",
+            "id": "CC0-1.0"
+        },
+        {
+            "match": "pkg:maven/com.fg/xmleditor@1.0.1?type=jar,",
+            "id": "CC0-1.0"
+        }
+    ]
+}

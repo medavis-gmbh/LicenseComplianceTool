@@ -21,9 +21,8 @@ package de.medavis.lct.core.asset;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
-import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,13 +45,13 @@ class AssetLoaderTest {
         assertThat(actual.name()).isEqualTo("de.medavis.license-compliance-tool-core");
         assertThat(actual.version()).isEqualTo("1.4.0");
         assertThat(actual.components()).contains(
-                new Component("org.cyclonedx", "cyclonedx-core-java", "9.0.0", "https://github.com/CycloneDX/cyclonedx-core-java.git", ImmutableSet.of(
+                new Component("org.cyclonedx", "cyclonedx-core-java", "9.0.0", "https://github.com/CycloneDX/cyclonedx-core-java.git", "pkg:maven/org.cyclonedx/cyclonedx-core-java@9.0.0?type=jar", ImmutableSet.of(
                         License.dynamic("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
                 )),
-                new Component("org.codehaus.woodstox", "stax2-api", "4.2.2", "http://github.com/FasterXML/stax2-api", ImmutableSet.of(
+                new Component("org.codehaus.woodstox", "stax2-api", "4.2.2", "http://github.com/FasterXML/stax2-api", "pkg:maven/org.codehaus.woodstox/stax2-api@4.2.2?type=jar", ImmutableSet.of(
                         License.dynamic("BSD-2-Clause", null)
                 )),
-                new Component("org.slf4j", "slf4j-api", "2.0.13", "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api", ImmutableSet.of(
+                new Component("org.slf4j", "slf4j-api", "2.0.13", "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api", "pkg:maven/org.slf4j/slf4j-api@2.0.13?type=jar", ImmutableSet.of(
                         License.dynamic("MIT", "https://opensource.org/licenses/MIT"),
                         License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")))
         );

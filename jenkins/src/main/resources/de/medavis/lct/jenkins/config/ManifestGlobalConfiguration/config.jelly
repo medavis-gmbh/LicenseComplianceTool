@@ -11,5 +11,9 @@
         <f:entry field="licenseMappings" title="${%licenseMappings}">
             <f:textbox />
         </f:entry>
+        <f:entry field="spdxLicenses" title="${%spdxLicenses}" description="${%spdxLicenses.description}">
+            <f:textbox />
+        </f:entry>
+
     </f:section>
 </j:jelly>
