@@ -44,7 +44,7 @@ class CreateManifest implements Callable<Void> {
     private File outputFile;
     @Option(names = {"--template", "-t"})
     private String template;
-    @Option(names = {"--ignoreUnavailableUrl", "-iuu"}, defaultValue = "true")
+    @Option(names = {"--ignoreUnavailableUrl", "-iuu"}, defaultValue = "false")
     private boolean ignoreUnavailableUrl;
     @Mixin
     private ConfigurationOptions configurationOptions;
