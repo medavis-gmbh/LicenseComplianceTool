@@ -33,7 +33,7 @@ import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 // TODO Try to use dependency injection (maybe using ExtensionFinder, GuiceFinder?)
 class LicenseDownloadBuilderFactory {
 
-    private static Function<Configuration, LicensesDownloader> licensesDownloaderFactory = configuration -> new LicensesDownloader(
+    private static final Function<Configuration, LicensesDownloader> defaultFactory = configuration -> new LicensesDownloader(
             new ComponentLister(
                     new AssetLoader(),
                     new ComponentMetaDataLoader(),
@@ -42,6 +42,7 @@ class LicenseDownloadBuilderFactory {
                     configuration),
             new LicenseFileDownloader()
     );
+    private static Function<Configuration, LicensesDownloader> licensesDownloaderFactory = defaultFactory;
 
     private LicenseDownloadBuilderFactory() {
     }
@@ -55,6 +56,13 @@ class LicenseDownloadBuilderFactory {
      */
     static void setLicensesDownloaderFactory(Function<Configuration, LicensesDownloader> licensesDownloaderFactory) {
         LicenseDownloadBuilderFactory.licensesDownloaderFactory = licensesDownloaderFactory;
+    }
+
+    /**
+     * Should only be used for tests
+     */
+    static void resetLicensesDownloaderFactory() {
+        LicenseDownloadBuilderFactory.licensesDownloaderFactory = defaultFactory;
     }
 
 }

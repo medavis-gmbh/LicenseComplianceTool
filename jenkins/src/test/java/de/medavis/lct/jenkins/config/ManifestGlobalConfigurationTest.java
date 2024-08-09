@@ -36,6 +36,7 @@ public class ManifestGlobalConfigurationTest {
     private static final String COMPONENT_METADATA_URL = "https://component.metadata.url";
     private static final String LICENSES_URL = "https://licenses.url";
     private static final String LICENSES_MAPPING_URL = "https://licenses.mapping.url";
+    private static final String OVERRIDE_URL = "https://override.url";
 
     @Rule
     public JenkinsSessionRule jenkinsSession = new JenkinsSessionRule();
@@ -51,6 +52,23 @@ public class ManifestGlobalConfigurationTest {
             verifyStoredConfig("After submit");
         });
         jenkinsSession.then(jenkins -> verifyStoredConfig("After restart"));
+    }
+
+    @Test
+    public void overrideComponentMetadata() throws Throwable {
+        jenkinsSession.then(jenkins -> {
+            // Store default values
+            HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
+            setInputValue(config, "_.componentMetadata", COMPONENT_METADATA_URL);
+            setInputValue(config, "_.licenses", LICENSES_URL);
+            setInputValue(config, "_.licenseMappings", LICENSES_MAPPING_URL);
+            jenkins.submit(config);
+
+            // Override component metadata
+            assertThat(ManifestGlobalConfiguration.getInstance(OVERRIDE_URL, null, null).getComponentMetadata()).isEqualTo(OVERRIDE_URL);
+            assertThat(ManifestGlobalConfiguration.getInstance(null, OVERRIDE_URL, null).getLicenses()).isEqualTo(OVERRIDE_URL);
+            assertThat(ManifestGlobalConfiguration.getInstance(null, null, OVERRIDE_URL).getLicenseMappings()).isEqualTo(OVERRIDE_URL);
+        });
     }
 
     private void setInputValue(HtmlForm config, String name, String value) {

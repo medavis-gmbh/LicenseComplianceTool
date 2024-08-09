@@ -39,22 +39,26 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.downloader.LicensesDownloader;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
+import de.medavis.lct.jenkins.util.UrlValidator;
 
 public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
+    // Required parameters
     private final String inputPath;
     private final String outputPath;
-    private final transient LicensesDownloader licenseDownloader;
+
+    // Optional parameters
     private boolean failOnDynamicLicense;
+    private String componentMetadataOverride;
+    private String licensesOverride;
+    private String licenseMappingsOverride;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(ManifestGlobalConfiguration.getInstance());
     }
 
     public String getInputPath() {
@@ -74,9 +78,38 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         this.failOnDynamicLicense = failOnDynamicLicense;
     }
 
+    public String getComponentMetadataOverride() {
+        return componentMetadataOverride;
+    }
+
+    @DataBoundSetter
+    public void setComponentMetadataOverride(final String componentMetadataOverride) {
+        this.componentMetadataOverride = componentMetadataOverride;
+    }
+
+    public String getLicensesOverride() {
+        return licensesOverride;
+    }
+
+    @DataBoundSetter
+    public void setLicensesOverride(final String licensesOverride) {
+        this.licensesOverride = licensesOverride;
+    }
+
+    public String getLicenseMappingsOverride() {
+        return licenseMappingsOverride;
+    }
+
+    @DataBoundSetter
+    public void setLicenseMappingsOverride(final String licenseMappingsOverride) {
+        this.licenseMappingsOverride = licenseMappingsOverride;
+    }
+
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
+        var licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(ManifestGlobalConfiguration.getInstance(componentMetadataOverride, licensesOverride, licenseMappingsOverride));
+
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
@@ -109,6 +142,21 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         @POST
         public FormValidation doCheckOutputPath(@QueryParameter String value) {
             return FormValidation.validateRequired(value);
+        }
+
+        @POST
+        public FormValidation doCheckComponentMetadataOverride(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
+        @POST
+        public FormValidation doCheckLicensesOverride(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
+        @POST
+        public FormValidation doCheckLicenseMappingsOverride(@QueryParameter String value) {
+            return UrlValidator.validate(value);
         }
 
     }

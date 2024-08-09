@@ -25,9 +25,11 @@ import hudson.model.Label;
 import hudson.model.Run.Artifact;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+
 import jenkins.util.VirtualFile;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -48,6 +50,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
@@ -66,15 +69,23 @@ class CreateManifestBuilderTest {
             new ComponentData("name", "version", "url", Collections.emptySet(), Collections.emptySet()));
     private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
     private static final String FAKE_MANIFEST = "IRL, I would be the manifest";
+    private static final String COMPONENT_METADATA_OVERRIDE_URL = "http://componentMetadata.override";
+    private static final String LICENSES_OVERRIDE_URL = "http://licenses.override";
+    private static final String LICENSE_MAPPINGS_OVERRIDE_URL = "http://licenseMappings.override";
 
     @Mock(strictness = Strictness.LENIENT)
     private ComponentLister componentListerMock;
     @Mock(strictness = Strictness.LENIENT)
     private FreemarkerOutputter outputterMock;
 
+    private Configuration capturedConfiguration;
+
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> {
+            capturedConfiguration = configuration;
+            return componentListerMock;
+        });
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
         CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
@@ -90,6 +101,9 @@ class CreateManifestBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setTemplateUrl(TEMPLATE_URL);
+        builder.setComponentMetadataOverride(COMPONENT_METADATA_OVERRIDE_URL);
+        builder.setLicensesOverride(LICENSES_OVERRIDE_URL);
+        builder.setLicenseMappingsOverride(LICENSE_MAPPINGS_OVERRIDE_URL);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
@@ -104,6 +118,15 @@ class CreateManifestBuilderTest {
     @Test
     void testDeclarativePipelineBuild(JenkinsRule jenkins) throws Exception {
         runAndAssertPipelineJob(jenkins, "declarativePipeline.groovy");
+    }
+
+    @Test
+    void testConfigurationOverride(JenkinsRule jenkins) throws Exception {
+        runAndAssertPipelineJob(jenkins, "declarativePipelineOverride.groovy");
+
+        assertThat(capturedConfiguration.getComponentMetadataUrl()).hasValue(new URL(COMPONENT_METADATA_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicensesUrl()).hasValue(new URL(LICENSES_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicenseMappingsUrl()).hasValue(new URL(LICENSE_MAPPINGS_OVERRIDE_URL));
     }
 
     private void runAndAssertPipelineJob(JenkinsRule jenkins, String pipelineFile) throws Exception {

@@ -9,4 +9,13 @@
     <f:entry title="${%failOnDynamicLicense}" field="failOnDynamicLicense" description="${%failOnDynamicLicense.description}">
         <f:checkbox />
     </f:entry>
+    <f:entry title="${%componentMetadataOverride}" field="componentMetadataOverride" description="${%override.description}">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%licensesOverride}" field="licensesOverride" description="${%override.description}">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%licenseMappingsOverride}" field="licenseMappingsOverride" description="${%override.description}">
+        <f:textbox />
+    </f:entry>
 </j:jelly>

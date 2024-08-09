@@ -51,8 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.medavis.lct.core.list.ComponentData;
-import de.medavis.lct.core.list.ComponentLister;
-import de.medavis.lct.core.outputter.FreemarkerOutputter;
 import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 import de.medavis.lct.jenkins.util.UrlValidator;
@@ -64,20 +62,22 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
     private static final Logger log = LoggerFactory.getLogger(CreateManifestBuilder.class);
 
+    // Required parameters
     private final String inputPath;
     private final String outputPath;
+
+    // Optional parameters
     private String templateUrl;
     private boolean ignoreUnavailableUrl;
+    private String componentMetadataOverride;
+    private String licensesOverride;
+    private String licenseMappingsOverride;
 
-    private transient ComponentLister componentLister;
-    private final transient FreemarkerOutputter outputter;
 
     @DataBoundConstructor
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance(), false);
-        this.outputter = CreateManifestBuilderFactory.getOutputterFactory();
     }
 
     public String getInputPath() {
@@ -92,26 +92,54 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
         return templateUrl;
     }
 
-    public boolean isIgnoreUnavailableUrl() {
-        return ignoreUnavailableUrl;
-    }
-
     @DataBoundSetter
     public void setTemplateUrl(String templateUrl) {
         this.templateUrl = templateUrl;
     }
 
+    public boolean isIgnoreUnavailableUrl() {
+        return ignoreUnavailableUrl;
+    }
+
     @DataBoundSetter
     public void setIgnoreUnavailableUrl(final boolean ignoreUnavailableUrl) {
-        if (this.ignoreUnavailableUrl != ignoreUnavailableUrl) {
-            this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance(), ignoreUnavailableUrl);
-            this.ignoreUnavailableUrl = ignoreUnavailableUrl;
-        }
+        this.ignoreUnavailableUrl = ignoreUnavailableUrl;
+    }
+
+    public String getComponentMetadataOverride() {
+        return componentMetadataOverride;
+    }
+
+    @DataBoundSetter
+    public void setComponentMetadataOverride(final String componentMetadataOverride) {
+        this.componentMetadataOverride = componentMetadataOverride;
+    }
+
+    public String getLicensesOverride() {
+        return licensesOverride;
+    }
+
+    @DataBoundSetter
+    public void setLicensesOverride(final String licensesOverride) {
+        this.licensesOverride = licensesOverride;
+    }
+
+    public String getLicenseMappingsOverride() {
+        return licenseMappingsOverride;
+    }
+
+    @DataBoundSetter
+    public void setLicenseMappingsOverride(final String licenseMappingsOverride) {
+        this.licenseMappingsOverride = licenseMappingsOverride;
     }
 
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
+        final ManifestGlobalConfiguration configuration = ManifestGlobalConfiguration.getInstance(componentMetadataOverride, licensesOverride, licenseMappingsOverride);
+        var componentLister = CreateManifestBuilderFactory.getComponentLister(configuration, ignoreUnavailableUrl);
+        var outputter = CreateManifestBuilderFactory.getOutputterFactory();
+
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Writing component manifest from '%s' to '%s'.%n", inputPath, outputPath);
@@ -150,6 +178,21 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public FormValidation doCheckTemplateUrl(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
+        @POST
+        public FormValidation doCheckComponentMetadataOverride(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
+        @POST
+        public FormValidation doCheckLicensesOverride(@QueryParameter String value) {
+            return UrlValidator.validate(value);
+        }
+
+        @POST
+        public FormValidation doCheckLicenseMappingsOverride(@QueryParameter String value) {
             return UrlValidator.validate(value);
         }
 
