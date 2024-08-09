@@ -25,9 +25,6 @@ import hudson.model.PersistentDescriptor;
 import hudson.util.FormValidation;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import jenkins.model.GlobalConfiguration;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -47,7 +44,16 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     private String licenseMappings;
 
     public static ManifestGlobalConfiguration getInstance() {
-        return GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
+        return getInstance(null, null, null);
+    }
+
+    public static ManifestGlobalConfiguration getInstance(String componentMetadataOverride, String licensesOverride, String licenseMappingsOverride) {
+        var defaultConfiguration = GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
+        var result = new ManifestGlobalConfiguration();
+       result.setComponentMetadata(componentMetadataOverride != null ? componentMetadataOverride : defaultConfiguration.getComponentMetadata());
+       result.setLicenses(licensesOverride != null ? licensesOverride : defaultConfiguration.getLicenses());
+       result.setLicenseMappings(licenseMappingsOverride != null ? licenseMappingsOverride : defaultConfiguration.getLicenseMappings());
+       return result;
     }
 
     public String getComponentMetadata() {

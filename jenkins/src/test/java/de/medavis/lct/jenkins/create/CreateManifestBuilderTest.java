@@ -25,9 +25,12 @@ import hudson.model.Label;
 import hudson.model.Run.Artifact;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
+
 import jenkins.util.VirtualFile;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -48,6 +51,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
@@ -72,9 +76,11 @@ class CreateManifestBuilderTest {
     @Mock(strictness = Strictness.LENIENT)
     private FreemarkerOutputter outputterMock;
 
+    private Configuration capturedConfiguration;
+
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory(componentListerFactoryMock());
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
         CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
@@ -83,6 +89,13 @@ class CreateManifestBuilderTest {
             writer.write(FAKE_MANIFEST);
             return null;
         }).when(outputterMock).output(any(), any(), any());
+    }
+
+    private BiFunction<Configuration, Boolean, ComponentLister> componentListerFactoryMock() {
+        return (configuration, ignoreUnavailableUrl) -> {
+            capturedConfiguration = configuration;
+            return componentListerMock;
+        };
     }
 
     @Test
@@ -104,6 +117,15 @@ class CreateManifestBuilderTest {
     @Test
     void testDeclarativePipelineBuild(JenkinsRule jenkins) throws Exception {
         runAndAssertPipelineJob(jenkins, "declarativePipeline.groovy");
+    }
+
+    @Test
+    void testConfigurationOverride(JenkinsRule jenkins) throws Exception {
+        runAndAssertPipelineJob(jenkins, "declarativePipelineOverride.groovy");
+
+        assertThat(capturedConfiguration.getComponentMetadataUrl()).hasValue(new URL("http://componentMetadata.override"));
+        assertThat(capturedConfiguration.getLicensesUrl()).hasValue(new URL("http://licenses.override"));
+        assertThat(capturedConfiguration.getLicenseMappingsUrl()).hasValue(new URL("http://licenseMappins.override"));
     }
 
     private void runAndAssertPipelineJob(JenkinsRule jenkins, String pipelineFile) throws Exception {
