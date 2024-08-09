@@ -29,7 +29,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import jenkins.util.VirtualFile;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -70,9 +69,9 @@ class CreateManifestBuilderTest {
             new ComponentData("name", "version", "url", Collections.emptySet(), Collections.emptySet()));
     private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
     private static final String FAKE_MANIFEST = "IRL, I would be the manifest";
-    protected static final String COMPONENT_METADATA_OVERRIDE_URL = "http://componentMetadata.override";
-    protected static final String LICENSES_OVERRIDE_URL = "http://licenses.override";
-    protected static final String LICENSE_MAPPINGS_OVERRIDE_URL = "http://licenseMappings.override";
+    private static final String COMPONENT_METADATA_OVERRIDE_URL = "http://componentMetadata.override";
+    private static final String LICENSES_OVERRIDE_URL = "http://licenses.override";
+    private static final String LICENSE_MAPPINGS_OVERRIDE_URL = "http://licenseMappings.override";
 
     @Mock(strictness = Strictness.LENIENT)
     private ComponentLister componentListerMock;
@@ -83,7 +82,10 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentListerFactory(componentListerFactoryMock());
+        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> {
+            capturedConfiguration = configuration;
+            return componentListerMock;
+        });
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
         CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
@@ -92,13 +94,6 @@ class CreateManifestBuilderTest {
             writer.write(FAKE_MANIFEST);
             return null;
         }).when(outputterMock).output(any(), any(), any());
-    }
-
-    private BiFunction<Configuration, Boolean, ComponentLister> componentListerFactoryMock() {
-        return (configuration, ignoreUnavailableUrl) -> {
-            capturedConfiguration = configuration;
-            return componentListerMock;
-        };
     }
 
     @Test

@@ -23,8 +23,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                writeFile(file: 'input.bom', text: 'Normally, this would be a CycloneDX SBOM.')
-                componentManifest inputPath: 'input.bom', outputPath: 'output.html', templateUrl: 'file://template.ftl',
+                downloadLicenses inputPath: 'input.json', outputPath: 'output/licenses',
                         componentMetadataOverride: 'http://componentMetadata.override',
                         licensesOverride: 'http://licenses.override',
                         licenseMappingsOverride: 'http://licenseMappings.override'

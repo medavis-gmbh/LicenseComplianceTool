@@ -19,26 +19,29 @@
  */
 package de.medavis.lct.jenkins.download;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
-import com.sun.net.httpserver.HttpServer;
-import hudson.FilePath;
-import hudson.model.FreeStyleProject;
-import hudson.model.Result;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
+import com.sun.net.httpserver.HttpServer;
+import hudson.FilePath;
+import hudson.model.FreeStyleProject;
+import hudson.model.Result;
 import org.apache.http.entity.ContentType;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +51,10 @@ import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.downloader.LicensesDownloader;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 @WithJenkins
@@ -64,14 +68,20 @@ class LicenseDownloadBuilderTest {
             "LGPL-2.1", "This is LGPL-2.1",
             "MIT", "This is MIT");
     private static final String OUTPUT_EXT = ".txt";
+    private static final String COMPONENT_METADATA_OVERRIDE_URL = "http://componentMetadata.override";
+    private static final String LICENSES_OVERRIDE_URL = "http://licenses.override";
+    private static final String LICENSE_MAPPINGS_OVERRIDE_URL = "http://licenseMappings.override";
 
     @Mock(strictness = Strictness.LENIENT)
     private LicensesDownloader licenseDownloaderMock;
     private String baseUrl;
     private HttpServer httpServer;
+    private Configuration capturedConfiguration;
 
     @BeforeEach
-    void configureWebserver() throws IOException {
+    void setUp() throws IOException {
+        LicenseDownloadBuilderFactory.resetLicensesDownloaderFactory();
+
         httpServer = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         httpServer.createContext("/", exchange -> {
             var path = exchange.getRequestURI().getPath();
@@ -105,6 +115,9 @@ class LicenseDownloadBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final LicenseDownloadBuilder builder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setFailOnDynamicLicense(true);
+        builder.setComponentMetadataOverride(COMPONENT_METADATA_OVERRIDE_URL);
+        builder.setLicensesOverride(LICENSES_OVERRIDE_URL);
+        builder.setLicenseMappingsOverride(LICENSE_MAPPINGS_OVERRIDE_URL);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
@@ -132,16 +145,35 @@ class LicenseDownloadBuilderTest {
                 .contains(FAKE_LICENSES.keySet());
     }
 
+    @Test
+    void testConfigurationOverride(JenkinsRule jenkins) throws Exception {
+        LicenseDownloadBuilderFactory.setLicensesDownloaderFactory(configuration -> {
+            capturedConfiguration = configuration;
+            return licenseDownloaderMock;
+        });
+
+        executePipeline(jenkins, "declarativePipelineOverride.groovy");
+
+        assertThat(capturedConfiguration.getComponentMetadataUrl()).hasValue(new URL(COMPONENT_METADATA_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicensesUrl()).hasValue(new URL(LICENSES_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicenseMappingsUrl()).hasValue(new URL(LICENSE_MAPPINGS_OVERRIDE_URL));
+    }
+
     private void executePipelineAndVerifyResult(JenkinsRule jenkins, SoftAssertions softly, String pipelineFile) throws Exception {
+        final FilePath workspace = executePipeline(jenkins, pipelineFile);
+
+        assertThat(Paths.get(workspace.toURI()).resolve(OUTPUT_PATH))
+                .isNotEmptyDirectory()
+                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> softly.assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
+    }
+
+    private FilePath executePipeline(final JenkinsRule jenkins, final String pipelineFile) throws Exception {
         WorkflowJob job = createJob(jenkins, pipelineFile);
         final FilePath workspace = jenkins.jenkins.getWorkspaceFor(job);
         workspace.child("input.json").write(getModifiedInputBom(), StandardCharsets.UTF_8.name());
 
         jenkins.buildAndAssertSuccess(job);
-
-        assertThat(Paths.get(workspace.toURI()).resolve(OUTPUT_PATH))
-                .isNotEmptyDirectory()
-                .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> softly.assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
+        return workspace;
     }
 
     private WorkflowJob createJob(JenkinsRule jenkins, String name) throws IOException {
