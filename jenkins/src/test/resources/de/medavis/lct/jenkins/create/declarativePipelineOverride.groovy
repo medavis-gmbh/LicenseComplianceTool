@@ -28,7 +28,7 @@ pipeline {
                 componentManifest inputPath: 'input.bom', outputPath: 'output.html', templateUrl: 'file://template.ftl',
                         componentMetadataOverride: 'http://componentMetadata.override',
                         licensesOverride: 'http://licenses.override',
-                        licenseMappingsOverride: 'http://licenseMappins.override'
+                        licenseMappingsOverride: 'http://licenseMappings.override'
             }
         }
     }

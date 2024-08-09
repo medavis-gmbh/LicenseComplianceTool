@@ -70,6 +70,9 @@ class CreateManifestBuilderTest {
             new ComponentData("name", "version", "url", Collections.emptySet(), Collections.emptySet()));
     private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
     private static final String FAKE_MANIFEST = "IRL, I would be the manifest";
+    protected static final String COMPONENT_METADATA_OVERRIDE_URL = "http://componentMetadata.override";
+    protected static final String LICENSES_OVERRIDE_URL = "http://licenses.override";
+    protected static final String LICENSE_MAPPINGS_OVERRIDE_URL = "http://licenseMappings.override";
 
     @Mock(strictness = Strictness.LENIENT)
     private ComponentLister componentListerMock;
@@ -103,6 +106,9 @@ class CreateManifestBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setTemplateUrl(TEMPLATE_URL);
+        builder.setComponentMetadataOverride(COMPONENT_METADATA_OVERRIDE_URL);
+        builder.setLicensesOverride(LICENSES_OVERRIDE_URL);
+        builder.setLicenseMappingsOverride(LICENSE_MAPPINGS_OVERRIDE_URL);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
@@ -123,9 +129,9 @@ class CreateManifestBuilderTest {
     void testConfigurationOverride(JenkinsRule jenkins) throws Exception {
         runAndAssertPipelineJob(jenkins, "declarativePipelineOverride.groovy");
 
-        assertThat(capturedConfiguration.getComponentMetadataUrl()).hasValue(new URL("http://componentMetadata.override"));
-        assertThat(capturedConfiguration.getLicensesUrl()).hasValue(new URL("http://licenses.override"));
-        assertThat(capturedConfiguration.getLicenseMappingsUrl()).hasValue(new URL("http://licenseMappins.override"));
+        assertThat(capturedConfiguration.getComponentMetadataUrl()).hasValue(new URL(COMPONENT_METADATA_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicensesUrl()).hasValue(new URL(LICENSES_OVERRIDE_URL));
+        assertThat(capturedConfiguration.getLicenseMappingsUrl()).hasValue(new URL(LICENSE_MAPPINGS_OVERRIDE_URL));
     }
 
     private void runAndAssertPipelineJob(JenkinsRule jenkins, String pipelineFile) throws Exception {

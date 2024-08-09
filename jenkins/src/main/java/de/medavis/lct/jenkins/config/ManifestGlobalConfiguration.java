@@ -50,10 +50,10 @@ public class ManifestGlobalConfiguration extends GlobalConfiguration implements 
     public static ManifestGlobalConfiguration getInstance(String componentMetadataOverride, String licensesOverride, String licenseMappingsOverride) {
         var defaultConfiguration = GlobalConfiguration.all().getInstance(ManifestGlobalConfiguration.class);
         var result = new ManifestGlobalConfiguration();
-       result.setComponentMetadata(componentMetadataOverride != null ? componentMetadataOverride : defaultConfiguration.getComponentMetadata());
-       result.setLicenses(licensesOverride != null ? licensesOverride : defaultConfiguration.getLicenses());
-       result.setLicenseMappings(licenseMappingsOverride != null ? licenseMappingsOverride : defaultConfiguration.getLicenseMappings());
-       return result;
+        result.setComponentMetadata(!Strings.isNullOrEmpty(componentMetadataOverride) ? componentMetadataOverride : defaultConfiguration.getComponentMetadata());
+        result.setLicenses(!Strings.isNullOrEmpty(licensesOverride) ? licensesOverride : defaultConfiguration.getLicenses());
+        result.setLicenseMappings(!Strings.isNullOrEmpty(licenseMappingsOverride) ? licenseMappingsOverride : defaultConfiguration.getLicenseMappings());
+        return result;
     }
 
     public String getComponentMetadata() {
