@@ -9,4 +9,7 @@
     <f:entry title="${%templateUrl}" field="templateUrl" description="${%templateUrl.description}">
         <f:textbox />
     </f:entry>
+    <f:entry title="${%ignoreUnavailableUrl}" field="ignoreUnavailableUrl" description="${%ignoreUnavailableUrl.description}">
+        <f:checkbox />
+    </f:entry>
 </j:jelly>

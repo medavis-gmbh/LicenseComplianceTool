@@ -37,8 +37,20 @@ import org.cyclonedx.model.ExternalReference.Type;
 import org.cyclonedx.parsers.BomParserFactory;
 
 import de.medavis.lct.core.license.License;
+import de.medavis.lct.core.urlchecker.OnlineHttpUrlChecker;
+import de.medavis.lct.core.urlchecker.HttpUrlChecker;
 
 public class AssetLoader {
+
+    private final HttpUrlChecker urlChecker;
+
+    public AssetLoader() {
+        this(false);
+    }
+
+    public AssetLoader(final boolean checkUrlAvailability) {
+        this.urlChecker = checkUrlAvailability ? new OnlineHttpUrlChecker() : url -> true;
+    }
 
     public Asset loadFromBom(InputStream bomStream) {
         Bom assetBom = parseBom(bomStream);
@@ -48,7 +60,7 @@ public class AssetLoader {
         String assetVersion = assetBom.getMetadata().getComponent().getVersion();
         Set<Component> components = assetBom.getComponents() == null
                 ? Collections.emptySet()
-                : assetBom.getComponents().stream()
+                : assetBom.getComponents().parallelStream()
                         // FIXME Find out what the scope exactly means and why some components are added that are not in the BOM
 //                        .filter(component -> component.getScope() != null)
                         .map(this::bomComponentToEntity)
@@ -101,6 +113,7 @@ public class AssetLoader {
                 externalReferences.stream()
                         .filter(ref -> ref.getType() == type)
                         .map(ExternalReference::getUrl)
+                        .filter(urlChecker::isUrlAvailable)
                         .findFirst()
                 : Optional.empty();
     }
