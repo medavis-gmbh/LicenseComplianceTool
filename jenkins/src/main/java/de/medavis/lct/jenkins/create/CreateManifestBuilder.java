@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 import de.medavis.lct.core.list.ComponentData;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.outputter.FreemarkerOutputter;
-import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
+import de.medavis.lct.jenkins.config.GlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 import de.medavis.lct.jenkins.util.UrlValidator;
 
@@ -76,7 +76,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance(), false);
+        this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getInstance(), false);
         this.outputter = CreateManifestBuilderFactory.getOutputterFactory();
     }
 
@@ -104,7 +104,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setIgnoreUnavailableUrl(final boolean ignoreUnavailableUrl) {
         if (this.ignoreUnavailableUrl != ignoreUnavailableUrl) {
-            this.componentLister = CreateManifestBuilderFactory.getComponentLister(ManifestGlobalConfiguration.getInstance(), ignoreUnavailableUrl);
+            this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getInstance(), ignoreUnavailableUrl);
             this.ignoreUnavailableUrl = ignoreUnavailableUrl;
         }
     }

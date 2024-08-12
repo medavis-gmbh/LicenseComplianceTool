@@ -40,7 +40,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
 import de.medavis.lct.core.downloader.LicensesDownloader;
-import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
+import de.medavis.lct.jenkins.config.GlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 
 public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
@@ -54,7 +54,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(ManifestGlobalConfiguration.getInstance());
+        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getInstance());
     }
 
     public String getInputPath() {
