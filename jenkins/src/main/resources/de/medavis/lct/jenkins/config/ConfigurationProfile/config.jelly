@@ -4,6 +4,9 @@
     <f:entry field="name" title="${%name}">
         <f:textbox/>
     </f:entry>
+    <f:entry field="defaultProfile" title="${%default}">
+        <f:checkbox/>
+    </f:entry>
     <f:entry field="componentMetadata" title="${%componentMetadata}">
         <f:textbox/>
     </f:entry>
