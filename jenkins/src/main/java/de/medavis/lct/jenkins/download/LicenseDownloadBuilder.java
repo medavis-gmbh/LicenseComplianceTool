@@ -54,7 +54,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getInstance());
+        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getConfiguration());
     }
 
     public String getInputPath() {

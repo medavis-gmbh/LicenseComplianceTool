@@ -76,7 +76,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     public CreateManifestBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getInstance(), false);
+        this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getConfiguration(), false);
         this.outputter = CreateManifestBuilderFactory.getOutputterFactory();
     }
 
@@ -104,7 +104,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setIgnoreUnavailableUrl(final boolean ignoreUnavailableUrl) {
         if (this.ignoreUnavailableUrl != ignoreUnavailableUrl) {
-            this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getInstance(), ignoreUnavailableUrl);
+            this.componentLister = CreateManifestBuilderFactory.getComponentLister(GlobalConfiguration.getConfiguration(), ignoreUnavailableUrl);
             this.ignoreUnavailableUrl = ignoreUnavailableUrl;
         }
     }

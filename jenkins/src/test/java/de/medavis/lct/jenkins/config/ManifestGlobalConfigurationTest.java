@@ -59,7 +59,7 @@ public class ManifestGlobalConfigurationTest {
     }
 
     private void verifyStoredConfig(String stage) {
-        assertThat(GlobalConfiguration.getInstance()).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
+        assertThat(GlobalConfiguration.getConfiguration()).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
             softly.assertThat(storedConfig.getComponentMetadataUrl()).map(URL::toString).hasValue(COMPONENT_METADATA_URL);
             softly.assertThat(storedConfig.getLicensesUrl()).map(URL::toString).hasValue(LICENSES_URL);
             softly.assertThat(storedConfig.getLicenseMappingsUrl()).map(URL::toString).hasValue(LICENSES_MAPPING_URL);
@@ -72,7 +72,7 @@ public class ManifestGlobalConfigurationTest {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
             jenkins.submit(config);
 
-            assertThat(GlobalConfiguration.getInstance()).satisfies(storedConfig -> assertSoftly(softly -> {
+            assertThat(GlobalConfiguration.getConfiguration()).satisfies(storedConfig -> assertSoftly(softly -> {
                 softly.assertThat(storedConfig.getComponentMetadataUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();

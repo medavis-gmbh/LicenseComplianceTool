@@ -20,25 +20,26 @@
 package de.medavis.lct.jenkins.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import hudson.Extension;
 import hudson.model.PersistentDescriptor;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.medavis.lct.core.Configuration;
 
 @Extension
 public class GlobalConfiguration extends jenkins.model.GlobalConfiguration implements PersistentDescriptor {
 
-    public static Configuration getInstance() {
+    public static Configuration getConfiguration() {
         final var configurationProfiles = jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles();
-        return configurationProfiles.isEmpty() ? new NoConfiguration() : configurationProfiles.get(0);
+        if (!configurationProfiles.isEmpty()) {
+            return configurationProfiles.stream()
+                    .filter(ConfigurationProfile::isDefaultProfile)
+                    .findFirst()
+                    .orElseGet(() -> configurationProfiles.get(0));
+        } else {
+            return new NoConfiguration();
+        }
     }
 
     private List<ConfigurationProfile> profiles = new ArrayList<>();
@@ -55,14 +56,14 @@ public class GlobalConfiguration extends jenkins.model.GlobalConfiguration imple
         this.profiles = profiles;
         save();
     }
-
-    @Override public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-        if (Jenkins.get().hasPermission(getRequiredGlobalConfigPagePermission())) {
-            setProfiles(Collections.emptyList()); // allow last library to be deleted
-            return super.configure(req, json);
-        } else {
-            return true;
-        }
-    }
+//
+//    @Override public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
+//        if (Jenkins.get().hasPermission(getRequiredGlobalConfigPagePermission())) {
+//            setProfiles(Collections.emptyList()); // allow last library to be deleted
+//            return super.configure(req, json);
+//        } else {
+//            return true;
+//        }
+//    }
 
 }
