@@ -19,18 +19,14 @@
  */
 package de.medavis.lct.jenkins.config;
 
-import hudson.Extension;
-import hudson.model.PersistentDescriptor;
-import hudson.util.FormValidation;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import hudson.Extension;
+import hudson.model.PersistentDescriptor;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +36,9 @@ import de.medavis.lct.core.Configuration;
 @Extension
 public class GlobalConfiguration extends jenkins.model.GlobalConfiguration implements PersistentDescriptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalConfiguration.class);
-
     public static Configuration getInstance() {
         final var configurationProfiles = jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles();
-        return configurationProfiles.isEmpty() ? new ConfigurationProfile("empty") : configurationProfiles.get(0);
+        return configurationProfiles.isEmpty() ? new NoConfiguration() : configurationProfiles.get(0);
     }
 
     private List<ConfigurationProfile> profiles = new ArrayList<>();
@@ -57,7 +51,6 @@ public class GlobalConfiguration extends jenkins.model.GlobalConfiguration imple
         return profiles;
     }
 
-//    @DataBoundSetter
     public void setProfiles(final List<ConfigurationProfile> profiles) {
         this.profiles = profiles;
         save();
@@ -70,14 +63,6 @@ public class GlobalConfiguration extends jenkins.model.GlobalConfiguration imple
         } else {
             return true;
         }
-    }
-
-    public FormValidation doCheckName(@QueryParameter String name) {
-        return FormValidation.validateRequired(name);
-    }
-
-    public FormValidation doCheckNewName(@QueryParameter String name) {
-        return FormValidation.validateRequired(name);
     }
 
 }
