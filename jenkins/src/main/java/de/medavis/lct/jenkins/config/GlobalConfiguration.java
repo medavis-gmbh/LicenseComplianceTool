@@ -56,14 +56,5 @@ public class GlobalConfiguration extends jenkins.model.GlobalConfiguration imple
         this.profiles = profiles;
         save();
     }
-//
-//    @Override public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-//        if (Jenkins.get().hasPermission(getRequiredGlobalConfigPagePermission())) {
-//            setProfiles(Collections.emptyList()); // allow last library to be deleted
-//            return super.configure(req, json);
-//        } else {
-//            return true;
-//        }
-//    }
 
 }

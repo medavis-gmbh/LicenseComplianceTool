@@ -103,11 +103,13 @@ public class ConfigurationProfile extends AbstractDescribableImpl<ConfigurationP
     public static class DescriptorImpl extends Descriptor<ConfigurationProfile> {
 
         public FormValidation doCheckName(@QueryParameter String value) {
-            if(Util.fixEmptyAndTrim(value) == null) {
-                return FormValidation.error(Messages.FormValidation_ValidateRequired());
+            var required = FormValidation.validateRequired(value);
+            if (!required.equals(FormValidation.ok())) {
+                return required;
+            } else {
+                return getSavedProfiles().map(ConfigurationProfile::getName).filter(value::equals).count() > 1 ?
+                        FormValidation.error(de.medavis.lct.jenkins.config.Messages.ConfigurationProfile_error_duplicateName()) : FormValidation.ok();
             }
-            return getSavedProfiles().map(ConfigurationProfile::getName).filter(value::equals).count() > 1 ?
-                    FormValidation.error(de.medavis.lct.jenkins.config.Messages.ConfigurationProfile_error_duplicateName()) : FormValidation.ok();
         }
 
         private Stream<ConfigurationProfile> getSavedProfiles() {
