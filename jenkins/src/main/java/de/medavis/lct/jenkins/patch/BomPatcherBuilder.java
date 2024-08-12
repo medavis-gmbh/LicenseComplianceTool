@@ -53,7 +53,6 @@ public class BomPatcherBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Patching BOM from %s into %s.%n", inputFile, outputFile);
-            // TODO Logger?
             bomPatcher.patch(/*logger,*/ workspace.child(inputFile).read(), workspace.child(outputFile).write());
         } catch (IOException e) {
             throw new AbortException("Could not patch licenses: " + e.getMessage());
