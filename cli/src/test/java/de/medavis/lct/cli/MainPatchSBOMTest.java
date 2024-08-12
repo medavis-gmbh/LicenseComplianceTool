@@ -26,7 +26,6 @@ import de.medavis.lct.core.Json5MapperFactory;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -35,7 +34,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MainTest {
+class MainPatchSBOMTest {
 
     @Test
     void testPatchBOM() throws IOException {
@@ -56,7 +55,7 @@ class MainTest {
         assertTrue(Files.exists(testFile));
 
         ObjectMapper mapper = Json5MapperFactory.create();
-        JsonNode rootNode = mapper.readTree(new File("target/test-results/test-patched-01.json"));
+        JsonNode rootNode = mapper.readTree(testFile.toFile());
 
         assertEquals("Apache-2.0", JsonPath.path(rootNode, "components[0].licenses[0].license.id").asText());
         assertEquals("BSD-2-Clause", JsonPath.path(rootNode, "components[2].licenses[0].license.id").asText());

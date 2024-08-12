@@ -31,27 +31,11 @@ import org.slf4j.LoggerFactory;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(MockitoExtension.class)
 class ComponentMetaDataManagerTest {
 
     @Mock()
     private Logger mockedLogger;
-
-    @Test
-    void testFindMatch() throws URISyntaxException {
-
-        ComponentMetaDataManager mapper = ComponentMetaDataManager.create();
-        mapper.load(getClass().getClassLoader().getResource("de/medavis/lct/core/patcher/test-component-metadata.json").toURI());
-
-        assertFalse(mapper.findMatch(null, "AspectJ", null).isPresent());
-        assertFalse(mapper.findMatch("Bli", "bla", "Blub").isPresent());
-        assertTrue(mapper.findMatch("org.aspectj", "AspectJ", null).isPresent());
-        assertTrue(mapper.findMatch(null, "BliBlaBlub", "pkg:maven/javax.annotation/jakarta.annotation-api@1.3.2?type=jar").isPresent());
-        assertTrue(mapper.findMatch("abc", "BliBlaBlub", "pkg:maven/javax.annotation/jakarta.annotation-api@1.3.2?type=jar").isPresent());
-
-    }
 
     @Test
     void testValidateLicenseMappedNames() throws URISyntaxException {

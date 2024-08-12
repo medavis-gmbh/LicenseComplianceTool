@@ -24,7 +24,6 @@ import de.medavis.lct.core.metadata.ComponentMetadata;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -89,23 +87,6 @@ public class ComponentMetaDataManager {
         if (!findings.isEmpty()) {
             LOGGER.warn("Your component meta data configuration contains an unsupported to be mapped SPDX name '{}'.", findings);
         }
-    }
-
-    /**
-     * Try to match an {@link ComponentMetadata} by following condition: "group && name || purl".
-     *
-     * @param group Group to match or null. If null then it will be ignored in the match. According to CycloneDX Spec this is not a mandatory field
-     * @param name Name to match. According to CycloneDX Spec this is a mandatory field
-     * @param purl Package URL or null. If null then it will be ignored in the match. According to CycloneDX Spec this is not a mandatory field
-
-     * @return Returns always an {@link Optional} with the {@link ComponentMetadata} if match.
-     */
-    @NotNull
-    public Optional<ComponentMetadata> findMatch(@Nullable String group, @NotNull String name, @Nullable String purl) {
-        return componentMetaDataList
-                .stream()
-                .filter(cm -> cm.matches(group, name, purl))
-                .findFirst();
     }
 
 }

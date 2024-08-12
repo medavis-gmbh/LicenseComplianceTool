@@ -79,6 +79,7 @@ public class SpdxLicenseManager {
                     StandardCharsets.UTF_8,
                     ClassLoader.getSystemClassLoader()
             );
+
             SpdxLicenses licenses = Json5MapperFactory
                     .create()
                     .readValue(resource, SpdxLicenses.class);
