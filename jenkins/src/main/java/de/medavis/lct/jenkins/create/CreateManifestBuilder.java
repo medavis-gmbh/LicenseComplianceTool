@@ -53,9 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.list.ComponentData;
-import de.medavis.lct.core.list.ComponentLister;
-import de.medavis.lct.core.outputter.FreemarkerOutputter;
-import de.medavis.lct.jenkins.config.GlobalConfiguration;
+import de.medavis.lct.jenkins.config.LCTGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 import de.medavis.lct.jenkins.util.UrlValidator;
 
@@ -116,7 +114,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
-        final Configuration configuration = GlobalConfiguration.getConfigurationByProfile(configurationProfile);
+        final Configuration configuration = LCTGlobalConfiguration.getConfigurationByProfile(configurationProfile);
         var componentLister = CreateManifestBuilderFactory.getComponentLister(configuration, ignoreUnavailableUrl);
         var outputter = CreateManifestBuilderFactory.getOutputterFactory();
 
@@ -148,7 +146,7 @@ public class CreateManifestBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public FormValidation doCheckConfigurationProfile(@QueryParameter String value) {
-            if (Util.fixEmptyAndTrim(value) != null && GlobalConfiguration.checkConfigurationProfile(value)) {
+            if (Util.fixEmptyAndTrim(value) != null && LCTGlobalConfiguration.checkConfigurationProfile(value)) {
                 return FormValidation.error(Messages.CreateManifestBuilder_DescriptorImpl_error_profileNotFound());
             }
             return FormValidation.ok(value);

@@ -29,17 +29,17 @@ import hudson.model.PersistentDescriptor;
 import de.medavis.lct.core.Configuration;
 
 @Extension
-public class GlobalConfiguration extends jenkins.model.GlobalConfiguration implements PersistentDescriptor {
+public class LCTGlobalConfiguration extends jenkins.model.GlobalConfiguration implements PersistentDescriptor {
 
     public static boolean checkConfigurationProfile(String profileName) {
-        return jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles().stream()
-                .map(ConfigurationProfile::getName)
-                .anyMatch(profileName::equals);
+        return jenkins.model.GlobalConfiguration.all().getInstance(LCTGlobalConfiguration.class).getProfiles().stream()
+                                                .map(ConfigurationProfile::getName)
+                                                .anyMatch(profileName::equals);
     }
 
     public static Configuration getConfigurationByProfile(final String profileName) {
         Predicate<ConfigurationProfile> filter = profileName == null ? ConfigurationProfile::isDefaultProfile : (profile -> profile.getName().equals(profileName));
-        final var configurationProfiles = jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles();
+        final var configurationProfiles = jenkins.model.GlobalConfiguration.all().getInstance(LCTGlobalConfiguration.class).getProfiles();
         if(!configurationProfiles.isEmpty()) {
             return configurationProfiles.stream()
                                         .filter(filter)
@@ -52,7 +52,7 @@ public class GlobalConfiguration extends jenkins.model.GlobalConfiguration imple
 
     private List<ConfigurationProfile> profiles = new ArrayList<>();
 
-    public GlobalConfiguration() {
+    public LCTGlobalConfiguration() {
         load();
     }
 

@@ -7,11 +7,9 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Strings;
 import hudson.Extension;
-import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
-import hudson.util.Messages;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -113,7 +111,7 @@ public class ConfigurationProfile extends AbstractDescribableImpl<ConfigurationP
         }
 
         private Stream<ConfigurationProfile> getSavedProfiles() {
-            var profiles = jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles();
+            var profiles = jenkins.model.GlobalConfiguration.all().getInstance(LCTGlobalConfiguration.class).getProfiles();
             return profiles.stream();
         }
 

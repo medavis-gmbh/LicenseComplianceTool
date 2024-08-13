@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 // Still using JUnit 4 annotations since there seems to be no JUnit 5 equivalent for JenkinsSessionRule
-public class GlobalConfigurationTest {
+public class LCTGlobalConfigurationTest {
 
     private static int uniqueCounter = 1;
 
@@ -69,7 +69,7 @@ public class GlobalConfigurationTest {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
             jenkins.submit(config);
 
-            assertThat(GlobalConfiguration.getConfigurationByProfile(null)).satisfies(storedConfig -> assertSoftly(softly -> {
+            assertThat(LCTGlobalConfiguration.getConfigurationByProfile(null)).satisfies(storedConfig -> assertSoftly(softly -> {
                 softly.assertThat(storedConfig.getComponentMetadataUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
@@ -145,7 +145,7 @@ public class GlobalConfigurationTest {
     }
 
     private void verifyStoredConfig(String stage, final String profileName, final ConfigurationProfile expectedConfiguration) {
-        assertThat(GlobalConfiguration.getConfigurationByProfile(profileName)).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
+        assertThat(LCTGlobalConfiguration.getConfigurationByProfile(profileName)).as(stage).satisfies(storedConfig -> assertSoftly(softly -> {
             softly.assertThat(storedConfig.getComponentMetadataUrl()).isEqualTo(expectedConfiguration.getComponentMetadataUrl());
             softly.assertThat(storedConfig.getLicensesUrl()).isEqualTo(expectedConfiguration.getLicensesUrl());
             softly.assertThat(storedConfig.getLicenseMappingsUrl()).isEqualTo(expectedConfiguration.getLicenseMappingsUrl());

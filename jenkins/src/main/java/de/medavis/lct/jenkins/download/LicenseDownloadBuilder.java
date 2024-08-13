@@ -40,8 +40,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-import de.medavis.lct.core.downloader.LicensesDownloader;
-import de.medavis.lct.jenkins.config.GlobalConfiguration;
+import de.medavis.lct.jenkins.config.LCTGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 
 public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
@@ -86,7 +85,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
-         var licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getConfigurationByProfile(configurationProfile));
+         var licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(LCTGlobalConfiguration.getConfigurationByProfile(configurationProfile));
 
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
@@ -114,7 +113,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public FormValidation doCheckConfigurationProfile(@QueryParameter String value) {
-            if (Util.fixEmptyAndTrim(value) != null && GlobalConfiguration.checkConfigurationProfile(value)) {
+            if (Util.fixEmptyAndTrim(value) != null && LCTGlobalConfiguration.checkConfigurationProfile(value)) {
                 return FormValidation.error(Messages.LicenseDownloadBuilder_DescriptorImpl_error_profileNotFound());
             }
             return FormValidation.ok(value);
