@@ -3,6 +3,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:section title="${%title}">
         <f:entry title="${%listTitle}">
+            <span id="lct-profiles">
             <f:repeatableProperty field="profiles" header="${%entryTitle}" minimum="1">
                 <f:entry title="">
                     <div align="right">
@@ -10,6 +11,7 @@
                     </div>
                 </f:entry>
             </f:repeatableProperty>
+            </span>
         </f:entry>
     </f:section>
 </j:jelly>
