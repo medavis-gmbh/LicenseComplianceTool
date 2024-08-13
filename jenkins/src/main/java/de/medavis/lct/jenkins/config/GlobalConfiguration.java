@@ -31,8 +31,10 @@ import de.medavis.lct.core.Configuration;
 @Extension
 public class GlobalConfiguration extends jenkins.model.GlobalConfiguration implements PersistentDescriptor {
 
-    public static Configuration getConfiguration() {
-        return getConfigurationByProfile(null);
+    public static boolean checkConfigurationProfile(String profileName) {
+        return jenkins.model.GlobalConfiguration.all().getInstance(GlobalConfiguration.class).getProfiles().stream()
+                .map(ConfigurationProfile::getName)
+                .anyMatch(profileName::equals);
     }
 
     public static Configuration getConfigurationByProfile(final String profileName) {

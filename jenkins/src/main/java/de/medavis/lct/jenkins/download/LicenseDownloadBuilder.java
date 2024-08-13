@@ -25,6 +25,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -47,14 +48,13 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputPath;
     private final String outputPath;
-    private final transient LicensesDownloader licenseDownloader;
     private boolean failOnDynamicLicense;
+    private String configurationProfile;
 
     @DataBoundConstructor
     public LicenseDownloadBuilder(@NonNull String inputPath, @NonNull String outputPath) {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
-        this.licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getConfiguration());
     }
 
     public String getInputPath() {
@@ -69,14 +69,25 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         return failOnDynamicLicense;
     }
 
+    public String getConfigurationProfile() {
+        return configurationProfile;
+    }
+
     @DataBoundSetter
     public void setFailOnDynamicLicense(boolean failOnDynamicLicense) {
         this.failOnDynamicLicense = failOnDynamicLicense;
     }
 
+    @DataBoundSetter
+    public void setConfigurationProfile(final String configurationProfile) {
+        this.configurationProfile = configurationProfile;
+    }
+
     @Override
     public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull EnvVars env, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws AbortException, InterruptedException {
+         var licenseDownloader = LicenseDownloadBuilderFactory.getLicensesDownloader(GlobalConfiguration.getConfigurationByProfile(configurationProfile));
+
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
@@ -99,6 +110,14 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         @Override
         public String getDisplayName() {
             return Messages.LicenseDownloadBuilder_DescriptorImpl_displayName();
+        }
+
+        @POST
+        public FormValidation doCheckConfigurationProfile(@QueryParameter String value) {
+            if (Util.fixEmptyAndTrim(value) != null && GlobalConfiguration.checkConfigurationProfile(value)) {
+                return FormValidation.error(Messages.LicenseDownloadBuilder_DescriptorImpl_error_profileNotFound());
+            }
+            return FormValidation.ok(value);
         }
 
         @POST

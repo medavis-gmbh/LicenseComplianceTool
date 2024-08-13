@@ -69,7 +69,7 @@ public class GlobalConfigurationTest {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
             jenkins.submit(config);
 
-            assertThat(GlobalConfiguration.getConfiguration()).satisfies(storedConfig -> assertSoftly(softly -> {
+            assertThat(GlobalConfiguration.getConfigurationByProfile(null)).satisfies(storedConfig -> assertSoftly(softly -> {
                 softly.assertThat(storedConfig.getComponentMetadataUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicensesUrl()).isNotPresent();
                 softly.assertThat(storedConfig.getLicenseMappingsUrl()).isNotPresent();
