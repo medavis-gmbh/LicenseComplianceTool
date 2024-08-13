@@ -43,7 +43,7 @@ public class GlobalConfigurationTest {
 
     @Test
     public void persistSettingDuringReload() throws Throwable {
-        final ConfigurationProfile profile1 = createUniqueConfigurationProfile(true);
+        final ConfigurationProfile profile1 = createUniqueConfigurationProfile(false);
         final ConfigurationProfile profile2 = createUniqueConfigurationProfile(false);
         jenkinsSession.then(jenkins -> {
             HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
@@ -77,22 +77,39 @@ public class GlobalConfigurationTest {
         });
     }
 
-//    @Test
-//    public void persistSettingDuringReload() throws Throwable {
-//        final ConfigurationProfile profile1 = createUniqueConfigurationProfile(true);
-//        final ConfigurationProfile profile2 = createUniqueConfigurationProfile(false);
-//        jenkinsSession.then(jenkins -> {
-//            HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
-//            final DomNode lctConfigSection = getLCTConfigSection(config);
-//            addProfile(lctConfigSection);
-//            fillConfig(lctConfigSection, 0, profile1);
-//            fillConfig(lctConfigSection, 1, profile2);
-//
-//            jenkins.submit(config);
-//
-//            verifyStoredConfig("After submit", profile1.getName(), profile1);
-//        });
-//    }
+    @Test
+    public void shouldTreatProfileFlaggedAsDefaultAsDefaultProfile() throws Throwable {
+        final ConfigurationProfile profile1 = createUniqueConfigurationProfile(true);
+        final ConfigurationProfile profile2 = createUniqueConfigurationProfile(false);
+        jenkinsSession.then(jenkins -> {
+            HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
+            final DomNode lctConfigSection = getLCTConfigSection(config);
+            addProfile(lctConfigSection);
+            fillConfig(lctConfigSection, 0, profile1);
+            fillConfig(lctConfigSection, 1, profile2);
+
+            jenkins.submit(config);
+
+            verifyStoredConfig("After submit", null, profile1);
+        });
+    }
+
+    @Test
+    public void shouldTreatFirstProfileAsDefaultIfNoneIsFlaggedAsDefault() throws Throwable {
+        final ConfigurationProfile profile1 = createUniqueConfigurationProfile(false);
+        final ConfigurationProfile profile2 = createUniqueConfigurationProfile(false);
+        jenkinsSession.then(jenkins -> {
+            HtmlForm config = jenkins.createWebClient().goTo("configure").getFormByName("config");
+            final DomNode lctConfigSection = getLCTConfigSection(config);
+            addProfile(lctConfigSection);
+            fillConfig(lctConfigSection, 0, profile1);
+            fillConfig(lctConfigSection, 1, profile2);
+
+            jenkins.submit(config);
+
+            verifyStoredConfig("After submit", null, profile1);
+        });
+    }
 
     private void addProfile(final DomNode lctConfigSection) throws IOException {
         HtmlButton addButton = lctConfigSection.querySelector(".repeatable-add");
