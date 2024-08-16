@@ -118,7 +118,7 @@ public class ConfigurationProfile extends AbstractDescribableImpl<ConfigurationP
         public FormValidation doCheckDefaultProfile(@QueryParameter boolean value) {
             if (value) {
                 return getSavedProfiles().filter(ConfigurationProfile::isDefaultProfile).count() > 1 ?
-                        FormValidation.error(de.medavis.lct.jenkins.config.Messages.ConfigurationProfile_error_duplicateName()) : FormValidation.ok();
+                        FormValidation.error(de.medavis.lct.jenkins.config.Messages.ConfigurationProfile_error_multipleDefaults()) : FormValidation.ok();
             }
             return FormValidation.ok();
         }
