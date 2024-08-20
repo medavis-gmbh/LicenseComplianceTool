@@ -20,6 +20,7 @@
 package de.medavis.lct.core.asset;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,9 +55,9 @@ public class AssetLoader {
 
     public Asset loadFromBom(InputStream bomStream) {
         Bom assetBom = parseBom(bomStream);
-        String assetName = Joiner.on(".").join(
-                assetBom.getMetadata().getComponent().getGroup(),
-                assetBom.getMetadata().getComponent().getName());
+        final String group = assetBom.getMetadata().getComponent().getGroup();
+        final String name = assetBom.getMetadata().getComponent().getName();
+        String assetName = Strings.isNullOrEmpty(group) ? name : Joiner.on(".").join(group, name);
         String assetVersion = assetBom.getMetadata().getComponent().getVersion();
         Set<Component> components = assetBom.getComponents() == null
                 ? Collections.emptySet()
