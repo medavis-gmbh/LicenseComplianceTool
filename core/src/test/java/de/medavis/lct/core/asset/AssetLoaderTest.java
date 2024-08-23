@@ -52,7 +52,7 @@ class AssetLoaderTest {
                 new Component("org.codehaus.woodstox", "stax2-api", "4.2.2", "http://github.com/FasterXML/stax2-api", ImmutableSet.of(
                         License.dynamic("BSD-2-Clause", null)
                 )),
-                new Component("org.slf4j", "slf4j-api", "2.0.13", "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api", ImmutableSet.of(
+                new Component(null, "slf4j-api", "2.0.13", "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api", ImmutableSet.of(
                         License.dynamic("MIT", "https://opensource.org/licenses/MIT"),
                         License.dynamic("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")))
         );

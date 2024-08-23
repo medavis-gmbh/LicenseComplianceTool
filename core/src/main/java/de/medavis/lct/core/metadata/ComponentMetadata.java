@@ -65,7 +65,7 @@ public final class ComponentMetadata {
     }
 
     public boolean matches(String group, String name) {
-        boolean matchesGroup = Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, group);
+        boolean matchesGroup = Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group));
         boolean matchesName = Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name);
         return matchesGroup && matchesName;
     }
