@@ -46,7 +46,7 @@
         <htmlunit.version>2.70.0</htmlunit.version>
         <httpclient.version>4.5.14</httpclient.version>
         <jetbrains.version>24.1.0</jetbrains.version>
-        <junit-jupiter.version>5.11.0</junit-jupiter.version>
+        <junit-jupiter.version>5.11.1</junit-jupiter.version>
         <mockito.version>5.13.0</mockito.version>
         <slf4j.version>2.0.16</slf4j.version>
         <wiremock.version>3.9.1</wiremock.version>
