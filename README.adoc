@@ -50,6 +50,10 @@ Take a look at their https://github.com/CycloneDX[GitHub page] for a complete li
 
 image::GlobalConfiguration.png[]
 
+You can create multiple configuration profiles. One profile can be configured as the default profile, otherwise the first profile in the list considered the default.
+
+Each build step of this plugin provides a parameter `configurationProfile` to specify the desired profile. If that value is empty, the default profile is used.
+
 ==== Component meta data
 Use this setting to override existing or add missing attributes to the components of the SBOM.
 This is especially useful when you use a SBOM generated from your dependency management system since the resulting data is often incomplete and incorrect.
@@ -224,7 +228,7 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                componentManifest inputPath: 'input.json', outputPath: 'output.pdf', templateUrl: 'file://template.ftl'
+                componentManifest inputPath: 'input.json', outputPath: 'output.pdf', templateUrl: 'file://template.ftl', ignoreUnavailableUrl: true, configurationProfile: 'MyProfile'
             }
         }
     }
@@ -233,6 +237,10 @@ pipeline {
 
 With the parameter `templateUrl`, you can specify a URL pointing to a custom FreeMarker template which is used to create the output. The parameter is optional.
 If it is not set, the template from link:core/src/main/resources/de/medavis/lct/core/outputter/DefaultComponentManifest.ftlh[de.medavis.lct.core.outputter.DefaultComponentManifest.ftlh] is used.
+
+If the parameter `ignoreUnavailableUrl` is set (default value: `false`), URLs from the SBOM are ignored when they are not available, i.e. no connection can be established or they return a different status code than 200. This is useful to prevent the generated component manifest from containing invalid links.
+
+The desired profile from the global configuration can be chosen with `configurationProfile`. If that parameter is empty, the default profile is used.
 
 
 === Download licenses
@@ -258,6 +266,8 @@ Be aware that this task might download harmful content. Bundling the downloaded 
 malware. To safeguard against that risk, add license URLs after a manual review to your license configuration and run the task with `failOnDynamicLicense` option.
 It will then fail if it encounters a license that is not part of your license configuration .
 
+The desired profile from the global configuration can be chosen with `configurationProfile`. If that parameter is empty, the default profile is used.
+
 [source,groovy,title=Declarative pipeline example]
 ----
 pipeline {
@@ -266,7 +276,7 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY', failOnDynamicLicense: true
+                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY', failOnDynamicLicense: true, configurationProfile: 'MyProfile'
             }
         }
     }

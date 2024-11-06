@@ -80,8 +80,8 @@ public final class ComponentMetadata {
      * @return Returns true if we have a match
      */
     public boolean matches(@Nullable String group, @NotNull String name, @Nullable String purl) {
-        boolean matchesGroup = StringUtils.isNotBlank(groupMatch) && StringUtils.isNotBlank(group) && Pattern.matches(groupMatch, group);
-        boolean matchesName = StringUtils.isNotBlank(nameMatch) && Pattern.matches(nameMatch, name);
+        boolean matchesGroup = Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group));
+        boolean matchesName = Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name);
         boolean matchesPurl = StringUtils.isNotBlank(purlMatch) && StringUtils.isNotBlank(purl) && Pattern.matches(purlMatch, purl);
         return matchesPurl
                 || StringUtils.isBlank(nameMatch) && matchesGroup

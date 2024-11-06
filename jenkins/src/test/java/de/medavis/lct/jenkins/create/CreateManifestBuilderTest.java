@@ -62,6 +62,7 @@ class CreateManifestBuilderTest {
     private static final String OUTPUT_PATH = "output" + OUTPUT_FILE_EXTENSION;
     private static final String ARCHIVE_FILENAME = CreateManifestBuilder.ARCHIVE_FILE_NAME + OUTPUT_FILE_EXTENSION;
     private static final String TEMPLATE_URL = "file://template.ftl";
+    private static final String CONFIGURATION_PROFILE = "default";
     private static final List<ComponentData> COMPONENT_LIST = Collections.singletonList(
             new ComponentData("name", "version", "url", null, Collections.emptySet(), Collections.emptySet()));
     private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
@@ -74,7 +75,7 @@ class CreateManifestBuilderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        CreateManifestBuilderFactory.setComponentListerFactory(configuration -> componentListerMock);
+        CreateManifestBuilderFactory.setComponentListerFactory((configuration, ignoreUnavailableUrl) -> componentListerMock);
         when(componentListerMock.listComponents(argThat(new InputStreamContentArgumentMatcher(FAKE_SBOM)))).thenReturn(COMPONENT_LIST);
 
         CreateManifestBuilderFactory.setOutputterFactory(() -> outputterMock);
@@ -90,6 +91,8 @@ class CreateManifestBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final CreateManifestBuilder builder = new CreateManifestBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setTemplateUrl(TEMPLATE_URL);
+        builder.setIgnoreUnavailableUrl(true);
+        builder.setConfigurationProfile(CONFIGURATION_PROFILE);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 

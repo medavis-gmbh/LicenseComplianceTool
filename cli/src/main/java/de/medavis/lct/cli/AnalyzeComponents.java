@@ -21,9 +21,10 @@ package de.medavis.lct.cli;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.net.URL;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
@@ -33,36 +34,48 @@ import de.medavis.lct.core.license.LicenseLoader;
 import de.medavis.lct.core.license.LicenseMappingLoader;
 import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
-import de.medavis.lct.core.outputter.FreemarkerOutputter;
 
-@Command(name = "create-manifest", description = "Create component manifest")
-class CreateManifest implements Callable<Void> {
+import static de.medavis.lct.cli.AnalyzeComponents.AnalyzeMode.MISSING_URL;
+
+@Command(name = "analyze-components", description = "Analyze components based on specified criteria")
+class AnalyzeComponents implements Callable<Void> {
+
+    enum AnalyzeMode {
+        MISSING_URL
+    }
 
     @Option(names = {"--in", "-i"}, required = true)
     private File inputFile;
     @Option(names = {"--out", "-o"}, required = true)
     private File outputFile;
-    @Option(names = {"--template", "-t"})
-    private String template;
-    @Option(names = {"--ignoreUnavailableUrl", "-iuu"}, defaultValue = "false")
-    private boolean ignoreUnavailableUrl;
+    @Option(names = {"--mode", "-m"}, required = true)
+    private AnalyzeMode mode;
+
     @Mixin
     private ConfigurationOptions configurationOptions;
 
     @Override
     public Void call() throws Exception {
-        var componentLister = new ComponentLister(new AssetLoader(ignoreUnavailableUrl), new ComponentMetaDataLoader(), new LicenseLoader(), new LicenseMappingLoader(),
-                configurationOptions);
-        try (var bomInputStream = new FileInputStream(inputFile); var outputWriter = new FileWriter(outputFile)) {
-            var components = componentLister.listComponents(bomInputStream);
-            new FreemarkerOutputter().output(components, outputWriter, getTemplateUrl());
+        if(mode == MISSING_URL) {
+            analyzeMissingUrl();
         }
         return null;
     }
 
-    private String getTemplateUrl() {
-        return StringToUrlConverter.convert(template)
-                .map(URL::toString)
-                .orElse(null);
+    private void analyzeMissingUrl() throws IOException {
+        var componentLister = new ComponentLister(new AssetLoader(true), new ComponentMetaDataLoader(), new LicenseLoader(), new LicenseMappingLoader(),
+                configurationOptions);
+        try(var bomInputStream = new FileInputStream(inputFile)) {
+            var componentsWithoutUrl = componentLister.listComponents(bomInputStream).stream()
+                                                      .filter(component -> component.getUrl() == null)
+                                                      .collect(Collectors.toList());
+            if(componentsWithoutUrl.isEmpty()) {
+                System.out.println("No component without URL detected.");
+            } else {
+                System.out.printf("Detected %d components without URL:%n", componentsWithoutUrl.size());
+                componentsWithoutUrl.forEach(component -> System.out.println(component.getName()));
+            }
+        }
     }
+
 }

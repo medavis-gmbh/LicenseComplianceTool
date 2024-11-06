@@ -59,6 +59,7 @@ class LicenseDownloadBuilderTest {
 
     private static final String INPUT_PATH = "input.bom";
     private static final String OUTPUT_PATH = "output/licenses";
+    private static final String CONFIGURATION_PROFILE = "default";
     private static final Map<String, String> FAKE_LICENSES = ImmutableMap.of(
             "EPL-1.0", "This is EPL-1.0",
             "LGPL-2.1", "This is LGPL-2.1",
@@ -105,6 +106,7 @@ class LicenseDownloadBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final LicenseDownloadBuilder builder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setFailOnDynamicLicense(true);
+        builder.setConfigurationProfile(CONFIGURATION_PROFILE);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);
 
