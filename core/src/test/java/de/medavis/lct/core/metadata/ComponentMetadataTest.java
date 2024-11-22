@@ -26,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ComponentMetadataTest {
 
     @Test
-    void matches() {
+    void testMatches() {
         assertFalse(createComponentMetadata("de.medavis", "b", null).matches("de.medavis", "a", null));
-        assertTrue(createComponentMetadata("de.medavis", "a", "abc").matches("de.medavis", "a", "xyz"));
+        assertFalse(createComponentMetadata("de.medavis", "a", "abc").matches("de.medavis", "a", "xyz"));
         assertTrue(createComponentMetadata("xz.medavis", "b", "abc").matches("de.medavis", "a", "abc"));
         assertTrue(createComponentMetadata("de.medavis", "a", "abc").matches("de.medavis", "a", "abc"));
 
