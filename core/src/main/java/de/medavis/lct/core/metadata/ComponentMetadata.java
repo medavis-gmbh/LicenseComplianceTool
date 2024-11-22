@@ -24,8 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Strings;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,13 +80,10 @@ public final class ComponentMetadata {
      * @return Returns true if we have a match
      */
     public boolean matches(@Nullable String group, @NotNull String name, @Nullable String purl) {
-        boolean matchesGroup = Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group));
-        boolean matchesName = Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name);
-        boolean matchesPurl = StringUtils.isNotBlank(purlMatch) && StringUtils.isNotBlank(purl) && Pattern.matches(purlMatch, purl);
-        return matchesPurl
-                || StringUtils.isBlank(nameMatch) && matchesGroup
-                || StringUtils.isBlank(groupMatch) && matchesName
-                || matchesGroup && matchesName;
+        boolean matchesGroup = (Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group))) && Strings.isNullOrEmpty(purlMatch);
+        boolean matchesName = (Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name)) && Strings.isNullOrEmpty(purlMatch);
+        boolean matchesPurl = !Strings.isNullOrEmpty(purlMatch) && !Strings.isNullOrEmpty(purl) && Pattern.matches(purlMatch, purl);
+        return matchesPurl || matchesGroup && matchesName;
     }
 
     @Nullable
