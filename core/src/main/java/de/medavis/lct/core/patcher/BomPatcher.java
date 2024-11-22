@@ -30,6 +30,7 @@ import de.medavis.lct.core.list.ComponentLister;
 import de.medavis.lct.core.metadata.ComponentMetaDataLoader;
 
 import org.cyclonedx.Version;
+import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.BomGeneratorFactory;
 import org.cyclonedx.model.Bom;
@@ -167,7 +168,7 @@ public class BomPatcher {
             }
 
             return true;
-        } catch (IOException | ParseException ex) {
+        } catch (IOException | ParseException | GeneratorException ex) {
             throw new LicensePatcherException(ex.getMessage(), ex);
         }
     }
