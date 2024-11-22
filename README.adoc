@@ -29,7 +29,7 @@ toc::[]
 image::Overview.png[]
 
 1. Create a *Software Bill of Materials* (SBOM) for your source code.
-2. Call the *Jenkins Plugin* in your build job to create a component manifest and download the license files.
+2. Call the *Jenkins Plugin* in your build job to create a component manifest, to patch the SBOM and download the license files.
 You can *configure* several JSON data sources to improve data quality.
 3. Add the component manifest and the license files to your delivery package (e.g. ZIP, WAR, MSI).
 
@@ -79,6 +79,11 @@ Entries have the following attributes:
 | String
 | If groupMatch is not set
 | Regular expression for the component's name
+
+|purlMatch
+| Package URL
+| Optional, if groupMatch and nameMatch is not set and patching is in use
+| Regular expression for the component's purl
 
 | mappedName
 | String
@@ -148,6 +153,18 @@ Here are some examples to illustrate what you can do with it:
 }
 ----
 
+- Patching SBOM licenses > override licenses
+
+[source,json]
+----
+{
+  "purl": "pkg:maven\/com\.github\.kenglxn\.qrgen\/.*@2\.6\.0\?type=jar",
+  "licenses": [
+    "Apache-2.0"
+  ]
+}
+----
+
 ==== License information
 Use this setting to define licenses and URLs with the license texts. The URL needs to point to a JSON file containing an array of entries with the following attributes:
 |===
@@ -170,7 +187,9 @@ Use this setting to define licenses and URLs with the license texts. The URL nee
 |===
 
 ==== License mapping
-Different components often use different names for the same license. You can use this setting to define aliases for licenses. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+Different components often use different names for the same license. You can use this setting to define aliases for
+licenses. The URL needs to point to a JSON file containing an array of entries with the following attributes:
+
 |===
 |Name | Type | Required?|  Meaning
 
@@ -184,6 +203,19 @@ Different components often use different names for the same license. You can use
 |no
 |The name of the license in the license information
 |===
+
+==== License patching rules URL
+The URL where to download the rules for patching BOM licenses. This is a required field when you want to use license
+patching.
+
+tbd
+
+==== SPDX licenses URL
+The URL where to download the list of supported SPDX licenses. If not set, then a local copy of the
+https://github.com/spdx/license-list-data/tree/main/json[SPDX GitHub project] will be used.
+
+==== Resolve license expressions
+tbd
 
 === Create manifest
 This build step creates a component manifest file based on an input SBOM and the global configuration.
@@ -251,6 +283,25 @@ pipeline {
 }
 ----
 
+=== Patch SBOM
+This build step patch a SBOM, based on your component manifest configuration and the global configuration.
+Goal is, to fix incomplete or incorrect license informations in your SBOM.
+
+[source,groovy,title=Declarative pipeline example]
+----
+pipeline {
+    agent any
+
+    stages {
+        stage('Patch BOM') {
+            steps {
+                patchBOM inputFile: 'input.bom', outputFile: 'output.bom'
+            }
+        }
+    }
+}
+----
+
 == CLI tool
 You can also run the tool as a standalone CLI tool.
 This is especially useful when you want to test out changes to component or license metadata since you do not have to switch back and forth between Jenkins
@@ -284,6 +335,15 @@ Examples:
 [source]
 ----
   java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html
+----
+* Patch licenses
+[source]
+----
+  java -jar license-compliance-tool-cli.jar
+    patch-sbom
+    --in=file-path/in.bom
+    --out=file-path/out.bom
+    --componentMetadata=https://your.server.url/componentMetadata.json
 ----
 * Get usage help
 [source]

@@ -37,9 +37,9 @@ class ComponentMetaDataLoaderTest {
         final Collection<ComponentMetadata> actual = underTest.load(metadataUrl);
 
         Assertions.assertThat(actual).containsExactly(
-                new ComponentMetadata("my\\.group", "keep", false, "KEEP!", "https://keep.com", "Keep component",
+                new ComponentMetadata("my\\.group", "keep", null, false, "KEEP!", "https://keep.com", "Keep component",
                         ImmutableSet.of("LIC-1.0"), ImmutableSet.of("Copyright (c) 2020")),
-                new ComponentMetadata("my\\.group", "ignore", true, "IGNORE!", "https://ignore.com", "Ignore component",
+                new ComponentMetadata("my\\.group", "ignore", null, true, "IGNORE!", "https://ignore.com", "Ignore component",
                         ImmutableSet.of("LIC1-1.0", "LIC2-1.0"), ImmutableSet.of("Copyright (c) 2022", "Contains software by ACME Foundation"))
         );
     }
@@ -51,8 +51,8 @@ class ComponentMetaDataLoaderTest {
         final Collection<ComponentMetadata> actual = underTest.load(metadataUrl);
 
         Assertions.assertThat(actual).containsExactly(
-                new ComponentMetadata("my\\.group", null, false, null, null, null, Collections.emptySet(), Collections.emptySet()),
-                new ComponentMetadata(null, "my\\.name", false, null, null, null, Collections.emptySet(), Collections.emptySet())
+                new ComponentMetadata("my\\.group", null, null, false, null, null, null, Collections.emptySet(), Collections.emptySet()),
+                new ComponentMetadata(null, "my\\.name", null, false, null, null, null, Collections.emptySet(), Collections.emptySet())
         );
     }
 }

@@ -64,7 +64,7 @@ class CreateManifestBuilderTest {
     private static final String TEMPLATE_URL = "file://template.ftl";
     private static final String CONFIGURATION_PROFILE = "default";
     private static final List<ComponentData> COMPONENT_LIST = Collections.singletonList(
-            new ComponentData("name", "version", "url", Collections.emptySet(), Collections.emptySet()));
+            new ComponentData("name", "version", "url", null, Collections.emptySet(), Collections.emptySet()));
     private static final String FAKE_SBOM = "Normally, this would be a CycloneDX SBOM.";
     private static final String FAKE_MANIFEST = "IRL, I would be the manifest";
 

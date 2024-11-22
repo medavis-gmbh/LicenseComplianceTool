@@ -19,62 +19,72 @@
  */
 package de.medavis.lct.core.downloader;
 
-import com.google.common.io.ByteStreams;
+import de.medavis.lct.core.patcher.AbstractRestClient;
+
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.UnsupportedCharsetException;
-import org.apache.http.Header;
+
+import org.apache.http.HttpHeaders;
 import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.HttpClients;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static org.apache.http.entity.ContentType.TEXT_HTML;
 import static org.apache.http.entity.ContentType.TEXT_PLAIN;
 
-public class LicenseFileDownloader {
+public class LicenseFileDownloader extends AbstractRestClient {
 
-    private final transient HttpClient httpclient = HttpClients.createDefault();
-
-
+    /**
+     * Request the license text from external source.
+     *
+     * @return Returns result status of download
+     */
+    @NotNull
     Result downloadToFile(String url, String license, LicenseFileHandler licenseFileHandler) throws IOException {
-        if (!licenseFileHandler.isCached(license)) {
-            httpclient.execute(new HttpGet(url), response -> {
-                final int statusCode = response.getStatusLine().getStatusCode();
+        try {
+            if (!licenseFileHandler.isCached(license)) {
+                HttpRequest request = createDefaultGET(URI.create(url));
+                HttpResponse<byte[]> response = executeRequestWithResponse(request, HttpResponse.BodyHandlers.ofByteArray());
+                int statusCode = response.statusCode();
                 if (statusCode < 200 || statusCode >= 300) {
                     throw new IOException("Download not successful: Status " + statusCode);
                 }
 
-                String extension = determineExtension(response.getEntity().getContentType());
-                try (final InputStream input = response.getEntity().getContent()) {
-                    licenseFileHandler.save(license, extension, ByteStreams.toByteArray(input));
-                }
-                return null;
-            });
-            return Result.DOWNLOADED;
-        } else {
-            licenseFileHandler.copyFromCache(license);
-            return Result.FROM_CACHE;
+                String contentType = determineExtension(response.headers().firstValue(HttpHeaders.CONTENT_TYPE).orElse(""));
+                licenseFileHandler.save(license, contentType, response.body());
+
+                return Result.DOWNLOADED;
+            } else {
+                licenseFileHandler.copyFromCache(license);
+                return Result.FROM_CACHE;
+            }
+        } catch (InterruptedException ex) {
+            throw new IOException(ex);
         }
     }
 
-    private String determineExtension(Header contentTypeHeader) {
+    @NotNull
+    private String determineExtension(@NotNull String contentTypeHeader) {
         String result = "";
-        if (contentTypeHeader != null) {
-            String contentType = parseContentType(contentTypeHeader);
-            if (TEXT_HTML.getMimeType().equals(contentType)) {
-                result = ".html";
-            } else if (TEXT_PLAIN.getMimeType().equals(contentType)) {
-                result = ".txt";
-            }
+        String contentType = parseContentType(contentTypeHeader);
+
+        if (TEXT_HTML.getMimeType().equals(contentType)) {
+            result = ".html";
+        } else if (TEXT_PLAIN.getMimeType().equals(contentType)) {
+            result = ".txt";
         }
+
         return result;
     }
 
-    private String parseContentType(Header contentTypeHeader) {
+    @Nullable
+    private String parseContentType(String contentTypeHeader) {
         try {
-            return ContentType.parse(contentTypeHeader.getValue()).getMimeType();
+            return ContentType.parse(contentTypeHeader).getMimeType();
         } catch (ParseException | UnsupportedCharsetException e) {
             // Ignore error and assume unknown content type
             return null;

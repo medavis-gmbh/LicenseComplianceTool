@@ -51,6 +51,11 @@ public final class License {
         this.configured = configured;
     }
 
+    /**
+     * Can contain the name or ID of license.
+     *
+     * @return Returns Name or ID of the license
+     */
     public String getName() {
         return name;
     }

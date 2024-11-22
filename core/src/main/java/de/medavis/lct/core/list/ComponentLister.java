@@ -73,6 +73,7 @@ public class ComponentLister {
                 .map(componentByName -> {
                     // ComponentMetadata has to ensure that component with same name has same url and version
                     String url = componentByName.getValue().get(0).getUrl();
+                    String purl = componentByName.getValue().get(0).getPurl();
                     String version = componentByName.getValue().get(0).getVersion();
                     Set<License> allLicenses = componentByName.getValue().stream()
                             .flatMap(cd -> cd.getLicenses().stream())
@@ -80,7 +81,7 @@ public class ComponentLister {
                     Set<String> attributionNotices = componentByName.getValue().stream()
                             .flatMap(cd -> cd.getAttributionNotices().stream())
                             .collect(Collectors.toCollection(LinkedHashSet::new));
-                    return new ComponentData(componentByName.getKey(), url, version, allLicenses, attributionNotices);
+                    return new ComponentData(componentByName.getKey(), version, url, purl, allLicenses, attributionNotices);
                 })
                 .sorted(Comparator.comparing(ComponentData::getName, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
@@ -88,7 +89,7 @@ public class ComponentLister {
 
     private boolean isIgnored(Component component, Collection<ComponentMetadata> componentMetadata) {
         return componentMetadata.stream()
-                .filter(cmd -> cmd.matches(component.group(), component.name()))
+                .filter(cmd -> cmd.matches(component.group(), component.name(), component.purl()))
                 .map(ComponentMetadata::ignore)
                 .findFirst()
                 .orElse(false);
@@ -97,7 +98,7 @@ public class ComponentLister {
     private ComponentData enrichWithMetadata(Component component, Collection<ComponentMetadata> componentMetadata, Map<String, License> licenses,
             Map<String, String> licenseMappings) {
         Stream<License> actualLicenses = componentMetadata.stream()
-                .filter(cmd -> cmd.matches(component.group(), component.name()))
+                .filter(cmd -> cmd.matches(component.group(), component.name(), component.purl()))
                 .filter(cmd -> !cmd.licenses().isEmpty())
                 .findFirst()
                 .map(cmd -> cmd.licenses().stream().map(licenseName -> License.dynamic(licenseName, null, null)))
@@ -111,14 +112,15 @@ public class ComponentLister {
                 .collect(Collectors.toSet());
 
         return componentMetadata.stream()
-                .filter(cmd -> cmd.matches(component.group(), component.name()))
+                .filter(cmd -> cmd.matches(component.group(), component.name(), component.purl()))
                 .findFirst()
                 .map(cmd -> {
                     String exportName = !Strings.isNullOrEmpty(cmd.mappedName()) ? cmd.mappedName() : combineGroupAndName(component);
-                    String url = !Strings.isNullOrEmpty(cmd.url()) ? cmd.url() : component.url();
-                    return new ComponentData(exportName, url, component.version(), convertedLicenses, cmd.attributionNotices());
+                    String url = Strings.isNullOrEmpty(cmd.url()) ? component.url() : cmd.url();
+                    // TODO What to set in purl?
+                    return new ComponentData(exportName, component.version(), url, component.purl(), convertedLicenses, cmd.attributionNotices());
                 })
-                .orElse(new ComponentData(combineGroupAndName(component), component.url(), component.version(), convertedLicenses, Collections.emptySet()));
+                .orElse(new ComponentData(combineGroupAndName(component), component.version(), component.url(), component.purl(), convertedLicenses, Collections.emptySet()));
     }
 
     private String combineGroupAndName(Component component) {

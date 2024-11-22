@@ -25,6 +25,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +39,7 @@ public final class ComponentMetadata {
 
     private final String groupMatch;
     private final String nameMatch;
+    private final String purlMatch;
     private final boolean ignore;
     private final String mappedName;
     private final String url;
@@ -46,6 +51,7 @@ public final class ComponentMetadata {
     public ComponentMetadata(
             @JsonProperty("groupMatch") String groupMatch,
             @JsonProperty("nameMatch") String nameMatch,
+            @JsonProperty("purlMatch") String purlMatch,
             @JsonProperty("ignore") boolean ignore,
             @JsonProperty("mappedName") String mappedName,
             @JsonProperty("url") String url,
@@ -56,6 +62,8 @@ public final class ComponentMetadata {
             Set<String> attributionNotices) {
         this.groupMatch = groupMatch;
         this.nameMatch = nameMatch;
+        this.purlMatch = purlMatch;
+
         this.ignore = ignore;
         this.mappedName = mappedName;
         this.url = url;
@@ -64,18 +72,33 @@ public final class ComponentMetadata {
         this.attributionNotices = attributionNotices;
     }
 
-    public boolean matches(String group, String name) {
-        boolean matchesGroup = Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group));
-        boolean matchesName = Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name);
-        return matchesGroup && matchesName;
+    /**
+     * @param group Group to match or null. If null then it will be ignored in the match. According to CycloneDX Spec this is not a mandatory field
+     * @param name Name to match. According to CycloneDX Spec this is a mandatory field
+     * @param purl Package URL or null. If null then it will be ignored in the match. According to CycloneDX Spec this is not a mandatory field
+     *
+     * @return Returns true if we have a match
+     */
+    public boolean matches(@Nullable String group, @NotNull String name, @Nullable String purl) {
+        boolean matchesGroup = (Strings.isNullOrEmpty(groupMatch) || Pattern.matches(groupMatch, Strings.nullToEmpty(group))) && Strings.isNullOrEmpty(purlMatch);
+        boolean matchesName = (Strings.isNullOrEmpty(nameMatch) || Pattern.matches(nameMatch, name)) && Strings.isNullOrEmpty(purlMatch);
+        boolean matchesPurl = !Strings.isNullOrEmpty(purlMatch) && !Strings.isNullOrEmpty(purl) && Pattern.matches(purlMatch, purl);
+        return matchesPurl || matchesGroup && matchesName;
     }
 
+    @Nullable
     public String groupMatch() {
         return groupMatch;
     }
 
+    @Nullable
     public String nameMatch() {
         return nameMatch;
+    }
+
+    @Nullable
+    public String purlMatch() {
+        return purlMatch;
     }
 
     public boolean ignore() {
@@ -118,18 +141,19 @@ public final class ComponentMetadata {
         }
         ComponentMetadata that = (ComponentMetadata) o;
         return ignore == that.ignore
-               && Objects.equals(groupMatch, that.groupMatch)
-               && Objects.equals(nameMatch, that.nameMatch)
-               && Objects.equals(mappedName, that.mappedName)
-               && Objects.equals(url, that.url)
-               && Objects.equals(comment, that.comment)
-               && Objects.equals(licenses, that.licenses)
-               && Objects.equals(attributionNotices, that.attributionNotices);
+                && Objects.equals(groupMatch, that.groupMatch)
+                && Objects.equals(nameMatch, that.nameMatch)
+                && Objects.equals(purlMatch, that.purlMatch)
+                && Objects.equals(mappedName, that.mappedName)
+                && Objects.equals(url, that.url)
+                && Objects.equals(comment, that.comment)
+                && Objects.equals(licenses, that.licenses)
+                && Objects.equals(attributionNotices, that.attributionNotices);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(groupMatch, nameMatch, ignore, mappedName, url, comment, licenses, attributionNotices);
+        return Objects.hash(groupMatch, nameMatch, purlMatch, ignore, mappedName, url, comment, licenses, attributionNotices);
     }
 
     @Override
@@ -137,6 +161,7 @@ public final class ComponentMetadata {
         return new StringJoiner(", ", ComponentMetadata.class.getSimpleName() + "[", "]")
                 .add("groupMatch='" + groupMatch + "'")
                 .add("nameMatch='" + nameMatch + "'")
+                .add("purlMatch='" + purlMatch + "'")
                 .add("ignore=" + ignore)
                 .add("mappedName='" + mappedName + "'")
                 .add("url='" + url + "'")
@@ -145,6 +170,5 @@ public final class ComponentMetadata {
                 .add("attributionNotices=" + attributionNotices)
                 .toString();
     }
-
 
 }

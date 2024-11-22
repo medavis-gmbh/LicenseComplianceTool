@@ -26,7 +26,7 @@ import picocli.CommandLine.HelpCommand;
 @Command
 class Main {
 
-    public Main(String[] args) {
+    int run(String[] args) {
         System.setProperty("org.jboss.logging.provider", "slf4j");
 
         final CommandLine commandLine = new CommandLine(this);
@@ -34,12 +34,15 @@ class Main {
         commandLine.addSubcommand(new CreateManifest());
         commandLine.addSubcommand(new DownloadLicenses());
         commandLine.addSubcommand(new AnalyzeComponents());
+        commandLine.addSubcommand(new PatchSBOM());
         System.exit(commandLine.execute(args));
+
+        return commandLine.execute(args);
     }
 
     public static void main(String[] args) {
-        new Main(args);
-
+        Main main = new Main();
+        System.exit(main.run(args));
     }
 
 }
