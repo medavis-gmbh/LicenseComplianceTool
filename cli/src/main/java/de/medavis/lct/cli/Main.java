@@ -35,8 +35,6 @@ class Main {
         commandLine.addSubcommand(new DownloadLicenses());
         commandLine.addSubcommand(new AnalyzeComponents());
         commandLine.addSubcommand(new PatchSBOM());
-        System.exit(commandLine.execute(args));
-
         return commandLine.execute(args);
     }
 

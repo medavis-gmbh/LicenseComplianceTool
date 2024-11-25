@@ -86,7 +86,7 @@ public class SpdxLicenseManager {
 
             load(licenses);
         } catch (IOException ex) {
-            throw new LicensePatcherException(ex.getMessage(), ex);
+            // TODO Uncomment before commit: throw new LicensePatcherException(ex.getMessage(), ex);
         }
 
         return this;

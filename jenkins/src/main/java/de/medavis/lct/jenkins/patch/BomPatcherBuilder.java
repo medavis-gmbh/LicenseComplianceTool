@@ -14,12 +14,14 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
 
+import de.medavis.lct.core.Configuration;
 import de.medavis.lct.core.patcher.BomPatcher;
-import de.medavis.lct.jenkins.config.ManifestGlobalConfiguration;
+import de.medavis.lct.jenkins.config.LCTGlobalConfiguration;
 import de.medavis.lct.jenkins.util.JenkinsLogger;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
@@ -29,22 +31,31 @@ public class BomPatcherBuilder extends Builder implements SimpleBuildStep {
 
     private final String inputFile;
     private final String outputFile;
-    private final transient BomPatcher bomPatcher;
+    private String configurationProfile;
 
     @DataBoundConstructor
     public BomPatcherBuilder(@NonNull String inputFile, @NonNull String outputFile) {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
-
-        this.bomPatcher = BomPatcherBuilderFactory.getBomPatcher(ManifestGlobalConfiguration.getInstance());
     }
 
+    @NonNull
     public String getInputFile() {
         return inputFile;
     }
 
+    @NonNull
     public String getOutputFile() {
         return outputFile;
+    }
+
+    public String getConfigurationProfile() {
+        return configurationProfile;
+    }
+
+    @DataBoundSetter
+    public void setConfigurationProfile(final String configurationProfile) {
+        this.configurationProfile = configurationProfile;
     }
 
     @Override
@@ -53,6 +64,9 @@ public class BomPatcherBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Patching BOM from %s into %s.%n", inputFile, outputFile);
+
+            Configuration configuration = LCTGlobalConfiguration.getConfigurationByProfile(configurationProfile);
+            BomPatcher bomPatcher = BomPatcherBuilderFactory.getBomPatcher(configuration);
             bomPatcher.patch(/*logger,*/ workspace.child(inputFile).read(), workspace.child(outputFile).write());
         } catch (IOException e) {
             throw new AbortException("Could not patch licenses: " + e.getMessage());
