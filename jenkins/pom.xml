@@ -21,7 +21,7 @@
     <properties>
         <!-- Dependency versions -->
         <jenkins.version>2.440.3</jenkins.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.27.4</assertj.version>
 
         <!-- Use Java 11 -->
         <maven.compiler.release>11</maven.compiler.release>
