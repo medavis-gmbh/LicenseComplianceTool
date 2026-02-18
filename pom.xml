@@ -45,7 +45,7 @@
         <guava.version>33.5.0-jre</guava.version>
         <htmlunit.version>2.70.0</htmlunit.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <jetbrains.version>26.0.2-1</jetbrains.version>
+        <jetbrains.version>26.1.0</jetbrains.version>
         <junit-jupiter.version>5.14.3</junit-jupiter.version>
         <mockito.version>5.21.0</mockito.version>
         <slf4j.version>2.0.17</slf4j.version>
