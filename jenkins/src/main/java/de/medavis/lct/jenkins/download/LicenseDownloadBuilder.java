@@ -48,6 +48,7 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     private final String inputPath;
     private final String outputPath;
     private boolean failOnDynamicLicense;
+    private boolean failOnMissingLicense;
     private String configurationProfile;
 
     @DataBoundConstructor
@@ -68,6 +69,10 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         return failOnDynamicLicense;
     }
 
+    public boolean isFailOnMissingLicense() {
+        return failOnMissingLicense;
+    }
+
     public String getConfigurationProfile() {
         return configurationProfile;
     }
@@ -75,6 +80,11 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setFailOnDynamicLicense(boolean failOnDynamicLicense) {
         this.failOnDynamicLicense = failOnDynamicLicense;
+    }
+
+    @DataBoundSetter
+    public void setFailOnMissingLicense(boolean failOnMissingLicense) {
+        this.failOnMissingLicense = failOnMissingLicense;
     }
 
     @DataBoundSetter
@@ -90,7 +100,8 @@ public class LicenseDownloadBuilder extends Builder implements SimpleBuildStep {
         try {
             final JenkinsLogger logger = new JenkinsLogger(listener);
             logger.info("Downloading licenses from components in %s to %s.%n", inputPath, outputPath);
-            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath), failOnDynamicLicense);
+            licenseDownloader.download(logger, workspace.child(inputPath).read(), new JenkinsLicenseFileHandler(workspace, outputPath), failOnDynamicLicense,
+                    failOnMissingLicense);
         } catch (IOException e) {
             throw new AbortException("Could not download licenses: " + e.getMessage());
         }

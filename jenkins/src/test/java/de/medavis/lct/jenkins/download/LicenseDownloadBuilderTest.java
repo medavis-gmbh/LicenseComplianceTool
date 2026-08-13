@@ -106,6 +106,7 @@ class LicenseDownloadBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final LicenseDownloadBuilder builder = new LicenseDownloadBuilder(INPUT_PATH, OUTPUT_PATH);
         builder.setFailOnDynamicLicense(true);
+        builder.setFailOnMissingLicense(true);
         builder.setConfigurationProfile(CONFIGURATION_PROFILE);
         project.getBuildersList().add(builder);
         project = jenkins.configRoundtrip(project);

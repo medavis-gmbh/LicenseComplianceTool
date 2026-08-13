@@ -116,6 +116,35 @@ class LicensesDownloaderTest {
 
     }
 
+    @Test
+    void shouldOptionallyFailOnMissingLicense() {
+        ComponentData withoutLicense = component();
+        setup(component(configuredLicense("A", true, true)), withoutLicense);
+
+        Assertions.assertThatThrownBy(() -> invokeDownload(false, true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(withoutLicense.getName())
+                .hasMessageContaining(withoutLicense.getVersion());
+    }
+
+    @Test
+    void shouldNotFailOnMissingLicenseIfOptionIsDisabled() throws IOException {
+        setup(component(configuredLicense("A", true, true)), component());
+
+        invokeDownload(false, false);
+
+        verifyDownloaded(DOWNLOAD_URL, "A");
+    }
+
+    @Test
+    void shouldNotFailOnMissingLicenseIfAllComponentsHaveOne() throws IOException {
+        setup(component(configuredLicense("A", true, true)));
+
+        invokeDownload(false, true);
+
+        verifyDownloaded(DOWNLOAD_URL, "A");
+    }
+
     private void setup(ComponentData... components) {
         when(componentLister.listComponents(any())).thenReturn(Arrays.asList(components));
         underTest = new LicensesDownloader(componentLister, licenseFileDownloader);
@@ -159,6 +188,11 @@ class LicensesDownloaderTest {
 
     private void invokeDownload(boolean failOnUnconfiguredLicense) {
         underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense);
+    }
+
+    private void invokeDownload(boolean failOnUnconfiguredLicense, boolean failOnMissingLicense) {
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense,
+                failOnMissingLicense);
     }
 
     private void verifyDownloaded(String prefix, String... licenses) throws IOException {
