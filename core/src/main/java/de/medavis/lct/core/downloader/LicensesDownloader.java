@@ -51,10 +51,6 @@ public class LicensesDownloader {
         this.fileDownloader = fileDownloader;
     }
 
-    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnDynamicLicense) {
-        download(userLogger, inputStream, licenseFileHandler, failOnDynamicLicense, false);
-    }
-
     public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnDynamicLicense,
             boolean failOnMissingLicense) {
         final List<ComponentData> components = componentLister.listComponents(inputStream);

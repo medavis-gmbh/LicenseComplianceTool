@@ -72,7 +72,7 @@ class LicensesDownloaderTest {
                 component(configuredLicense("C", true, true))
         );
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(DOWNLOAD_URL, "A", "B", "C");
     }
@@ -84,7 +84,7 @@ class LicensesDownloaderTest {
                 component(configuredLicense("A", true, true))
         );
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(DOWNLOAD_URL, "A");
     }
@@ -93,7 +93,7 @@ class LicensesDownloaderTest {
     void shouldUseViewUrlIfDownloadUrlIsNotSet() throws IOException {
         setup(component(configuredLicense("A", true, false)));
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(VIEW_URL, "A");
     }
@@ -102,7 +102,7 @@ class LicensesDownloaderTest {
     void shouldNotDownloadLicenseIfNoUrlIsSet() throws IOException {
         setup(component(configuredLicense("A", false, false)));
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyNothingDownloaded();
     }
@@ -111,7 +111,7 @@ class LicensesDownloaderTest {
     void shouldOptionallyFailOnDynamicLicense() throws IOException {
         setup(component(dynamicLicense("A", true, true)));
 
-        Assertions.assertThatThrownBy(() -> invokeDownload(true))
+        Assertions.assertThatThrownBy(() -> invokeDownload(true, false))
                 .isInstanceOf(IllegalArgumentException.class);
 
     }
@@ -184,10 +184,6 @@ class LicensesDownloaderTest {
 
     private String createUrl(String... parts) {
         return "/" + Joiner.on("/").join(parts);
-    }
-
-    private void invokeDownload(boolean failOnUnconfiguredLicense) {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense);
     }
 
     private void invokeDownload(boolean failOnUnconfiguredLicense, boolean failOnMissingLicense) {
