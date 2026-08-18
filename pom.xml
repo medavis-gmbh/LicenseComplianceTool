@@ -30,16 +30,16 @@
     <packaging>pom</packaging>
 
     <properties>
-        <!-- Use Java 11 -->
-        <maven.compiler.release>11</maven.compiler.release>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <!-- Use Java 17 -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
         <assertj.version>3.27.7</assertj.version>
-        <cyclonedx.version>9.0.3</cyclonedx.version>
+        <cyclonedx.version>13.1.0</cyclonedx.version>
         <download-maven-plugin.version>1.13.0</download-maven-plugin.version>
         <freemarker.version>2.3.34</freemarker.version>
         <guava.version>33.7.0-jre</guava.version>
