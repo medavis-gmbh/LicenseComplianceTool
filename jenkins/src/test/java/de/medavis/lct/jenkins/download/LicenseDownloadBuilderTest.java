@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.sun.net.httpserver.HttpServer;
 import hudson.FilePath;
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import java.io.IOException;
@@ -147,7 +148,7 @@ class LicenseDownloadBuilderTest {
                 .satisfies(outputDir -> FAKE_LICENSES.forEach((name, content) -> softly.assertThat(outputDir.resolve(name + OUTPUT_EXT)).hasContent(content)));
     }
 
-    private WorkflowJob createJob(JenkinsRule jenkins, String name) throws IOException {
+    private WorkflowJob createJob(JenkinsRule jenkins, String name) throws IOException, Descriptor.FormException {
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-pipeline");
         String pipelineScript = Resources.toString(getClass().getResource(name), Charset.defaultCharset());
         job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
