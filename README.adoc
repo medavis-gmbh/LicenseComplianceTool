@@ -234,6 +234,10 @@ Be aware that this task might download harmful content. Bundling the downloaded 
 malware. To safeguard against that risk, add license URLs after a manual review to your license configuration and run the task with `failOnDynamicLicense` option.
 It will then fail if it encounters a license that is not part of your license configuration .
 
+`failOnDynamicLicense` only sees licenses that are named but cannot be resolved. A component that declares *no* license at all passes silently, is listed in the
+component manifest without a license and has no license text shipped for it. Set `failOnMissingLicense` to fail on those as well. The message names the affected
+components, so they can be given a license through the component metadata - or excluded from the manifest with `ignore` if they are not third-party software.
+
 The desired profile from the global configuration can be chosen with `configurationProfile`. If that parameter is empty, the default profile is used.
 
 [source,groovy,title=Declarative pipeline example]
@@ -244,7 +248,7 @@ pipeline {
     stages {
         stage('Create manifest') {
             steps {
-                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY', failOnDynamicLicense: true, configurationProfile: 'MyProfile'
+                downloadLicenses inputPath: 'bom.json', outputPath: 'target/THIRDPARTY', failOnDynamicLicense: true, failOnMissingLicense: true, configurationProfile: 'MyProfile'
             }
         }
     }
@@ -284,6 +288,11 @@ Examples:
 [source]
 ----
   java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html
+----
+* Download licenses and fail on anything unresolved - a license that is not in the configuration, or a component that declares no license at all
+[source]
+----
+  java -jar license-compliance-tool-cli.jar download-licenses --in=path/to/bom --out=manifest.html --fail-dynamic-license --fail-missing-license
 ----
 * Get usage help
 [source]

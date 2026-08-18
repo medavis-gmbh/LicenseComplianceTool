@@ -51,7 +51,8 @@ public class LicensesDownloader {
         this.fileDownloader = fileDownloader;
     }
 
-    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnDynamicLicense) {
+    public void download(UserLogger userLogger, InputStream inputStream, LicenseFileHandler licenseFileHandler, boolean failOnDynamicLicense,
+            boolean failOnMissingLicense) {
         final List<ComponentData> components = componentLister.listComponents(inputStream);
         Set<License> licenses = components.stream()
                 .map(ComponentData::getLicenses)
@@ -65,6 +66,17 @@ public class LicensesDownloader {
                     .collect(Collectors.toList());
             if (!dynamicLicenses.isEmpty()) {
                 throw new IllegalArgumentException("Option failOnDynamicLicense was given, encountered the following dynamic licenses: " + dynamicLicenses);
+            }
+        }
+
+        if (failOnMissingLicense) {
+            var componentsWithoutLicense = components.stream()
+                    .filter(component -> component.getLicenses().isEmpty())
+                    .map(component -> component.getName() + " " + component.getVersion())
+                    .collect(Collectors.toList());
+            if (!componentsWithoutLicense.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Option failOnMissingLicense was given, the following components declare no license at all: " + componentsWithoutLicense);
             }
         }
 

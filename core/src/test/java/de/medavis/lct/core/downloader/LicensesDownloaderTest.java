@@ -72,7 +72,7 @@ class LicensesDownloaderTest {
                 component(configuredLicense("C", true, true))
         );
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(DOWNLOAD_URL, "A", "B", "C");
     }
@@ -84,7 +84,7 @@ class LicensesDownloaderTest {
                 component(configuredLicense("A", true, true))
         );
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(DOWNLOAD_URL, "A");
     }
@@ -93,7 +93,7 @@ class LicensesDownloaderTest {
     void shouldUseViewUrlIfDownloadUrlIsNotSet() throws IOException {
         setup(component(configuredLicense("A", true, false)));
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyDownloaded(VIEW_URL, "A");
     }
@@ -102,7 +102,7 @@ class LicensesDownloaderTest {
     void shouldNotDownloadLicenseIfNoUrlIsSet() throws IOException {
         setup(component(configuredLicense("A", false, false)));
 
-        invokeDownload(false);
+        invokeDownload(false, false);
 
         verifyNothingDownloaded();
     }
@@ -111,9 +111,38 @@ class LicensesDownloaderTest {
     void shouldOptionallyFailOnDynamicLicense() throws IOException {
         setup(component(dynamicLicense("A", true, true)));
 
-        Assertions.assertThatThrownBy(() -> invokeDownload(true))
+        Assertions.assertThatThrownBy(() -> invokeDownload(true, false))
                 .isInstanceOf(IllegalArgumentException.class);
 
+    }
+
+    @Test
+    void shouldOptionallyFailOnMissingLicense() {
+        ComponentData withoutLicense = component();
+        setup(component(configuredLicense("A", true, true)), withoutLicense);
+
+        Assertions.assertThatThrownBy(() -> invokeDownload(false, true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(withoutLicense.getName())
+                .hasMessageContaining(withoutLicense.getVersion());
+    }
+
+    @Test
+    void shouldNotFailOnMissingLicenseIfOptionIsDisabled() throws IOException {
+        setup(component(configuredLicense("A", true, true)), component());
+
+        invokeDownload(false, false);
+
+        verifyDownloaded(DOWNLOAD_URL, "A");
+    }
+
+    @Test
+    void shouldNotFailOnMissingLicenseIfAllComponentsHaveOne() throws IOException {
+        setup(component(configuredLicense("A", true, true)));
+
+        invokeDownload(false, true);
+
+        verifyDownloaded(DOWNLOAD_URL, "A");
     }
 
     private void setup(ComponentData... components) {
@@ -157,8 +186,9 @@ class LicensesDownloaderTest {
         return "/" + Joiner.on("/").join(parts);
     }
 
-    private void invokeDownload(boolean failOnUnconfiguredLicense) {
-        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense);
+    private void invokeDownload(boolean failOnUnconfiguredLicense, boolean failOnMissingLicense) {
+        underTest.download(userLogger, new ByteArrayInputStream(new byte[0]), Mockito.mock(LicenseFileHandler.class), failOnUnconfiguredLicense,
+                failOnMissingLicense);
     }
 
     private void verifyDownloaded(String prefix, String... licenses) throws IOException {

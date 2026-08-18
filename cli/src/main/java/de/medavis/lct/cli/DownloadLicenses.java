@@ -45,6 +45,9 @@ class DownloadLicenses implements Callable<Void> {
     @Option(names = {"--fail-dynamic-license", "-fdl"}, defaultValue = "false",
             description = "If enabled, download fails if a license is encountered that is not part of the license configuration.")
     private boolean failOnDynamicLicense;
+    @Option(names = {"--fail-missing-license", "-fml"}, defaultValue = "false",
+            description = "If enabled, download fails if a component declares no license at all.")
+    private boolean failOnMissingLicense;
     @Mixin
     private ConfigurationOptions configurationOptions;
 
@@ -54,7 +57,8 @@ class DownloadLicenses implements Callable<Void> {
                 configurationOptions);
         LicensesDownloader licensesDownloader = new LicensesDownloader(componentLister, new LicenseFileDownloader());
         try (var bomInputStream = new FileInputStream(inputFile)) {
-            licensesDownloader.download(new ConsoleUserLogger(), bomInputStream, new FilesystemLicenseFileHandler(outputPath), failOnDynamicLicense);
+            licensesDownloader.download(new ConsoleUserLogger(), bomInputStream, new FilesystemLicenseFileHandler(outputPath), failOnDynamicLicense,
+                    failOnMissingLicense);
         }
         return null;
     }
